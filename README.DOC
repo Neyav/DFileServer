@@ -1,0 +1,69 @@
+DFileServer 	[-port (port)] [-backlog (backlog)] [-maxconnections (connections)] [-maxbandwidth (bytes per second)]
+		[-log (logfile)] [-requireauth (username:password)] [-showconnections] [-background]
+
+*nix only: 	[-setuid (newuid)] [-chroot (folder to chroot to)]
+
+Basic Authentication:
+
+If you use "-requireauth jones:tutorpassword" on the command line while executing
+the program, any page viewed from the server will require the person to authenticate
+using the username jones, and the password tutorpassword. These are case sensitive.
+
+If you use the wrong username or password, you are denied access to the content.
+
+Structure of resource.cfg:
+
+[url] [mime/type] [Identifier] [IP Mask] [Local File] cannot have any spaces
+in them. If the [url] or [Local File] need a space, use %20 instead.
+If you are unaware of the mimetype, put - there instead. The program will
+attempt to identify the mimetype based off the file extension.
+
+RESOURCE 	[url]		[mime/type]
+[Identifier]	[IP Mask]	[Local File]
+
+IP Masks work like this --
+
+For 24.150.34.200
+
+24.150.34.200 - Direct match.
+24.150.       - Indirect match.
+x.x.x.x	      - Match all.
+
+If the IP doesn't match any of the IP Masks for the RESOURCE, they are
+sent a 404.
+
+Example:
+
+RESOURCE	/pictures/kitten.jpg	image/jpeg
+Somebody	24.150.34		c:/pictures/notkitten.jpg
+All		x.x.x.x			c:/pictures/kitten.jpg
+
+RESOURCE	/pictures/dumbass.jpg	image/jpeg
+Asshole		24.150.34		c:/pictures/deadmoose.jpg
+
+In the bottom example, only people in the 24.150.34 range will see the
+picture, everyone else gets a 404.
+
+If the mime/type is simply set to "redirect" then the "Local File" is treated as a path
+redirect and an index is created on the fly if it is a folder.
+
+Example:
+
+RESOURCE	/PersonalFiles		redirect
+All		x.x.x.x			c:/PersonalStuff
+
+Now if someone views that in their browser they will see an HTML index of the contents
+of that folder, and all subfolders in it will also be browsable.
+
+The Indexes themselves are very configurable. The program checks for an Index template at
+indextemplates/default.html . If it cannot find it, it uses an internal one to substitute.
+
+The template should be relatively straightforward, and I hate writing documentation, so
+here is a quick detail of the various template tags.
+
+$$LOCATION$$ = Replaced with the current URL location, minus the hostname, etc.
+$$SERVERVERSION$$ = Replaced with the DashFileServer version identifier.
+$$INDEXTABLE$$ = Replaced with the table of files in the folder you are browsing.
+$$INSERTFILE(filename)$$ = Replaced with the contents of "filename". You can only insert a file
+				once, while you can insert multiple files. This file is hidden
+				from the index.

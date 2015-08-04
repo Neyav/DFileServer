@@ -1,0 +1,26 @@
+   	DFileServer 1.1.x - Open Branch
+	^
+	|
+	DFileServer 1.1.3 - Sunday, October 23rd, 2005
+        ^ - Add Server Wide basic authentication (see -requireauth )
+	| - Able to fork to the background ( -background, *nix only )
+	| - Backported HTTPHeader from the development branch
+	| - ../ is always on top in the generated indexes
+   	|
+   	DFileServer 1.1.2 - Thursday, September 8th, 2005
+   	^ - Rearrange TerminateConnection to prevent crash on some platforms.
+   	|
+   	DFileServer 1.1.1 - Saturday, August 6th, 2005
+   	^ - Handle URL Encoding properly
+   	|
+   |--> DFileServer 1.1.0 - Sunday, June 19th, 2005
+   |
+   | - setuid/chroot/logfile support
+   | - Mimetype autodetection
+   | - Directory Indexes
+   |
+   |
+   |-->	DFileServer 1.0.0 - Thursday, June 5th, 2005
+   |
+   |
+   Development Began - Friday, May 27th, 2005
