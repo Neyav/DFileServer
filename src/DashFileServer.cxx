@@ -1,7 +1,7 @@
 /*
 ** ($Header: /var/www/cvsroot/DFileServer/src/DashFileServer.cxx,v 1.61.2.19 2005/10/23 19:51:28 incubus Exp $)
 **
-** Copyright 2005 Chris Laverdure
+** Copyright 2005, 2018 Chris Laverdure
 ** All rights reserved.
 **
 ** Redistribution and use in source and binary forms, with or without
@@ -61,9 +61,9 @@
 
 using namespace std;
 
-char MAJORVERSION[] = "1";
-char MINORVERSION[] = "1";
-char PATCHVERSION[] = "3";
+char MAJORVERSION[] = "2";
+char MINORVERSION[] = "0";
+char PATCHVERSION[] = "0";
 bool ServerLockdown = false;
 bool ServerShutdown = false;
 string ConfigurationBasicCredentials = "";
@@ -497,8 +497,8 @@ int main( int argc, char *argv[] )
    signal( SIGINT, InitateServerShutdown );
 
    printf("DashFileServer Version %s.%s.%s\n", MAJORVERSION, MINORVERSION, PATCHVERSION);
-   printf("             Copyright 2005 Chris Laverdure\n");
-   printf("-------------------------------------------\n");
+   printf("             Copyright 2005, 2018 Chris Laverdure\n");
+   printf("-------------------------------------------------\n");
 
    // Parse for command line parameters.
    for (int x = 1; x < argc; x++)
