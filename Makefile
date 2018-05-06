@@ -23,7 +23,7 @@ ClientConnection.o: src/ClientConnection.cxx
 HTTPHeader.o: src/HTTPHeader.cxx
 	$(CC) $(CFLAGS) -o HTTPHeader.o -c src/HTTPHeader.cxx
 	
-DashFileServer.o: src/DashFileServer.o
+DashFileServer.o: src/DashFileServer.cxx
 	$(CC) $(CFLAGS) -o DashFileServer.o -c src/DashFileServer.cxx
 	
 Mimetypes.o: src/MimeTypes.o
