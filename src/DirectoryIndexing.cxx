@@ -1,7 +1,7 @@
 /*
 ** ($Header: /var/www/cvsroot/DFileServer/src/DirectoryIndexing.cxx,v 1.41.2.6 2005/10/04 07:45:52 incubus Exp $)
 **
-** Copyright 2005 Chris Laverdure
+** Copyright 2005, 2018 Chris Laverdure
 ** All rights reserved.
 **
 ** Redistribution and use in source and binary forms, with or without
@@ -366,7 +366,7 @@ static string ParseTemplate ( ifstream &ArgFile, char *ArgVirtualPath, string Ar
 		StringPosition = TemplateData.find ("$$SERVERVERSION$$", LowestMatch);
 		if ( StringPosition != string::npos )
 		{
-			string VersionString("DashFileServer [Version " + string(MAJORVERSION) + "." + string(MINORVERSION) + "." + string(PATCHVERSION) + "]");
+			string VersionString("DFileServer [Version " + string(MAJORVERSION) + "." + string(MINORVERSION) + "." + string(PATCHVERSION) + "]");
 
 			TemplateData.replace( StringPosition, sizeof("$$SERVERVERSION$$") - 1, VersionString );
 
@@ -531,7 +531,7 @@ char GenerateFolderIndex( string ArgVirtualPath, char *ArgPath, string &ArgBuffe
 		// Insert the table.
 		ArgBuffer += InsertIndexTable( DirectoryPointer, VirtualPath, string( ArgPath ), Filler );
 		// Server Version Information.
-		ArgBuffer += "<hr><i>DashFileServer [Version " + string(MAJORVERSION) + "." + string(MINORVERSION) + "." + string(PATCHVERSION) + "]</i>\n";
+		ArgBuffer += "<hr><i>DFileServer [Version " + string(MAJORVERSION) + "." + string(MINORVERSION) + "." + string(PATCHVERSION) + "]</i>\n";
 		// End the index
 		ArgBuffer += "</body>\n</html>\n"; 
 	}

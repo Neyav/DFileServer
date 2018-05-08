@@ -458,7 +458,7 @@ void Buffer404 ( list<ClientConnection>::iterator ArgClient )
 
 	ArgClient->SendBuffer = "<HTML><HEAD><TITLE>Error: Resource not found</TITLE></HEAD><BODY><H1>Resource not found</H1>";
 	ArgClient->SendBuffer += "The resource you were trying to locate doesn't exist on this server.<br><br><HR>";
-	ArgClient->SendBuffer += "<I>DashFileServer [Version " + string(MAJORVERSION) + "." + string(MINORVERSION) + "." + string(PATCHVERSION) + "]</I>";
+	ArgClient->SendBuffer += "<I>DFileServer [Version " + string(MAJORVERSION) + "." + string(MINORVERSION) + "." + string(PATCHVERSION) + "]</I>";
 	ArgClient->SendBuffer += "</BODY></HTML>";
 }
 
@@ -468,7 +468,7 @@ void Buffer401 ( list<ClientConnection>::iterator ArgClient )
          
 	ArgClient->SendBuffer = "<HTML><HEAD><TITLE>Error: Authorization Required</TITLE></HEAD><BODY><H1>Authorization Required</H1>";
 	ArgClient->SendBuffer += "The resource you were trying to locate requires authorization on this server.<br><br><HR>";
-	ArgClient->SendBuffer += "<I>DashFileServer [Version " + string(MAJORVERSION) + "." + string(MINORVERSION) + "." + string(PATCHVERSION) + "]</I>";
+	ArgClient->SendBuffer += "<I>DFileServer [Version " + string(MAJORVERSION) + "." + string(MINORVERSION) + "." + string(PATCHVERSION) + "]</I>";
 	ArgClient->SendBuffer += "</BODY></HTML>";
 }
 
@@ -496,7 +496,7 @@ int main( int argc, char *argv[] )
    signal( SIGTERM, InitateServerShutdown );
    signal( SIGINT, InitateServerShutdown );
 
-   printf("DashFileServer Version %s.%s.%s\n", MAJORVERSION, MINORVERSION, PATCHVERSION);
+   printf("DFileServer Version %s.%s.%s\n", MAJORVERSION, MINORVERSION, PATCHVERSION);
    printf("             Copyright 2005, 2018 Chris Laverdure\n");
    printf("-------------------------------------------------\n");
 
@@ -796,7 +796,7 @@ int main( int argc, char *argv[] )
 						}
 					}
 
-					sprintf( Buffer, "DashFileServer/%s.%s.%s", MAJORVERSION, MINORVERSION, PATCHVERSION );
+					sprintf( Buffer, "DFileServer/%s.%s.%s", MAJORVERSION, MINORVERSION, PATCHVERSION );
 					
 					ConnectionListIterator->ServerResponse.SetValue ( "Server", string( Buffer ) );
 					ConnectionListIterator->ServerResponse.SetValue ( "Connection", "close" );
