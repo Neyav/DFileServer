@@ -1,0 +1,53 @@
+body {
+	font-family: Verdana, Arial, sans-serif;
+}
+
+#DFS_table {
+	border-style: dotted;
+	border-width: 3px;
+	border-color: #000080;
+}
+
+#DFS_table td {
+	border-style: none;
+}
+
+#DFS_table a {
+	text-decoration: none;
+	font-weight: bold;
+}
+
+#DFS_table th {
+	border-style: solid;
+	border-width: 2px;
+	border-color: #000080;
+	background: #70CAFE;
+}
+
+.DFS_entrytype {
+	text-align: center;
+	width: 6em;
+}
+
+.DFS_entryname {
+	width: 40em;
+}
+
+.DFS_entrysize {
+	text-align: right;
+	width: 10em;
+}
+
+tr.DFS_eventablerow {
+	background: #CCCCCC;
+}
+
+tr.DFS_oddtablerow {
+	background: #EEEEEE;
+}
+
+td.DFS_entrytype {
+	background: #000000;
+	font-weight: bold;
+	color: #FFFFFF;
+}
