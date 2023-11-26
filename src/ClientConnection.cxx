@@ -32,7 +32,6 @@
 #include <stdlib.h>
 #include <fcntl.h>
 #include <string.h>
-#include <unistd.h>
 #include <errno.h>
 #include <memory>
 #ifdef _WINDOWS
@@ -156,7 +155,7 @@ void ClientConnection::DisconnectClient ( void )
 int ClientConnection::SendData ( char *ArgString, int ArgSize )
 {
 	unsigned int DataSize;
-	ssize_t DataSent;
+	size_t DataSent;
 
 	if (ArgSize == 0)
 		DataSize = strlen( ArgString );
@@ -175,9 +174,9 @@ int ClientConnection::SendData ( char *ArgString, int ArgSize )
 	return (int) DataSent;
 }
 
-ssize_t ClientConnection::RecvData ( char *ArgString, ssize_t ArgDataSize )
+size_t ClientConnection::RecvData ( char *ArgString, size_t ArgDataSize )
 {
-	ssize_t DataRecv;
+	size_t DataRecv;
 
 	LastAction = time ( NULL );
 

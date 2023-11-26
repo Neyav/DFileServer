@@ -1,7 +1,7 @@
 /*
 ** ($Header: /var/www/cvsroot/DFileServer/src/DashFileServer.cxx,v 1.61.2.19 2005/10/23 19:51:28 incubus Exp $)
 **
-** Copyright 2005 Chris Laverdure
+** Copyright 2005, 2018 Chris Laverdure
 ** All rights reserved.
 **
 ** Redistribution and use in source and binary forms, with or without
@@ -38,6 +38,11 @@
 #include <winsock.h>
 #include <io.h>
 #include "contrib/fakepoll.h"
+#define strncasecmp _strnicmp
+#define strcasecmp _stricmp
+#define strncpy strncpy_s
+
+#pragma comment(lib, "Ws2_32.lib")
 #else
 #include <unistd.h>
 #include <sys/poll.h>
@@ -61,9 +66,9 @@
 
 using namespace std;
 
-char MAJORVERSION[] = "1";
-char MINORVERSION[] = "1";
-char PATCHVERSION[] = "3";
+char MAJORVERSION[] = "2";
+char MINORVERSION[] = "0";
+char PATCHVERSION[] = "0";
 bool ServerLockdown = false;
 bool ServerShutdown = false;
 string ConfigurationBasicCredentials = "";
@@ -458,7 +463,7 @@ void Buffer404 ( list<ClientConnection>::iterator ArgClient )
 
 	ArgClient->SendBuffer = "<HTML><HEAD><TITLE>Error: Resource not found</TITLE></HEAD><BODY><H1>Resource not found</H1>";
 	ArgClient->SendBuffer += "The resource you were trying to locate doesn't exist on this server.<br><br><HR>";
-	ArgClient->SendBuffer += "<I>DashFileServer [Version " + string(MAJORVERSION) + "." + string(MINORVERSION) + "." + string(PATCHVERSION) + "]</I>";
+	ArgClient->SendBuffer += "<I>DFileServer [Version " + string(MAJORVERSION) + "." + string(MINORVERSION) + "." + string(PATCHVERSION) + "]</I>";
 	ArgClient->SendBuffer += "</BODY></HTML>";
 }
 
@@ -468,7 +473,7 @@ void Buffer401 ( list<ClientConnection>::iterator ArgClient )
          
 	ArgClient->SendBuffer = "<HTML><HEAD><TITLE>Error: Authorization Required</TITLE></HEAD><BODY><H1>Authorization Required</H1>";
 	ArgClient->SendBuffer += "The resource you were trying to locate requires authorization on this server.<br><br><HR>";
-	ArgClient->SendBuffer += "<I>DashFileServer [Version " + string(MAJORVERSION) + "." + string(MINORVERSION) + "." + string(PATCHVERSION) + "]</I>";
+	ArgClient->SendBuffer += "<I>DFileServer [Version " + string(MAJORVERSION) + "." + string(MINORVERSION) + "." + string(PATCHVERSION) + "]</I>";
 	ArgClient->SendBuffer += "</BODY></HTML>";
 }
 
@@ -496,9 +501,9 @@ int main( int argc, char *argv[] )
    signal( SIGTERM, InitateServerShutdown );
    signal( SIGINT, InitateServerShutdown );
 
-   printf("DashFileServer Version %s.%s.%s\n", MAJORVERSION, MINORVERSION, PATCHVERSION);
-   printf("             Copyright 2005 Chris Laverdure\n");
-   printf("-------------------------------------------\n");
+   printf("DFileServer Version %s.%s.%s\n", MAJORVERSION, MINORVERSION, PATCHVERSION);
+   printf("             Copyright 2005, 2018 Chris Laverdure\n");
+   printf("-------------------------------------------------\n");
 
    // Parse for command line parameters.
    for (int x = 1; x < argc; x++)
@@ -657,7 +662,7 @@ int main( int argc, char *argv[] )
 		if ( PollStruct[ConnectionListIterator->PollIterator].revents & POLLIN )
 		{
 			char DataBuffer[500]; // 500 should be big enough.
-			ssize_t DataRecved;
+			size_t DataRecved;
 
 			if ( ( DataRecved = ConnectionListIterator->RecvData( DataBuffer, sizeof( DataBuffer ) ) ) < 1 )
 			{ // Disconnection or error. Terminate client.
@@ -796,7 +801,7 @@ int main( int argc, char *argv[] )
 						}
 					}
 
-					sprintf( Buffer, "DashFileServer/%s.%s.%s", MAJORVERSION, MINORVERSION, PATCHVERSION );
+					sprintf( Buffer, "DFileServer/%s.%s.%s", MAJORVERSION, MINORVERSION, PATCHVERSION );
 					
 					ConnectionListIterator->ServerResponse.SetValue ( "Server", string( Buffer ) );
 					ConnectionListIterator->ServerResponse.SetValue ( "Connection", "close" );

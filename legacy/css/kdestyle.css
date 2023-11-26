@@ -1,0 +1,58 @@
+body {
+	font-family: Verdana, Arial, sans-serif;
+}
+
+#DFS_table {
+	color: rgb(0, 0, 0);
+	background-color: rgb(234, 233, 232);
+	border: thin outset;
+	width: 100%;
+}
+
+#DFS_table td {
+        margin: 0px;
+        white-space: nowrap;
+}
+
+#DFS_table a {
+	color: rgb(0, 0, 0);
+	text-decoration: none;
+}
+
+#DFS_table th {
+	color: rgb(0, 0, 0);
+	background-color: rgb(230, 240, 249);
+	text-align: left;
+	white-space: nowrap;
+	border: thin outset;	
+}
+
+tr.DFS_eventablerow {
+	background-color: rgb(255, 255, 255);
+	color: rgb (0, 0, 0);
+}
+
+tr.DFS_oddtablerow {
+	background-color: rgb(238, 246, 255);
+	color: rgb(0, 0, 0);
+}
+
+.DFS_entrytype {
+        text-align: center;
+        width: 6em;
+}
+
+td.DFS_entrytype {	
+	background-color: rgb(255, 255, 255);
+	font-weight: bold;
+	color: rgb(150, 150, 150);
+}
+
+.DFS_entrysize {
+	color: rgb(0, 0, 0);
+	text-align: right;
+}
+
+a.DFS_direntry {
+	font-weight: bold;
+}

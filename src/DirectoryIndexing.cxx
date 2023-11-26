@@ -1,7 +1,7 @@
 /*
 ** ($Header: /var/www/cvsroot/DFileServer/src/DirectoryIndexing.cxx,v 1.41.2.6 2005/10/04 07:45:52 incubus Exp $)
 **
-** Copyright 2005 Chris Laverdure
+** Copyright 2005, 2018 Chris Laverdure
 ** All rights reserved.
 **
 ** Redistribution and use in source and binary forms, with or without
@@ -35,17 +35,18 @@
 #include <fcntl.h>
 #ifdef _WINDOWS
 #include <windows.h>
-#include "contrib/win32dirent.h"
+#include <io.h>
 #else
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/param.h>
-#include <dirent.h>
 #endif
 #include <string>
 #include <fstream>
 #include <vector>
 #include <set>
+#include <algorithm>
+#include <filesystem>
 
 #include "Version.hxx"
 
@@ -78,7 +79,7 @@ bool operator< ( const DirectoryEntryStruct &FirstElement, const DirectoryEntryS
 	return FirstElement.Name < SecondElement.Name;
 }
 
-static int FileSize ( const char *ArgFileName )
+int FileSize ( const char *ArgFileName )
 {
 	ifstream		FilePointer;
 	ifstream::pos_type 	FileSize;
@@ -106,7 +107,7 @@ static int FileSize ( const char *ArgFileName )
 	return static_cast<int>(FileSize);
 }
 
-static char *ConvertSizeToFriendly ( int ArgFileSize )
+char *ConvertSizeToFriendly ( int ArgFileSize )
 {
 	static char FriendlyFileSize[50];
 
@@ -147,21 +148,7 @@ static string FullPath ( string ArgPath, const char *ArgFile )
 	return Buffer;
 }
 
-static bool IsAFolder( string &ArgPath )
-{
-	DIR *DirectoryPointer = NULL;
-
-	DirectoryPointer = opendir( (char *) ArgPath.c_str() );
-
-	if (!DirectoryPointer)
-		return false; // It's not a folder, or doesn't exist.
-
-	closedir( DirectoryPointer );
-
-	return true; // It is a folder.
-}
-
-static string InsertFile ( const char *ArgPath, const char *ArgFile )
+string InsertFile ( const char *ArgPath, const char *ArgFile )
 {
 	string FileName;
 	string FileData;
@@ -199,58 +186,51 @@ static string InsertFile ( const char *ArgPath, const char *ArgFile )
 
         FileData = TempSpace;
                  
-        free ( TempSpace );
+        delete TempSpace;
 
 	return FileData;
 }
 
-static string InsertIndexTable ( DIR *DirectoryPointer, char *ArgVirtualPath, string ArgPath, set<string> &ArgHidden )
+static string InsertIndexTable ( string *ArgVirtualPath, string ArgPath, set<string> &ArgHidden )
 {
         struct dirent *DirentPointer = NULL;
         bool AlternatingVariable = false;
-	string Buffer;
+		string Buffer;
         vector<DirectoryEntryStruct> DirectoryVector;
 
 	// Top Table row.
 	Buffer += "<table id=\"DFS_table\">\n<tr class=\"DFS_headertablerow\"><th class=\"DFS_entrytype\">Entry Type</th><th class=\"DFS_entryname\">Entry Name</th><th class=\"DFS_entrysize\">Entry Size</th></tr>\n";
          
-	// Walk through the folder grabbing files and adding them to our vector.
-	while ( ( DirentPointer = readdir( DirectoryPointer ) ) != NULL )
+	// Walk through the folder grabbing files and adding them to our vector, using the new filesystem library.
+    for (const auto& entry : filesystem::directory_iterator(ArgPath))
 	{
-		string CompleteVirtualPath;
-		string CompleteRealPath;
-		DirectoryEntryStruct DirectoryEntry;
-
 		// In UNIX, hidden files start with periods. This is a good policy.
-		if ( DirentPointer->d_name[0] == '.')
+		if ( entry.path().filename().string()[0] == '.')
 		{
 			// We must of course allow for .., so make a special case.
-			if ( !(strlen( DirentPointer->d_name ) == 2
-					&& DirentPointer->d_name[1] == '.') )
+			if ( !(entry.path().filename().string().size() == 2
+					&& entry.path().filename().string()[1] == '.') )
 				continue; // Don't display it.
 		}
 
-		DirectoryEntry.Name = string( DirentPointer->d_name );
+		DirectoryEntryStruct DirectoryEntry;
+
+		DirectoryEntry.Name = entry.path().filename().string();
 
 		// Check through the ArgHidden vector for files that shouldn't be displayed.
 		if ( ArgHidden.find( DirectoryEntry.Name ) != ArgHidden.end() )
 			continue;
 
-		// Make sure the path has no URL encodings in it so they don't get URL encoded twice.
-		ParseURLEncoding ( ArgVirtualPath );
-
-		DirectoryEntry.CompletePath = FullPath( ArgVirtualPath, DirentPointer->d_name );
+		DirectoryEntry.CompletePath = FullPath( *ArgVirtualPath, DirectoryEntry.Name.c_str() );
 
 		// URL encode the link
 		URLEncode (DirectoryEntry.CompletePath);
 		
-		CompleteRealPath = FullPath( ArgPath, DirentPointer->d_name);
-
-		DirectoryEntry.Folder = IsAFolder ( CompleteRealPath );
+		DirectoryEntry.Folder = entry.is_directory();
 
 		// If it's not a folder, grab the size.
 		if ( !DirectoryEntry.Folder )
-			DirectoryEntry.Size = FileSize ( CompleteRealPath.c_str() );
+			DirectoryEntry.Size = FileSize ( entry.path().string().c_str() );
 
 		// Is the file accessable?
 		if ( DirectoryEntry.Size == -1 )
@@ -258,6 +238,8 @@ static string InsertIndexTable ( DIR *DirectoryPointer, char *ArgVirtualPath, st
 
 		DirectoryVector.push_back ( DirectoryEntry );
 	}
+
+
 
 	// Now sort it!
 	sort(DirectoryVector.begin(), DirectoryVector.end());
@@ -313,7 +295,7 @@ static string InsertIndexTable ( DIR *DirectoryPointer, char *ArgVirtualPath, st
 	return Buffer;
 }
 	
-static string ParseTemplate ( ifstream &ArgFile, char *ArgVirtualPath, string ArgPath, DIR *DirectoryPointer )
+static string ParseTemplate ( ifstream &ArgFile, string *ArgVirtualPath, string ArgPath )
 {
 	char *TempSpace;
 	int FileSize;
@@ -354,19 +336,19 @@ static string ParseTemplate ( ifstream &ArgFile, char *ArgVirtualPath, string Ar
 		StringPosition = TemplateData.find ("$$LOCATION$$", LowestMatch);
 		if ( StringPosition != string::npos )
 		{
-			TemplateData.replace( StringPosition, sizeof("$$LOCATION$$") - 1, string(ArgVirtualPath) );
+			TemplateData.replace( StringPosition, sizeof("$$LOCATION$$") - 1, *ArgVirtualPath);
 
 			if ( StringPosition < LocalLowestMatch || LocalLowestMatch == 0 )
 				LocalLowestMatch = StringPosition;
 
-			StringOffset += strlen(ArgVirtualPath) - sizeof("$$LOCATION$$");			
+			StringOffset += ArgVirtualPath->size() - sizeof("$$LOCATION$$");
 			ActiveLoop = true;
 		}
 		// $$SERVERVERSION$$
 		StringPosition = TemplateData.find ("$$SERVERVERSION$$", LowestMatch);
 		if ( StringPosition != string::npos )
 		{
-			string VersionString("DashFileServer [Version " + string(MAJORVERSION) + "." + string(MINORVERSION) + "." + string(PATCHVERSION) + "]");
+			string VersionString("DFileServer [Version " + string(MAJORVERSION) + "." + string(MINORVERSION) + "." + string(PATCHVERSION) + "]");
 
 			TemplateData.replace( StringPosition, sizeof("$$SERVERVERSION$$") - 1, VersionString );
 
@@ -459,50 +441,42 @@ static string ParseTemplate ( ifstream &ArgFile, char *ArgVirtualPath, string Ar
 	StringPosition = TemplateData.find ("$$INDEXTABLE$$", 0);
 	if ( StringPosition != string::npos )
 		TemplateData.replace( StringPosition, sizeof("$$INDEXTABLE$$") - 1, 
-					InsertIndexTable( DirectoryPointer, ArgVirtualPath, ArgPath, FilesToHide ) );
+					InsertIndexTable( ArgVirtualPath, ArgPath, FilesToHide ) );
 
 	return TemplateData;
 }
 
 char GenerateFolderIndex( string ArgVirtualPath, char *ArgPath, string &ArgBuffer )
 {
-	DIR *DirectoryPointer = NULL;
 	int FileTestDescriptor;
 	ifstream FileStream;
 	vector<DirectoryEntryStruct> DirectoryVector;
-	char VirtualPath[255];
 
-	// This is a bit stupid, but I don't want to spend all night converting shit to std::string just to get it building again
-	// before sunrise.
-	strncpy ( VirtualPath, ArgVirtualPath.c_str(), sizeof(VirtualPath) );
-
-	// Open the directory.
-	DirectoryPointer = opendir( ArgPath );
-
-	if ( DirectoryPointer == NULL )
+	// Determine wheter it's a directory or a filesystem. Now using C++17 filesystem library.
+	if (!filesystem::is_directory(ArgPath))
 	{
 		// Try to open it as a file now.
-		FileTestDescriptor = open( ArgPath, O_RDONLY );
+		FileTestDescriptor = _open(ArgPath, O_RDONLY);
 
-		if ( FileTestDescriptor < 1 )
+		if (FileTestDescriptor < 1)
 			return -1; // Path is invalid.
 		else
 		{
-			close ( FileTestDescriptor );
+			_close(FileTestDescriptor);
 			return 0;  // Path points to a file.
 		}
 	}
 
 	// Check for index.htm and index.html
-	if ( ( FileTestDescriptor = open( FullPath( ArgPath, "index.html" ).c_str(), O_RDONLY ) ) > 0 )
+	if ( ( FileTestDescriptor = _open( FullPath( ArgPath, "index.html" ).c_str(), O_RDONLY ) ) > 0 )
 	{ // Index.html found.
-		close ( FileTestDescriptor );
+		_close ( FileTestDescriptor );
 		strcat( ArgPath, "/index.html");
 		return 0; 
 	}
-	if ( ( FileTestDescriptor = open( FullPath( ArgPath, "index.htm" ).c_str(), O_RDONLY ) ) > 0 )
+	if ( ( FileTestDescriptor = _open( FullPath( ArgPath, "index.htm" ).c_str(), O_RDONLY ) ) > 0 )
 	{ // Index.htm found.
-		close ( FileTestDescriptor );
+		_close ( FileTestDescriptor );
 		strcat( ArgPath, "/index.htm");
 		return 0;
 	}
@@ -529,19 +503,17 @@ char GenerateFolderIndex( string ArgVirtualPath, char *ArgPath, string &ArgBuffe
 		ArgBuffer += ".DFS_entrysize { color: rgb(0, 0, 0); text-align: right;}\na.DFS_direntry { font-weight: bold; }\n";
 		ArgBuffer += "-->\n</style>\n";
 		// Insert the table.
-		ArgBuffer += InsertIndexTable( DirectoryPointer, VirtualPath, string( ArgPath ), Filler );
+		ArgBuffer += InsertIndexTable( &ArgVirtualPath, string( ArgPath ), Filler );
 		// Server Version Information.
-		ArgBuffer += "<hr><i>DashFileServer [Version " + string(MAJORVERSION) + "." + string(MINORVERSION) + "." + string(PATCHVERSION) + "]</i>\n";
+		ArgBuffer += "<hr><i>DFileServer [Version " + string(MAJORVERSION) + "." + string(MINORVERSION) + "." + string(PATCHVERSION) + "]</i>\n";
 		// End the index
 		ArgBuffer += "</body>\n</html>\n"; 
 	}
 	else
 	{ // Let's grab the one from the template and parse it.
-		ArgBuffer += ParseTemplate( FileStream, VirtualPath, string( ArgPath ), DirectoryPointer );
+		ArgBuffer += ParseTemplate( FileStream, &ArgVirtualPath, string( ArgPath ) );
 		FileStream.close();
 	}
-
-	closedir( DirectoryPointer );
 
 	return 1;
 }

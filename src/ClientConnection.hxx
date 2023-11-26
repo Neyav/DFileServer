@@ -37,6 +37,6 @@ class ClientConnection
 		char AcceptConnection ( int );
 		void DisconnectClient ( void );
 		int SendData ( char *, int );
-		ssize_t RecvData ( char *, ssize_t );
+		size_t RecvData ( char *, size_t );
 		time_t SecondsIdle ( void );
 };
