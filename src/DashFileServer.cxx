@@ -51,7 +51,8 @@
 #include <arpa/inet.h>
 #include <sys/wait.h>
 #endif
-#include <list>
+#include <vector>
+#include <iterator>
 #include <string>
 
 #include "ClientConnection.hxx"
@@ -242,7 +243,7 @@ int InitalizeNetwork ( int ArgPort, int ArgBacklog )
 }
 
 void IncomingConnection ( int ArgSocket, int *ArgHighestIterator, struct pollfd ArgPoll[], 
-								list<ClientConnection> *ArgList )
+								vector<ClientConnection> *ArgList )
 {
 	ClientConnection IncomingClient;
 
@@ -280,12 +281,9 @@ void IncomingConnection ( int ArgSocket, int *ArgHighestIterator, struct pollfd 
 	
 }
 
-list<ClientConnection>::iterator
-TerminateConnection ( int ArgSocket, list<ClientConnection>::iterator ArgClient, int *ArgHighestIterator, 
-						struct pollfd ArgPoll[], list <ClientConnection> *ArgList )
+void TerminateConnection ( int ArgSocket, int ArgClient, int *ArgHighestIterator, 
+						struct pollfd ArgPoll[], static vector <ClientConnection> ArgList )
 {
-	list<ClientConnection>::iterator ConnectionListIterator;
-	list<ClientConnection>::iterator PreviousElement;
 	int NewHighestPollIterator = 0;
 	int OldPollIterator = 0;
 
@@ -300,39 +298,35 @@ TerminateConnection ( int ArgSocket, list<ClientConnection>::iterator ArgClient,
 			printf("Client Disconnected; %i remaining...\n", ActiveConnections);
 	}
 
-	if ( ArgClient->FileStream )
-		ArgClient->CloseFile();
-
 	// Keep track of the old iterator. Previously I just used ArgClient->PollIterator in this function, but that doesn't
 	// appear safe to do after the ArgList->erase command. It's causing crashes on some platforms (i.e. FreeBSD 6.x )
-	OldPollIterator = ArgClient->PollIterator;
+	OldPollIterator = ArgList[ArgClient].PollIterator;
 
 	// Remove this client from the Poll structure so it doesn't get polled.
 	ArgPoll[OldPollIterator].fd = 0;
 	ArgPoll[OldPollIterator].events = 0;
 
 	// Close the socket and possibly do some other Misc shutdown stuff.
-        ArgClient->DisconnectClient();
+    ArgList[ArgClient].DisconnectClient();
 
 	// Remove the client from the linked list.
-	PreviousElement = ArgList->erase ( ArgClient );
+	ArgList.erase(ArgList.begin() + ArgClient);
 
 	// This Client had the highest descriptor..
 	if ( OldPollIterator == *ArgHighestIterator )
 	{
 		// Traverse through the active connections to find the new highest file descriptor
-		for (ConnectionListIterator = ArgList->begin();
-			ConnectionListIterator != ArgList->end();
+		for (int ConnectionListIterator = 0;
+			ConnectionListIterator < ArgList.size();
 				ConnectionListIterator++)
 		{
-			if ( ConnectionListIterator->PollIterator > NewHighestPollIterator )
-				NewHighestPollIterator = ConnectionListIterator->PollIterator;
+			if ( ArgList[ConnectionListIterator].PollIterator > NewHighestPollIterator )
+				NewHighestPollIterator = ArgList[ConnectionListIterator].PollIterator;
 		}
 
 		*ArgHighestIterator = NewHighestPollIterator;
 	}
-
-	return PreviousElement--;
+	return;
 }
 
 char *TimeAndDate ( void )
@@ -349,7 +343,7 @@ char *TimeAndDate ( void )
 	return Output;
 }
 
-char LocateResource ( string Resource, list<ClientConnection>::iterator ArgClient, char *DstResource, char *DstResourceType )
+char LocateResource ( string Resource, ClientConnection *ArgClient, char *DstResource, char *DstResourceType )
 {
 	FILE *FileStream;
 	char FieldName[31];
@@ -457,7 +451,7 @@ char LocateResource ( string Resource, list<ClientConnection>::iterator ArgClien
 
 }
 
-void Buffer404 ( list<ClientConnection>::iterator ArgClient )
+void Buffer404 ( ClientConnection *ArgClient )
 {
 	// This fills the buffer with the 404 error.
 
@@ -467,7 +461,7 @@ void Buffer404 ( list<ClientConnection>::iterator ArgClient )
 	ArgClient->SendBuffer += "</BODY></HTML>";
 }
 
-void Buffer401 ( list<ClientConnection>::iterator ArgClient )
+void Buffer401 ( ClientConnection *ArgClient )
 {
 	// This fills the buffer with the 401 error.
          
@@ -492,7 +486,7 @@ int main( int argc, char *argv[] )
    string ConfigurationChrootFolder;
 #endif
    struct pollfd PollStruct[2048];
-   list<ClientConnection> ConnectionList;
+   static vector<ClientConnection> ConnectionList;
 
 #ifndef _WINDOWS
    // Catch SIGPIPE and ignore it.
@@ -653,48 +647,47 @@ int main( int argc, char *argv[] )
 		IncomingConnection ( ServerSocket, &HighestPollIterator, PollStruct, &ConnectionList );
 	}
 
-	// Traverse the linked list searching for Sockets that are ready.
-	for (ConnectionListIterator = ConnectionList.begin();
-		ConnectionListIterator != ConnectionList.end();
-			ConnectionListIterator++)
+	// Go through the list looking for connections that have incoming data.
+	for (int ConnectionListIterator = 0; ConnectionListIterator < ConnectionList.size(); ConnectionListIterator++)
 	{
 		// This socket has incoming data.
-		if ( PollStruct[ConnectionListIterator->PollIterator].revents & POLLIN )
+		if ( PollStruct[ConnectionList[ConnectionListIterator].PollIterator].revents & POLLIN)
 		{
 			char DataBuffer[500]; // 500 should be big enough.
 			size_t DataRecved;
 
-			if ( ( DataRecved = ConnectionListIterator->RecvData( DataBuffer, sizeof( DataBuffer ) ) ) < 1 )
+			if ( ( DataRecved = ConnectionList[ConnectionListIterator].RecvData( DataBuffer, sizeof( DataBuffer ) ) ) < 1 )
 			{ // Disconnection or error. Terminate client.
 
-				ConnectionListIterator = TerminateConnection ( ServerSocket, ConnectionListIterator, &HighestPollIterator,
-												PollStruct, &ConnectionList );
+				TerminateConnection ( ServerSocket, ConnectionListIterator, &HighestPollIterator,
+												PollStruct, ConnectionList );
 			}
 			else
 			{ // Incoming data.
-				ConnectionListIterator->BrowserRequest.ImportHeader ( string( DataBuffer ) );
+				ConnectionList[ConnectionListIterator].BrowserRequest.ImportHeader ( string( DataBuffer ) );
 
 				// Find what resource this person is after.
-				ConnectionListIterator->Resource = ConnectionListIterator->BrowserRequest.AccessPath;
+				ConnectionList[ConnectionListIterator].Resource = ConnectionList[ConnectionListIterator].BrowserRequest.AccessPath;
 			}			
 
 		} // [/END] Incoming Data on socket.
 		
-		if ( ConnectionListIterator != ConnectionList.end() && !ConnectionListIterator->Resource.empty() && 
-				PollStruct[ConnectionListIterator->PollIterator].revents & POLLOUT )
+		if ( ConnectionListIterator < ConnectionList.size() && !ConnectionList[ConnectionListIterator].Resource.empty() &&
+				PollStruct[ConnectionList[ConnectionListIterator].PollIterator].revents & POLLOUT )
 		{
 
-			if ( !ConnectionListIterator->FileStream && ConnectionListIterator->SendBuffer.empty() )
+			if ( !ConnectionList[ConnectionListIterator].FileStream 
+					&& ConnectionList[ConnectionListIterator].SendBuffer.empty() )
 			{
 				char Resource[151];
 				char ResourceType[151];
 				int ResourceSize = 0;
 
 				// We need to locate this resource.
-				if ( LocateResource ( ConnectionListIterator->Resource, ConnectionListIterator, Resource, ResourceType ) == -1 )
+				if ( LocateResource ( ConnectionList[ConnectionListIterator].Resource, &ConnectionList[ConnectionListIterator], Resource, ResourceType) == -1)
 				{ // Resource wasn't found.
-					Buffer404( ConnectionListIterator );
-					ResourceSize = ConnectionListIterator->BytesRemaining = ConnectionListIterator->SendBuffer.size();
+					Buffer404(&ConnectionList[ConnectionListIterator]);
+					ResourceSize = ConnectionList[ConnectionListIterator].BytesRemaining = ConnectionList[ConnectionListIterator].SendBuffer.size();
 					strcpy (Resource, "--404--");
 					strcpy (ResourceType, "text/html");
 
@@ -708,21 +701,21 @@ int main( int argc, char *argv[] )
 				{
 					char direrror;
 
-					direrror = GenerateFolderIndex( ConnectionListIterator->Resource, Resource, ConnectionListIterator->SendBuffer );
+					direrror = GenerateFolderIndex( ConnectionList[ConnectionListIterator].Resource, Resource, ConnectionList[ConnectionListIterator].SendBuffer );
 
 					if (direrror == -1)
 					{ // File/Folder doesn't exist
-						Buffer404( ConnectionListIterator );
-						ResourceSize = ConnectionListIterator->BytesRemaining = ConnectionListIterator->SendBuffer.size();
+						Buffer404(&ConnectionList[ConnectionListIterator]);
+						ResourceSize = ConnectionList[ConnectionListIterator].BytesRemaining = ConnectionList[ConnectionListIterator].SendBuffer.size();
 						strcpy (Resource, "--404--");
 						strcpy (ResourceType, "text/html");
 					}
 					else if (direrror)
 					{ // It generated an index for us.
 
-						ConnectionListIterator->SendBufferIterator = 0;
+						ConnectionList[ConnectionListIterator].SendBufferIterator = 0;
 
-						ResourceSize = ConnectionListIterator->BytesRemaining = ConnectionListIterator->SendBuffer.size();
+						ResourceSize = ConnectionList[ConnectionListIterator].BytesRemaining = ConnectionList[ConnectionListIterator].SendBuffer.size();
 
 						strcpy (ResourceType, "text/html");
 					}
@@ -739,61 +732,61 @@ int main( int argc, char *argv[] )
 
 				if ( ConfigurationShowConnections )
 				{
-					printf("%s %s - [%s] (%s)\n", TimeAndDate(), ConnectionListIterator->GetIP(), 
-									ConnectionListIterator->Resource.c_str(), Resource );
+					printf("%s %s - [%s] (%s)\n", TimeAndDate(), ConnectionList[ConnectionListIterator].GetIP(), 
+									ConnectionList[ConnectionListIterator].Resource.c_str(), Resource );
 				}
 
 				if ( LogFilePointer != NULL )
 				{
-					fprintf( LogFilePointer, "%s %s - [%s] (%s)\n", TimeAndDate(), ConnectionListIterator->GetIP(),
-									ConnectionListIterator->Resource.c_str(), Resource );
+					fprintf( LogFilePointer, "%s %s - [%s] (%s)\n", TimeAndDate(), ConnectionList[ConnectionListIterator].GetIP(),
+									ConnectionList[ConnectionListIterator].Resource.c_str(), Resource );
 
 					// Make sure it gets written to disk.
 					fflush( LogFilePointer );
 				}
 
 				// If there is no sendbuffer, try to open the file, and if you can't, terminate the connection.
-				if ( ConnectionListIterator->SendBuffer.empty() && 
-					(( ResourceSize = ConnectionListIterator->OpenFile( Resource ) ) == -1) )
+				if ( ConnectionList[ConnectionListIterator].SendBuffer.empty() && 
+					(( ResourceSize = ConnectionList[ConnectionListIterator].OpenFile( Resource ) ) == -1) )
 				{ // File couldn't be opened.
-					ConnectionListIterator = TerminateConnection ( ServerSocket, ConnectionListIterator, &HighestPollIterator,
-													PollStruct, &ConnectionList );
+					TerminateConnection ( ServerSocket, ConnectionListIterator, &HighestPollIterator,
+													PollStruct, ConnectionList );
 				}
 				else
 				{				
 					// Send the HTTP header.
 					char Buffer[500];
 
-					ConnectionListIterator->ServerResponse.AccessType = "HTTP/1.1";
-					ConnectionListIterator->ServerResponse.AccessPath = "200";
-					ConnectionListIterator->ServerResponse.AccessProtocol = "OK";
+					ConnectionList[ConnectionListIterator].ServerResponse.AccessType = "HTTP/1.1";
+					ConnectionList[ConnectionListIterator].ServerResponse.AccessPath = "200";
+					ConnectionList[ConnectionListIterator].ServerResponse.AccessProtocol = "OK";
 
 					if ( !ConfigurationBasicCredentials.empty() ) // Authentication Required
 					{
-						if ( ConnectionListIterator->BrowserRequest.GetValue( "Authorization" ).empty() )
+						if ( ConnectionList[ConnectionListIterator].BrowserRequest.GetValue( "Authorization" ).empty() )
 						{ // Authentication wasn't attempted, send the request.
-							ConnectionListIterator->ServerResponse.SetValue ( "WWW-Authenticate", 
+							ConnectionList[ConnectionListIterator].ServerResponse.SetValue ( "WWW-Authenticate", 
 								"Basic realm=\"DFileServer\"" );
-							ConnectionListIterator->ServerResponse.AccessPath = "401"; // Authorization Required
+							ConnectionList[ConnectionListIterator].ServerResponse.AccessPath = "401"; // Authorization Required
 						}
 						else
 						{ // Try to verify the authentication.
 							Base64 Base64Encoding;
 							string Base64Authorization;
 
-							Base64Authorization = ConnectionListIterator->BrowserRequest.GetValue( "Authorization" );
+							Base64Authorization = ConnectionList[ConnectionListIterator].BrowserRequest.GetValue( "Authorization" );
 
 							Base64Authorization.erase (0, 6); // Remove the beginning "Basic "
 
 						        if ( Base64Encoding.decode( Base64Authorization ) != ConfigurationBasicCredentials )
 							{
-								ConnectionListIterator->ServerResponse.AccessPath = "401"; // Authorization Required
+								ConnectionList[ConnectionListIterator].ServerResponse.AccessPath = "401"; // Authorization Required
 
-								ConnectionListIterator->CloseFile(); // Make sure we close the resource.
+								ConnectionList[ConnectionListIterator].CloseFile(); // Make sure we close the resource.
 
 								// Prepare the 401...
-								Buffer401 ( ConnectionListIterator );
-								ResourceSize = ConnectionListIterator->BytesRemaining = ConnectionListIterator->SendBuffer.size();
+								Buffer401 (&ConnectionList[ConnectionListIterator]);
+								ResourceSize = ConnectionList[ConnectionListIterator].BytesRemaining = ConnectionList[ConnectionListIterator].SendBuffer.size();
 								strcpy (Resource, "--401--");
 								strcpy (ResourceType, "text/html");
 							}
@@ -803,16 +796,16 @@ int main( int argc, char *argv[] )
 
 					sprintf( Buffer, "DFileServer/%s.%s.%s", MAJORVERSION, MINORVERSION, PATCHVERSION );
 					
-					ConnectionListIterator->ServerResponse.SetValue ( "Server", string( Buffer ) );
-					ConnectionListIterator->ServerResponse.SetValue ( "Connection", "close" );
+					ConnectionList[ConnectionListIterator].ServerResponse.SetValue ( "Server", string( Buffer ) );
+					ConnectionList[ConnectionListIterator].ServerResponse.SetValue ( "Connection", "close" );
 
 					sprintf( Buffer, "%i", ResourceSize );
 
-					ConnectionListIterator->ServerResponse.SetValue ( "Content-Length", string ( Buffer ) );
-					ConnectionListIterator->ServerResponse.SetValue ( "Content-Type", string ( ResourceType ) );
+					ConnectionList[ConnectionListIterator].ServerResponse.SetValue ( "Content-Length", string ( Buffer ) );
+					ConnectionList[ConnectionListIterator].ServerResponse.SetValue ( "Content-Type", string ( ResourceType ) );
 
-					ConnectionListIterator->SendData( 
-						(char *) ConnectionListIterator->ServerResponse.ExportHeader().c_str(), 0 );
+					ConnectionList[ConnectionListIterator].SendData( 
+						(char *) ConnectionList[ConnectionListIterator].ServerResponse.ExportHeader().c_str(), 0 );
 				}					
 			}
 			else
@@ -827,52 +820,52 @@ int main( int argc, char *argv[] )
 				if ( ConfigurationMaxBandwidth )
 				{
 					// -- Bandwidth Control --
-					if ( ConnectionListIterator->LastBandReset != time ( NULL ) )
+					if ( ConnectionList[ConnectionListIterator].LastBandReset != time ( NULL ) )
 					{
-						ConnectionListIterator->BandwidthLeft = ConfigurationMaxBandwidth / ActiveConnections;
+						ConnectionList[ConnectionListIterator].BandwidthLeft = ConfigurationMaxBandwidth / ActiveConnections;
 
-						ConnectionListIterator->LastBandReset = time ( NULL );
+						ConnectionList[ConnectionListIterator].LastBandReset = time ( NULL );
 					}
 
-					 if ( BytesToRead > ConnectionListIterator->BandwidthLeft )
-						 BytesToRead = ConnectionListIterator->BandwidthLeft;
+					 if ( BytesToRead > ConnectionList[ConnectionListIterator].BandwidthLeft )
+						 BytesToRead = ConnectionList[ConnectionListIterator].BandwidthLeft;
 
-					ConnectionListIterator->BandwidthLeft -= BytesToRead;
+					ConnectionList[ConnectionListIterator].BandwidthLeft -= BytesToRead;
 					// / -- Bandwidth Control --
 				}
 				
-				if ( BytesToRead > ConnectionListIterator->BytesRemaining )
-					BytesToRead = ConnectionListIterator->BytesRemaining;
+				if ( BytesToRead > ConnectionList[ConnectionListIterator].BytesRemaining )
+					BytesToRead = ConnectionList[ConnectionListIterator].BytesRemaining;
 
-				if ( ConnectionListIterator->FileStream )
+				if ( ConnectionList[ConnectionListIterator].FileStream )
 				{ // Read from a file
-					ConnectionListIterator->FileStream->read ( Buffer, BytesToRead );
+					ConnectionList[ConnectionListIterator].FileStream->read ( Buffer, BytesToRead );
 				}
 				else
 				{ // Send from the buffer
 
-					strcpy( Buffer, ConnectionListIterator->SendBuffer.substr( 
-								ConnectionListIterator->SendBufferIterator, BytesToRead ).c_str() );
+					strcpy( Buffer, ConnectionList[ConnectionListIterator].SendBuffer.substr( 
+								ConnectionList[ConnectionListIterator].SendBufferIterator, BytesToRead ).c_str() );
 					
 					// Increment Iterator
-					ConnectionListIterator->SendBufferIterator += BytesToRead;
+					ConnectionList[ConnectionListIterator].SendBufferIterator += BytesToRead;
 				}
 
-				BytesRead = ConnectionListIterator->SendData( Buffer, BytesToRead);
+				BytesRead = ConnectionList[ConnectionListIterator].SendData( Buffer, BytesToRead);
 
-				ConnectionListIterator->BytesRemaining -= BytesRead;
+				ConnectionList[ConnectionListIterator].BytesRemaining -= BytesRead;
 
 				// It hasn't sent all the bytes we've read.
 				if (BytesRead != BytesToRead)
 				{
-					if ( ConnectionListIterator->FileStream )
+					if ( ConnectionList[ConnectionListIterator].FileStream )
 					{
 						// Relocate the file pointer to match where we are.
 
 						int LocationOffset = BytesToRead - BytesRead;
-						ifstream::pos_type CurrentPosition = ConnectionListIterator->FileStream->tellg();
+						ifstream::pos_type CurrentPosition = ConnectionList[ConnectionListIterator].FileStream->tellg();
 
-						ConnectionListIterator->FileStream->seekg((CurrentPosition - (ifstream::pos_type) LocationOffset));
+						ConnectionList[ConnectionListIterator].FileStream->seekg((CurrentPosition - (ifstream::pos_type) LocationOffset));
 					}
 					else
 					{
@@ -880,15 +873,15 @@ int main( int argc, char *argv[] )
 
 						int LocationOffset = BytesToRead - BytesRead;
 
-						ConnectionListIterator->SendBufferIterator -= LocationOffset;
+						ConnectionList[ConnectionListIterator].SendBufferIterator -= LocationOffset;
 					}
 				}
 
 				// End of the file?
-				if ( ConnectionListIterator->BytesRemaining == 0 )
+				if ( ConnectionList[ConnectionListIterator].BytesRemaining == 0 )
 				{
-					ConnectionListIterator = TerminateConnection ( ServerSocket, ConnectionListIterator, &HighestPollIterator,
-											PollStruct, &ConnectionList );
+					TerminateConnection ( ServerSocket, ConnectionListIterator, &HighestPollIterator,
+											PollStruct, ConnectionList );
 				}
 			}
 				
@@ -896,10 +889,10 @@ int main( int argc, char *argv[] )
 		} // [/END] Socket can accept data.
 
 		// Connection was idle for too long, remove the jerk.
-		if ( ConnectionListIterator != ConnectionList.end() && ConnectionListIterator->SecondsIdle() > 15 )
+		if ( ConnectionList[ConnectionListIterator].SecondsIdle() > 15 )
 		{
-			ConnectionListIterator = TerminateConnection ( ServerSocket, ConnectionListIterator, &HighestPollIterator, 
-									PollStruct, &ConnectionList );
+			TerminateConnection ( ServerSocket, ConnectionListIterator, &HighestPollIterator, 
+									PollStruct, ConnectionList );
 		}
 
 	} // The linked list for loop.
@@ -907,16 +900,14 @@ int main( int argc, char *argv[] )
 	// Initate self destruct sequence.
 	if ( ServerShutdown )
 	{
-		ConnectionListIterator = ConnectionList.begin();
-		
 		printf("Initating self destruct sequence...\n");
 
 		printf("Terminating %i Client(s)\n", ActiveConnections );
 		// Remove all Client Connections gracefully.
-		while ( ConnectionListIterator != ConnectionList.end() )
+		while ( ConnectionList.begin() != ConnectionList.end() )
 		{
-			ConnectionListIterator = TerminateConnection ( ServerSocket, ConnectionListIterator, &HighestPollIterator,
-									PollStruct, &ConnectionList );
+			TerminateConnection ( ServerSocket, 0, &HighestPollIterator,
+									PollStruct, ConnectionList );
 		}
 
 		// Close the main server socket.
