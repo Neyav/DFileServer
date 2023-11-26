@@ -46,6 +46,7 @@
 #include <fstream>
 #include <vector>
 #include <set>
+#include <algorithm>
 
 #include "Version.hxx"
 
@@ -482,27 +483,27 @@ char GenerateFolderIndex( string ArgVirtualPath, char *ArgPath, string &ArgBuffe
 	if ( DirectoryPointer == NULL )
 	{
 		// Try to open it as a file now.
-		FileTestDescriptor = open( ArgPath, O_RDONLY );
+		FileTestDescriptor = _open( ArgPath, O_RDONLY );
 
 		if ( FileTestDescriptor < 1 )
 			return -1; // Path is invalid.
 		else
 		{
-			close ( FileTestDescriptor );
+			_close ( FileTestDescriptor );
 			return 0;  // Path points to a file.
 		}
 	}
 
 	// Check for index.htm and index.html
-	if ( ( FileTestDescriptor = open( FullPath( ArgPath, "index.html" ).c_str(), O_RDONLY ) ) > 0 )
+	if ( ( FileTestDescriptor = _open( FullPath( ArgPath, "index.html" ).c_str(), O_RDONLY ) ) > 0 )
 	{ // Index.html found.
-		close ( FileTestDescriptor );
+		_close ( FileTestDescriptor );
 		strcat( ArgPath, "/index.html");
 		return 0; 
 	}
-	if ( ( FileTestDescriptor = open( FullPath( ArgPath, "index.htm" ).c_str(), O_RDONLY ) ) > 0 )
+	if ( ( FileTestDescriptor = _open( FullPath( ArgPath, "index.htm" ).c_str(), O_RDONLY ) ) > 0 )
 	{ // Index.htm found.
-		close ( FileTestDescriptor );
+		_close ( FileTestDescriptor );
 		strcat( ArgPath, "/index.htm");
 		return 0;
 	}

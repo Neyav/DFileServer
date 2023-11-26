@@ -38,6 +38,11 @@
 #include <winsock.h>
 #include <io.h>
 #include "contrib/fakepoll.h"
+#define strncasecmp _strnicmp
+#define strcasecmp _stricmp
+#define strncpy strncpy_s
+
+#pragma comment(lib, "Ws2_32.lib")
 #else
 #include <unistd.h>
 #include <sys/poll.h>
@@ -657,7 +662,7 @@ int main( int argc, char *argv[] )
 		if ( PollStruct[ConnectionListIterator->PollIterator].revents & POLLIN )
 		{
 			char DataBuffer[500]; // 500 should be big enough.
-			ssize_t DataRecved;
+			size_t DataRecved;
 
 			if ( ( DataRecved = ConnectionListIterator->RecvData( DataBuffer, sizeof( DataBuffer ) ) ) < 1 )
 			{ // Disconnection or error. Terminate client.

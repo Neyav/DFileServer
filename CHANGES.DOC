@@ -1,18 +1,28 @@
-   	DFileServer 1.1.x - Open Branch
-	^
-	|
-	DFileServer 1.1.3 - Sunday, October 23rd, 2005
+   |--> DFileServer 2.0.0 - 2023
+   |
+   | - Original 2.0.0 branch lost to time. Was an attempt at multithreading the program to make
+   |   scale better with more concurrent connections. The idea was to make the tiniest little webserver
+   |   that could. This 2.0.0 branch is going to be slightly different. First, I've grown as a programmer.
+   |   DFileServer was my first real attempt at a C++ program, and not only have I changed, but so has
+   |   C++. I'm going to clean the code base, add threading, and make it easier to add features for the
+   |   future. An upload form was also originally planned, to make it a very easy file sharing tool.
+   |   That idea is still fascinating. We'll see.    
+   |
+   |	DFileServer 1.1.4 - Sometime 2005
+   |	^ - Lost Version, minor bug fixes. Lost in time after a computer crash.
+   |	|
+   |<---DFileServer 1.1.3 - Sunday, October 23rd, 2005
         ^ - Add Server Wide basic authentication (see -requireauth )
-	| - Able to fork to the background ( -background, *nix only )
-	| - Backported HTTPHeader from the development branch
-	| - ../ is always on top in the generated indexes
-   	|
-   	DFileServer 1.1.2 - Thursday, September 8th, 2005
-   	^ - Rearrange TerminateConnection to prevent crash on some platforms.
-   	|
-   	DFileServer 1.1.1 - Saturday, August 6th, 2005
-   	^ - Handle URL Encoding properly
-   	|
+    	| - Able to fork to the background ( -background, *nix only )
+    	| - Backported HTTPHeader from the development branch
+    	| - ../ is always on top in the generated indexes
+    	|
+    	DFileServer 1.1.2 - Thursday, September 8th, 2005
+    	^ - Rearrange TerminateConnection to prevent crash on some platforms.
+    	|
+    	DFileServer 1.1.1 - Saturday, August 6th, 2005
+    	^ - Handle URL Encoding properly
+    	|
    |--> DFileServer 1.1.0 - Sunday, June 19th, 2005
    |
    | - setuid/chroot/logfile support

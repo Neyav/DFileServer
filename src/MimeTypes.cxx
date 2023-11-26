@@ -32,6 +32,10 @@
 #include <stdlib.h>
 #include <string.h>
 
+#ifdef _WINDOWS
+#define strcasecmp _stricmp
+#endif
+
 #include "MimeTypes.hxx"
 
 #define MIMETYPES 52
