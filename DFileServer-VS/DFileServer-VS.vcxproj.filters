@@ -62,8 +62,5 @@
     <ClInclude Include="..\src\contrib\fakepoll.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\contrib\win32dirent.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
   </ItemGroup>
 </Project>
