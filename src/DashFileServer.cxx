@@ -1,4 +1,4 @@
-/*
+﻿/*
 ** ($Header: /var/www/cvsroot/DFileServer/src/DashFileServer.cxx,v 1.61.2.19 2005/10/23 19:51:28 incubus Exp $)
 **
 ** Copyright 2005, 2018 Chris Laverdure
@@ -54,6 +54,7 @@
 #include <vector>
 #include <iterator>
 #include <string>
+#include <iostream>
 
 #include "ClientConnection.hxx"
 #include "CPathResolver.hxx"
@@ -72,6 +73,7 @@ bool ServerLockdown = false;
 bool ServerShutdown = false;
 std::string ConfigurationBasicCredentials = "";
 int ActiveConnections = 0;
+#define MAXIDENTIFIERLEN 151
 
 void InitateServerShutdown ( int ArgSignal )
 {
@@ -345,10 +347,10 @@ char LocateResource ( std::string Resource, ClientConnection *ArgClient, char *D
 {
 	FILE *FileStream;
 	char FieldName[31];
-	char ResolveIdentifier[151];
-	char RealIdentifier[151];
+	char ResolveIdentifier[MAXIDENTIFIERLEN];
+	char RealIdentifier[MAXIDENTIFIERLEN];
 	char IPRange[17];
-	char SignOfBadEngineering[151];
+	char ResourceType[MAXIDENTIFIERLEN];
 
 	// No resource defined.
 	if ( Resource.empty() )
@@ -379,22 +381,22 @@ char LocateResource ( std::string Resource, ClientConnection *ArgClient, char *D
 	// Find the resource identifier.
 	while (!feof(FileStream))
 	{
-		fscanf( FileStream, "%30s %150s %150s", FieldName, ResolveIdentifier, SignOfBadEngineering );
+		fscanf( FileStream, "%30s %150s %150s", FieldName, ResolveIdentifier, ResourceType );
 
 		if ( strcmp( FieldName, "RESOURCE" ) == 0) // A resource.
 		{
-			if ( strcmp( SignOfBadEngineering, "redirect" ) == 0 ) // redirect
+			if ( strcmp( ResourceType, "redirect" ) == 0 ) // redirect
 			{
 				if ( strncmp( ResolveIdentifier, Resource.c_str(), strlen( ResolveIdentifier ) ) == 0 )
 				{
-					strcpy ( DstResourceType, SignOfBadEngineering );
+					strcpy ( DstResourceType, ResourceType );
 					break;
 				}
 			}
 
 			if ( strcmp( ResolveIdentifier, Resource.c_str() ) == 0) // A match.
 			{
-				strcpy ( DstResourceType, SignOfBadEngineering );	
+				strcpy ( DstResourceType, ResourceType );	
 				break;
 			}
 		}
@@ -493,10 +495,18 @@ int main( int argc, char *argv[] )
    signal( SIGTERM, InitateServerShutdown );
    signal( SIGINT, InitateServerShutdown );
 
-   printf("DFileServer Version %s.%s.%s\n", MAJORVERSION, MINORVERSION, PATCHVERSION);
-   printf("             Copyright 2005, 2018 Chris Laverdure\n");
-   printf("-------------------------------------------------\n");
+   //printf("DFileServer Version %s.%s.%s\n", MAJORVERSION, MINORVERSION, PATCHVERSION);
+   //printf("             Copyright 2005, 2018 Chris Laverdure\n");
+   //printf("-------------------------------------------------\n");
 
+   // First we want to clear the screen.
+   std::cout << "\u001B[2J\u001B[1;1H";
+   std::cout << "\u001B[41m\u001B[30mDFileServer Version " << MAJORVERSION << "." << MINORVERSION << "." << PATCHVERSION << "                                                                      **-]\u001B[0m" << std::endl;
+   std::cout << "\u001B[41m\u001B[30m                    (c) 2005, 2018, 2023 Christopher Laverdure                                 **-]\u001B[0m" << std::endl;
+   std::cout << "\u001B[41m\u001B[30m                    All Rights Reserved.                                                       **-]\u001B[0m" << std::endl;
+   std::cout << "In memorial for all the code that was lost that one day when Sylvia wrote her last bit." << std::endl;
+   std::cout << "Initalizing..." << std::endl;
+   std::cout << " -=Parameters..." << std::endl;
    // Parse for command line parameters.
    for (int x = 1; x < argc; x++)
    {
@@ -586,6 +596,8 @@ int main( int argc, char *argv[] )
 #endif
    }
 
+   std::cout << " -=Initalize Network..." << std::endl;
+
    memset( PollStruct, '\0', sizeof(PollStruct) );
 
    if ( (ServerSocket = InitalizeNetwork( ConfigurationPort, ConfigurationBackLog )) == -1 )
@@ -594,9 +606,11 @@ int main( int argc, char *argv[] )
 	exit(-1);
    }
 
-   printf("Listening on port: %i\n", ConfigurationPort );
+   printf(" -=Listening on port: %i\n", ConfigurationPort );
 
 #ifndef _WINDOWS
+
+   std::cout << " -=UNIX Specific configuration optionals..." << std::endl;
 
    // chroot
    if ( !ConfigurationChrootFolder.empty() )
@@ -630,6 +644,8 @@ int main( int argc, char *argv[] )
    PollStruct[0].fd = ServerSocket;
    PollStruct[0].events = POLLIN;
    HighestPollIterator = 0;
+
+   std::cout << " -=Waiting for connections. Initalization complete." << std::endl;
 
    // Main Program Loop
    while (1)
