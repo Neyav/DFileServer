@@ -147,7 +147,7 @@ void ClientConnection::DisconnectClient ( void )
 #else
 	if ( close (NetworkSocket) == -1 )
 #endif
-		perror("ClientConnection::DisconnectClient -- close()");
+	perror("ClientConnection::DisconnectClient -- close()");
 
 	NetworkSocket = -1;
 }

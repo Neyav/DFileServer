@@ -282,7 +282,7 @@ void IncomingConnection ( int ArgSocket, int *ArgHighestIterator, struct pollfd 
 }
 
 void TerminateConnection ( int ArgSocket, int ArgClient, int *ArgHighestIterator, 
-						struct pollfd ArgPoll[], static vector <ClientConnection> ArgList )
+						struct pollfd ArgPoll[], vector <ClientConnection> *ArgList )
 {
 	int NewHighestPollIterator = 0;
 	int OldPollIterator = 0;
@@ -300,28 +300,28 @@ void TerminateConnection ( int ArgSocket, int ArgClient, int *ArgHighestIterator
 
 	// Keep track of the old iterator. Previously I just used ArgClient->PollIterator in this function, but that doesn't
 	// appear safe to do after the ArgList->erase command. It's causing crashes on some platforms (i.e. FreeBSD 6.x )
-	OldPollIterator = ArgList[ArgClient].PollIterator;
+	OldPollIterator = (*ArgList)[ArgClient].PollIterator;
 
 	// Remove this client from the Poll structure so it doesn't get polled.
 	ArgPoll[OldPollIterator].fd = 0;
 	ArgPoll[OldPollIterator].events = 0;
 
 	// Close the socket and possibly do some other Misc shutdown stuff.
-    ArgList[ArgClient].DisconnectClient();
+    (*ArgList)[ArgClient].DisconnectClient();
 
 	// Remove the client from the linked list.
-	ArgList.erase(ArgList.begin() + ArgClient);
+	(*ArgList).erase((*ArgList).begin() + ArgClient);
 
 	// This Client had the highest descriptor..
 	if ( OldPollIterator == *ArgHighestIterator )
 	{
 		// Traverse through the active connections to find the new highest file descriptor
 		for (int ConnectionListIterator = 0;
-			ConnectionListIterator < ArgList.size();
+			ConnectionListIterator < (*ArgList).size();
 				ConnectionListIterator++)
 		{
-			if ( ArgList[ConnectionListIterator].PollIterator > NewHighestPollIterator )
-				NewHighestPollIterator = ArgList[ConnectionListIterator].PollIterator;
+			if ( (*ArgList)[ConnectionListIterator].PollIterator > NewHighestPollIterator )
+				NewHighestPollIterator = (*ArgList)[ConnectionListIterator].PollIterator;
 		}
 
 		*ArgHighestIterator = NewHighestPollIterator;
@@ -486,7 +486,7 @@ int main( int argc, char *argv[] )
    string ConfigurationChrootFolder;
 #endif
    struct pollfd PollStruct[2048];
-   static vector<ClientConnection> ConnectionList;
+   vector<ClientConnection> ConnectionList;
 
 #ifndef _WINDOWS
    // Catch SIGPIPE and ignore it.
@@ -660,7 +660,11 @@ int main( int argc, char *argv[] )
 			{ // Disconnection or error. Terminate client.
 
 				TerminateConnection ( ServerSocket, ConnectionListIterator, &HighestPollIterator,
-												PollStruct, ConnectionList );
+												PollStruct, &ConnectionList );
+				ConnectionListIterator--;
+				if ( ConnectionListIterator < 0 )
+					ConnectionListIterator = 0;
+				continue;
 			}
 			else
 			{ // Incoming data.
@@ -750,7 +754,11 @@ int main( int argc, char *argv[] )
 					(( ResourceSize = ConnectionList[ConnectionListIterator].OpenFile( Resource ) ) == -1) )
 				{ // File couldn't be opened.
 					TerminateConnection ( ServerSocket, ConnectionListIterator, &HighestPollIterator,
-													PollStruct, ConnectionList );
+													PollStruct, &ConnectionList );
+					ConnectionListIterator--;
+					if ( ConnectionListIterator < 0 )
+						ConnectionListIterator = 0;
+					continue;
 				}
 				else
 				{				
@@ -881,7 +889,11 @@ int main( int argc, char *argv[] )
 				if ( ConnectionList[ConnectionListIterator].BytesRemaining == 0 )
 				{
 					TerminateConnection ( ServerSocket, ConnectionListIterator, &HighestPollIterator,
-											PollStruct, ConnectionList );
+											PollStruct, &ConnectionList );
+					ConnectionListIterator--;
+					if ( ConnectionListIterator < 0 )
+						ConnectionListIterator = 0;
+					continue;
 				}
 			}
 				
@@ -892,7 +904,11 @@ int main( int argc, char *argv[] )
 		if ( ConnectionList[ConnectionListIterator].SecondsIdle() > 15 )
 		{
 			TerminateConnection ( ServerSocket, ConnectionListIterator, &HighestPollIterator, 
-									PollStruct, ConnectionList );
+									PollStruct, &ConnectionList );
+			ConnectionListIterator--;
+			if ( ConnectionListIterator < 0 )
+				ConnectionListIterator = 0;
+			continue;
 		}
 
 	} // The linked list for loop.
@@ -907,7 +923,7 @@ int main( int argc, char *argv[] )
 		while ( ConnectionList.begin() != ConnectionList.end() )
 		{
 			TerminateConnection ( ServerSocket, 0, &HighestPollIterator,
-									PollStruct, ConnectionList );
+									PollStruct, &ConnectionList );
 		}
 
 		// Close the main server socket.
