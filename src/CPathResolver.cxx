@@ -37,7 +37,6 @@
 using std::ifstream;
 using std::ios;
 
-using std::string;
 using std::list;
 using std::map;
 
@@ -70,10 +69,10 @@ CPathResolver::CPathResolver() {
  */
 void CPathResolver::Add( std::string Fake, std::string Real ) {
 
-	list<string> Parts = PathExplode( Fake );
+	list<std::string> Parts = PathExplode( Fake );
 
 	SPathNode *Node = mPaths;
-	for( list<string>::iterator i = Parts.begin(); i != Parts.end(); i++ ) {
+	for( list<std::string>::iterator i = Parts.begin(); i != Parts.end(); i++ ) {
 		if( Node->Children[*i] == NULL ) {
 			Node->Children[*i] = new SPathNode;
 		}
@@ -95,7 +94,7 @@ void CPathResolver::Add( std::string Fake, std::string Real ) {
  *
  *  @todo  Much more stable config file reading. :)
  */
-CPathResolver::CPathResolver( string ConfigFile ) {
+CPathResolver::CPathResolver( std::string ConfigFile ) {
 
 	mPaths = new SPathNode();
 
@@ -103,7 +102,7 @@ CPathResolver::CPathResolver( string ConfigFile ) {
 	if( !Config.is_open() ) throw( (exn_t)EXN_IO );
 
 	while( !Config.eof() ) {
-		string Fake, Real;
+		std::string Fake, Real;
 		Config >> Fake >> Real;
 		Add( Fake, Real );
 	}
@@ -112,22 +111,22 @@ CPathResolver::CPathResolver( string ConfigFile ) {
 
 
 
-/** Resolve virtual path strings.
+/** Resolve virtual path std::strings.
  *
- *  Resolves path strings based on the currently stored mapping.
+ *  Resolves path std::strings based on the currently stored mapping.
  *  Throws EXN_ILLEGAL if there is no valid resolution for the path.
  *
  *  @param   Path  Path to be resolved.
  *  @return  Resolved path.
  */
-string CPathResolver::operator()( string Path ) {
+std::string CPathResolver::operator()( std::string Path ) {
 
-	list<string> Parts = PathExplode( PathClean( Path ) );
+	list<std::string> Parts = PathExplode( PathClean( Path ) );
 
-	list<string>::iterator iPart = Parts.begin();
+	list<std::string>::iterator iPart = Parts.begin();
 	SPathNode *Node = mPaths;
 
-	string NewPath;
+	std::string NewPath;
 	NewPath.reserve( 4096 );
 
 	while( iPart != Parts.end() && Node->Children[*iPart] != NULL ) {
@@ -159,24 +158,24 @@ CPathResolver::~CPathResolver() {
 
 
 
-/** Clean path strings.
+/** Clean path std::strings.
  *
- *  Removes @c . and @c .. from path strings (properly evaluating them).
+ *  Removes @c . and @c .. from path std::strings (properly evaluating them).
  *  All paths are required to use @c / for directory seperation.
  *  Throws @c EXN_ILLEGAL if the resulting path is empty or negative.
  *
- *  @param   Path  Path string to be cleaned.
- *  @return  cleaned path string.
+ *  @param   Path  Path std::string to be cleaned.
+ *  @return  cleaned path std::string.
  */
-string CPathResolver::PathClean( string Path ) {
+std::string CPathResolver::PathClean( std::string Path ) {
 
-	list<string> Parts = PathExplode( Path );
+	list<std::string> Parts = PathExplode( Path );
 
 	if( Parts.empty() ) return "/";
 
-	string NewPath;
+	std::string NewPath;
 	NewPath.reserve( 4096 );
-	for( list<string>::iterator i = Parts.begin(); i != Parts.end(); i++ ) {
+	for( list<std::string>::iterator i = Parts.begin(); i != Parts.end(); i++ ) {
 		NewPath += "/" + *i;
 	}
 
@@ -186,20 +185,20 @@ string CPathResolver::PathClean( string Path ) {
 
 
 
-/** Split path strings into individual parts.
+/** Split path std::strings into individual parts.
  *
  *  Splits paths into parts, automatically resolving "." and "..".
  *  All paths are required to use @c / for directory seperation.
  *  Throws @c EXN_ILLEGAL if the resulting path is empty or negative.
  *
- *  @param   Path  Path string to be split up.
+ *  @param   Path  Path std::string to be split up.
  *  @return  List of path parts.
  */
-list<string> CPathResolver::PathExplode( string Path ) {
+list<std::string> CPathResolver::PathExplode( std::string Path ) {
 
-	list<string> Parts;
+	list<std::string> Parts;
 
-	string Current;
+	std::string Current;
 	Current.reserve( 256 );
 	for( unsigned int i = 0; i < Path.length(); i++ ) {
 		if( !IS_SEP( Path[i] ) ) Current += Path[i];

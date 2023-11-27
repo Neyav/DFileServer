@@ -107,7 +107,7 @@ char *ReturnMimeType ( char *ArgFileName )
 	static char mimetype[40];
 	char *CharPointer;
 
-	// Set the pointer to the end of the string.
+	// Set the pointer to the end of the std::string.
 	CharPointer = &ArgFileName[strlen(ArgFileName) - 1];
 
 	// Go backwards until you find the last period, be sure not to go beyond the start of our first variable.

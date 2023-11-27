@@ -55,12 +55,12 @@ using namespace std;
 struct DirectoryEntryStruct 
 { 
 	bool Folder;
-	string Name;
-	string CompletePath;
+	std::string Name;
+	std::string CompletePath;
 	int Size;
 }; 
  
-void URLEncode( string & );
+void URLEncode( std::string & );
 void ParseURLEncoding( char * );
 
 bool operator< ( const DirectoryEntryStruct &FirstElement, const DirectoryEntryStruct &SecondElement ) 
@@ -131,9 +131,9 @@ char *ConvertSizeToFriendly ( int ArgFileSize )
 	return (char *) FriendlyFileSize;
 }
 
-static string FullPath ( string ArgPath, const char *ArgFile )
+static std::string FullPath ( std::string ArgPath, const char *ArgFile )
 {
-	string Buffer;
+	std::string Buffer;
 
 	// First copy the path into the buffer.
 	Buffer = ArgPath;
@@ -143,15 +143,15 @@ static string FullPath ( string ArgPath, const char *ArgFile )
 		Buffer += "/";
 
 	// Now tag on the filename at the end.
-	Buffer += string(ArgFile);
+	Buffer += std::string(ArgFile);
 
 	return Buffer;
 }
 
-string InsertFile ( const char *ArgPath, const char *ArgFile )
+std::string InsertFile ( const char *ArgPath, const char *ArgFile )
 {
-	string FileName;
-	string FileData;
+	std::string FileName;
+	std::string FileData;
 	ifstream                FilePointer;
 	ifstream::pos_type      FileSize;
 	char *TempSpace;
@@ -191,17 +191,17 @@ string InsertFile ( const char *ArgPath, const char *ArgFile )
 	return FileData;
 }
 
-static string InsertIndexTable ( string *ArgVirtualPath, string ArgPath, set<string> &ArgHidden )
+static std::string InsertIndexTable ( std::string *ArgVirtualPath, std::string ArgPath, set<std::string> &ArgHidden )
 {
         struct dirent *DirentPointer = NULL;
         bool AlternatingVariable = false;
-		string Buffer;
-        vector<DirectoryEntryStruct> DirectoryVector;
+		std::string Buffer;
+        std::vector<DirectoryEntryStruct> Directoryvector;
 
 	// Top Table row.
 	Buffer += "<table id=\"DFS_table\">\n<tr class=\"DFS_headertablerow\"><th class=\"DFS_entrytype\">Entry Type</th><th class=\"DFS_entryname\">Entry Name</th><th class=\"DFS_entrysize\">Entry Size</th></tr>\n";
          
-	// Walk through the folder grabbing files and adding them to our vector, using the new filesystem library.
+	// Walk through the folder grabbing files and adding them to our std::vector, using the new filesystem library.
     for (const auto& entry : filesystem::directory_iterator(ArgPath))
 	{
 		// In UNIX, hidden files start with periods. This is a good policy.
@@ -217,7 +217,7 @@ static string InsertIndexTable ( string *ArgVirtualPath, string ArgPath, set<str
 
 		DirectoryEntry.Name = entry.path().filename().string();
 
-		// Check through the ArgHidden vector for files that shouldn't be displayed.
+		// Check through the ArgHidden std::vector for files that shouldn't be displayed.
 		if ( ArgHidden.find( DirectoryEntry.Name ) != ArgHidden.end() )
 			continue;
 
@@ -234,18 +234,18 @@ static string InsertIndexTable ( string *ArgVirtualPath, string ArgPath, set<str
 
 		// Is the file accessable?
 		if ( DirectoryEntry.Size == -1 )
-			continue; // Don't add it to the vector.
+			continue; // Don't add it to the std::vector.
 
-		DirectoryVector.push_back ( DirectoryEntry );
+		Directoryvector.push_back ( DirectoryEntry );
 	}
 
 
 
 	// Now sort it!
-	sort(DirectoryVector.begin(), DirectoryVector.end());
+	sort(Directoryvector.begin(), Directoryvector.end());
 
 	// Scan through all the files in it.
-	for ( unsigned int Iterator = 0; Iterator < DirectoryVector.size(); Iterator++ )
+	for ( unsigned int Iterator = 0; Iterator < Directoryvector.size(); Iterator++ )
 	{
 		// Resize it if we're about to run out of space.
 		if ( Buffer.capacity() - Buffer.size() < 100 )
@@ -264,28 +264,28 @@ static string InsertIndexTable ( string *ArgVirtualPath, string ArgPath, set<str
 		}
 
 		// Entry Type
-		if ( DirectoryVector[Iterator].Folder )
+		if ( Directoryvector[Iterator].Folder )
 			Buffer += "<td class=\"DFS_entrytype\">[DIR]</td>";
 		else
 			Buffer += "<td class=\"DFS_entrytype\">[FILE]</td>";
 
 		// Entry Name
-		if ( DirectoryVector[Iterator].Folder )
+		if ( Directoryvector[Iterator].Folder )
 		{ // Give folders slashes on the end.
-			Buffer += "<td class=\"DFS_entryname\"><a href=\"" + DirectoryVector[Iterator].CompletePath +
-						"/\" class=\"DFS_direntry\">" + DirectoryVector[Iterator].Name + "/</a></td>";
+			Buffer += "<td class=\"DFS_entryname\"><a href=\"" + Directoryvector[Iterator].CompletePath +
+						"/\" class=\"DFS_direntry\">" + Directoryvector[Iterator].Name + "/</a></td>";
 		}
 		else
 		{
-			Buffer += "<td class=\"DFS_entryname\"><a href=\"" + DirectoryVector[Iterator].CompletePath +
-						"\" class=\"DFS_fileentry\">" + DirectoryVector[Iterator].Name + "</a></td>";
+			Buffer += "<td class=\"DFS_entryname\"><a href=\"" + Directoryvector[Iterator].CompletePath +
+						"\" class=\"DFS_fileentry\">" + Directoryvector[Iterator].Name + "</a></td>";
 		}
 
 		// Entry Size
-		if ( DirectoryVector[Iterator].Folder )
+		if ( Directoryvector[Iterator].Folder )
 			Buffer += "<td class=\"DFS_entrysize\">&nbsp;</td></tr>\n";
 		else
-			Buffer += "<td class=\"DFS_entrysize\">" + string( ConvertSizeToFriendly( DirectoryVector[Iterator].Size ) ) + "</td></tr>\n";
+			Buffer += "<td class=\"DFS_entrysize\">" + std::string( ConvertSizeToFriendly( Directoryvector[Iterator].Size ) ) + "</td></tr>\n";
 	}
 
 	// End the table.
@@ -295,15 +295,15 @@ static string InsertIndexTable ( string *ArgVirtualPath, string ArgPath, set<str
 	return Buffer;
 }
 	
-static string ParseTemplate ( ifstream &ArgFile, string *ArgVirtualPath, string ArgPath )
+static std::string ParseTemplate ( ifstream &ArgFile, std::string *ArgVirtualPath, std::string ArgPath )
 {
 	char *TempSpace;
 	int FileSize;
 	bool ActiveLoop = true;
-	string TemplateData;
-	string::size_type StringPosition;
-	string::size_type LowestMatch = 0;
-	set<string> FilesToHide;
+	std::string TemplateData;
+	std::string::size_type stringPosition;
+	std::string::size_type LowestMatch = 0;
+	set<std::string> FilesToHide;
 
 	// First determine the size of the file.
         ArgFile.seekg(0, ios_base::end);
@@ -317,7 +317,7 @@ static string ParseTemplate ( ifstream &ArgFile, string *ArgVirtualPath, string 
 	// Read all the information from the file into this char.
 	ArgFile.read ( TempSpace, FileSize );
 
-	// Dump the char into a string, parse and replace all "keywords"
+	// Dump the char into a std::string, parse and replace all "keywords"
 
 	TemplateData = TempSpace;
 
@@ -325,71 +325,71 @@ static string ParseTemplate ( ifstream &ArgFile, string *ArgVirtualPath, string 
 	
 	while (ActiveLoop)
 	{
-		string::size_type StringSize;
-		string::size_type LocalLowestMatch = 0;
-		int StringOffset = 0;
+		std::string::size_type stringSize;
+		std::string::size_type LocalLowestMatch = 0;
+		int stringOffset = 0;
 
-		StringSize = TemplateData.size();
+		stringSize = TemplateData.size();
 		ActiveLoop = false;
 
 		// $$LOCATION$$
-		StringPosition = TemplateData.find ("$$LOCATION$$", LowestMatch);
-		if ( StringPosition != string::npos )
+		stringPosition = TemplateData.find ("$$LOCATION$$", LowestMatch);
+		if ( stringPosition != std::string::npos )
 		{
-			TemplateData.replace( StringPosition, sizeof("$$LOCATION$$") - 1, *ArgVirtualPath);
+			TemplateData.replace( stringPosition, sizeof("$$LOCATION$$") - 1, *ArgVirtualPath);
 
-			if ( StringPosition < LocalLowestMatch || LocalLowestMatch == 0 )
-				LocalLowestMatch = StringPosition;
+			if ( stringPosition < LocalLowestMatch || LocalLowestMatch == 0 )
+				LocalLowestMatch = stringPosition;
 
-			StringOffset += ArgVirtualPath->size() - sizeof("$$LOCATION$$");
+			stringOffset += ArgVirtualPath->size() - sizeof("$$LOCATION$$");
 			ActiveLoop = true;
 		}
 		// $$SERVERVERSION$$
-		StringPosition = TemplateData.find ("$$SERVERVERSION$$", LowestMatch);
-		if ( StringPosition != string::npos )
+		stringPosition = TemplateData.find ("$$SERVERVERSION$$", LowestMatch);
+		if ( stringPosition != std::string::npos )
 		{
-			string VersionString("DFileServer [Version " + string(MAJORVERSION) + "." + string(MINORVERSION) + "." + string(PATCHVERSION) + "]");
+			std::string Versionstring("DFileServer [Version " + std::string(MAJORVERSION) + "." + std::string(MINORVERSION) + "." + std::string(PATCHVERSION) + "]");
 
-			TemplateData.replace( StringPosition, sizeof("$$SERVERVERSION$$") - 1, VersionString );
+			TemplateData.replace( stringPosition, sizeof("$$SERVERVERSION$$") - 1, Versionstring );
 
-			if ( StringPosition < LocalLowestMatch || LocalLowestMatch == 0 )
-				LocalLowestMatch = StringPosition;
+			if ( stringPosition < LocalLowestMatch || LocalLowestMatch == 0 )
+				LocalLowestMatch = stringPosition;
 
-			StringOffset += VersionString.size() - sizeof("$$SERVERVERSION$$");
+			stringOffset += Versionstring.size() - sizeof("$$SERVERVERSION$$");
 			ActiveLoop = true;
 		}
 		// $$INSERTFILE(*)$$
-		StringPosition = TemplateData.find ("$$INSERTFILE(", LowestMatch);
-		if ( StringPosition != string::npos )
+		stringPosition = TemplateData.find ("$$INSERTFILE(", LowestMatch);
+		if ( stringPosition != std::string::npos )
 		{
-			string FileData;
-			string::size_type StringEndPosition;
+			std::string FileData;
+			std::string::size_type stringEndPosition;
 
 			// Find where the end of this tag is...
-			StringEndPosition = TemplateData.find (")$$", StringPosition);
+			stringEndPosition = TemplateData.find (")$$", stringPosition);
 
 			// Make sure the tag ends
-			if ( StringEndPosition != string::npos )
+			if ( stringEndPosition != std::string::npos )
 			{
-				string TempFileName;
-				string::size_type TempPosition;
+				std::string TempFileName;
+				std::string::size_type TempPosition;
 
 				// Now we Seperate the chunck between these two positions.
-				TempPosition = StringPosition + sizeof("$$INSERTFILE");				
-				TempFileName = TemplateData.substr ( TempPosition, StringEndPosition - TempPosition );
+				TempPosition = stringPosition + sizeof("$$INSERTFILE");				
+				TempFileName = TemplateData.substr ( TempPosition, stringEndPosition - TempPosition );
 
 				// Make sure the filename doesn't contain certain elements that may be used
 				// to redirect the folder, and make sure that it's not a file that has already
 				// been included. ( Included files can have $$INSERTFILE tags, and they will be parsed.
 				// 		    If an inserted file inserts itself, it will recurse until the computer
 				//		    runs out of ram and the program dies. Not cool. )
-				if ( TempFileName.find("/", 0) == string::npos &&
-					TempFileName.find("\\", 0) == string::npos && 
-					TempFileName.find("~", 0) == string::npos &&
+				if ( TempFileName.find("/", 0) == std::string::npos &&
+					TempFileName.find("\\", 0) == std::string::npos && 
+					TempFileName.find("~", 0) == std::string::npos &&
 					FilesToHide.find( TempFileName ) == FilesToHide.end() )
 				{ 
-					// Load the file into our string and add it to the FilesToHide vector
-					// so that it doesn't show up in our vector.
+					// Load the file into our std::string and add it to the FilesToHide std::vector
+					// so that it doesn't show up in our std::vector.
 					FileData = InsertFile( ArgPath.c_str(), TempFileName.c_str() );
 					FilesToHide.insert( TempFileName );
 				}
@@ -398,20 +398,20 @@ static string ParseTemplate ( ifstream &ArgFile, string *ArgVirtualPath, string 
 
 				// We attempt to substitute $$INSERTFILE(*)$$ with the contents of FileData.
 				// This will simply remove the tag if FileData is blank.
-				TemplateData.replace( StringPosition, (StringEndPosition + 3) - StringPosition,
+				TemplateData.replace( stringPosition, (stringEndPosition + 3) - stringPosition,
 							FileData );
 			}
 			else
 			{ // The tag is incomplete, cripple it so we don't scan it again.
-				TemplateData[StringPosition] = '^';
+				TemplateData[stringPosition] = '^';
 				// Cancel out any offset detection.
-				StringPosition = ( StringEndPosition + 3 );
+				stringPosition = ( stringEndPosition + 3 );
 			}
 
-			if ( StringPosition < LocalLowestMatch || LocalLowestMatch == 0 )
-				LocalLowestMatch = StringPosition;
+			if ( stringPosition < LocalLowestMatch || LocalLowestMatch == 0 )
+				LocalLowestMatch = stringPosition;
 
-			StringOffset += FileData.size() - ( ( StringEndPosition + 3 ) - StringPosition );
+			stringOffset += FileData.size() - ( ( stringEndPosition + 3 ) - stringPosition );
 			ActiveLoop = true;
 		}
 
@@ -420,37 +420,37 @@ static string ParseTemplate ( ifstream &ArgFile, string *ArgVirtualPath, string 
 		LowestMatch = LocalLowestMatch;
 
 		// Check for a Negative offset.
-		if ( StringOffset < 0 )
+		if ( stringOffset < 0 )
 		{
-			string::size_type StringNewEnd;
+			std::string::size_type stringNewEnd;
 	
 			// Change it to a positive offset.
-			StringOffset *= -1;
+			stringOffset *= -1;
 
-			// New end of the string.
-			StringNewEnd = StringSize - StringOffset;
+			// New end of the std::string.
+			stringNewEnd = stringSize - stringOffset;
 
-			// Zap the tail of the string, if it exists.
-			TemplateData.erase ( StringNewEnd, StringOffset );			
+			// Zap the tail of the std::string, if it exists.
+			TemplateData.erase ( stringNewEnd, stringOffset );			
 		}
 
 	}
 
 	// This is a special case for the INDEX. We do it last and after the loop so that noting inside the index gets
 	// parsed and replaced. Not that I expect that to happen, but since when were such expectations safe?
-	StringPosition = TemplateData.find ("$$INDEXTABLE$$", 0);
-	if ( StringPosition != string::npos )
-		TemplateData.replace( StringPosition, sizeof("$$INDEXTABLE$$") - 1, 
+	stringPosition = TemplateData.find ("$$INDEXTABLE$$", 0);
+	if ( stringPosition != std::string::npos )
+		TemplateData.replace( stringPosition, sizeof("$$INDEXTABLE$$") - 1, 
 					InsertIndexTable( ArgVirtualPath, ArgPath, FilesToHide ) );
 
 	return TemplateData;
 }
 
-char GenerateFolderIndex( string ArgVirtualPath, char *ArgPath, string &ArgBuffer )
+char GenerateFolderIndex( std::string ArgVirtualPath, char *ArgPath, std::string &ArgBuffer )
 {
 	int FileTestDescriptor;
 	ifstream FileStream;
-	vector<DirectoryEntryStruct> DirectoryVector;
+	std::vector<DirectoryEntryStruct> Directoryvector;
 
 	// Determine wheter it's a directory or a filesystem. Now using C++17 filesystem library.
 	if (!filesystem::is_directory(ArgPath))
@@ -488,10 +488,10 @@ char GenerateFolderIndex( string ArgVirtualPath, char *ArgPath, string &ArgBuffe
 	FileStream.open ("indextemplates/default.html", ios::in ); // Open our template header.
 	if ( !FileStream.is_open() || !FileStream.good() )
 	{ // It doesn't exist, so toss in a generic header.
-		set<string> Filler;
+		set<std::string> Filler;
 
 		// <html> and <head>
-		ArgBuffer = "<html>\n<head>\n<title>Directory listing for " + string(ArgVirtualPath) + "</title>\n";
+		ArgBuffer = "<html>\n<head>\n<title>Directory listing for " + std::string(ArgVirtualPath) + "</title>\n";
 		// A clone of KDE's public fileserver CSS sheet
 		ArgBuffer += "<style type=\"text/css\">\n<!--\n";
 		ArgBuffer += "body { font-family: Verdana, Arial, sans-serif;}\n#DFS_table {color: rgb(0, 0, 0);background-color: rgb(234, 233, 232); border: thin outset; width: 100%; }\n";
@@ -503,15 +503,15 @@ char GenerateFolderIndex( string ArgVirtualPath, char *ArgPath, string &ArgBuffe
 		ArgBuffer += ".DFS_entrysize { color: rgb(0, 0, 0); text-align: right;}\na.DFS_direntry { font-weight: bold; }\n";
 		ArgBuffer += "-->\n</style>\n";
 		// Insert the table.
-		ArgBuffer += InsertIndexTable( &ArgVirtualPath, string( ArgPath ), Filler );
+		ArgBuffer += InsertIndexTable( &ArgVirtualPath, std::string( ArgPath ), Filler );
 		// Server Version Information.
-		ArgBuffer += "<hr><i>DFileServer [Version " + string(MAJORVERSION) + "." + string(MINORVERSION) + "." + string(PATCHVERSION) + "]</i>\n";
+		ArgBuffer += "<hr><i>DFileServer [Version " + std::string(MAJORVERSION) + "." + std::string(MINORVERSION) + "." + std::string(PATCHVERSION) + "]</i>\n";
 		// End the index
 		ArgBuffer += "</body>\n</html>\n"; 
 	}
 	else
 	{ // Let's grab the one from the template and parse it.
-		ArgBuffer += ParseTemplate( FileStream, &ArgVirtualPath, string( ArgPath ) );
+		ArgBuffer += ParseTemplate( FileStream, &ArgVirtualPath, std::string( ArgPath ) );
 		FileStream.close();
 	}
 

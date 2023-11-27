@@ -152,17 +152,17 @@ void ClientConnection::DisconnectClient ( void )
 	NetworkSocket = -1;
 }
 
-int ClientConnection::SendData ( char *ArgString, int ArgSize )
+int ClientConnection::SendData ( char *Argstring, int ArgSize )
 {
 	size_t DataSize;
 	size_t DataSent;
 
 	if (ArgSize == 0)
-		DataSize = strlen( ArgString );
+		DataSize = strlen( Argstring );
 	else
 		DataSize = ArgSize;
 
-	if ( (DataSent = send( NetworkSocket, ArgString, DataSize, 0 )) == -1)
+	if ( (DataSent = send( NetworkSocket, Argstring, DataSize, 0 )) == -1)
 	{
 		perror("ClientConnection::SendData -- send()");
 		return 0;
@@ -174,20 +174,20 @@ int ClientConnection::SendData ( char *ArgString, int ArgSize )
 	return (int) DataSent;
 }
 
-size_t ClientConnection::RecvData ( char *ArgString, size_t ArgDataSize )
+size_t ClientConnection::RecvData ( char *Argstring, size_t ArgDataSize )
 {
 	size_t DataRecv;
 
 	LastAction = time ( NULL );
 
-	if ( (DataRecv = recv( NetworkSocket, ArgString, ArgDataSize-1, 0 )) == -1)
+	if ( (DataRecv = recv( NetworkSocket, Argstring, ArgDataSize-1, 0 )) == -1)
 	{
 		perror("ClientConnection::RecvData -- recv()");
 		return -1;
 	}
 
-	// We want to make sure that the string is NULL terminated.
-	ArgString[DataRecv] = '\0';
+	// We want to make sure that the std::string is NULL terminated.
+	Argstring[DataRecv] = '\0';
 
 	return DataRecv;
 }

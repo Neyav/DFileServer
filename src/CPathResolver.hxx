@@ -70,7 +70,7 @@ struct SPathNode {
 
 /** Path resolver class.
  *  This class provides functions to read a virtual path mapping from a
- *  configuration file and apply that mapping to path strings.
+ *  configuration file and apply that mapping to path std::strings.
  */
 class CPathResolver {
 
@@ -88,17 +88,17 @@ class CPathResolver {
 		/** Create path resolver object and load a config file. */
 		CPathResolver( std::string ConfigFile );
 
-		/** Resolve virtual path strings. */
+		/** Resolve virtual path std::strings. */
 		std::string operator()( std::string Path );
 
 		~CPathResolver();
 
 	private:
 
-		/** Clean path strings. */
+		/** Clean path std::strings. */
 		std::string PathClean( std::string Path );
 
-		/** Split path strings into individual parts. */
+		/** Split path std::strings into individual parts. */
 		std::list<std::string> PathExplode( std::string Path );
 
 		SPathNode *mPaths;

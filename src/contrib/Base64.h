@@ -13,13 +13,12 @@
 #define Base64_H
 
 #include <string>
-using std::string;  // comment if your compiler doesn't use namespaces
 
 class Base64
 {
 public:
-    static string encode(string data);
-    static string decode(string data);
+    static std::string encode(std::string data);
+    static std::string decode(std::string data);
 };
 
 #endif

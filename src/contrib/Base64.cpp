@@ -15,7 +15,7 @@ const char          fillchar = '=';
 
                         // 00000000001111111111222222
                         // 01234567890123456789012345
-static string       cvt = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+static std::string       cvt = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
                         // 22223333333333444444444455
                         // 67890123456789012345678901
@@ -25,12 +25,12 @@ static string       cvt = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
                         // 234567890123
                           "0123456789+/";
 
-string Base64::encode(string data)
+std::string Base64::encode(std::string data)
 {
-    string::size_type  i;
+    std::string::size_type  i;
     char               c;
-    string::size_type  len = data.length();
-    string             ret;
+    std::string::size_type  len = data.length();
+    std::string             ret;
 
     for (i = 0; i < len; ++i)
     {
@@ -69,13 +69,13 @@ string Base64::encode(string data)
     return(ret);
 }
 
-string Base64::decode(string data)
+std::string Base64::decode(std::string data)
 {
-    string::size_type  i;
+    std::string::size_type  i;
     char               c;
     char               c1;
-    string::size_type  len = data.length();
-    string             ret;
+    std::string::size_type  len = data.length();
+    std::string             ret;
 
     for (i = 0; i < len; ++i)
     {

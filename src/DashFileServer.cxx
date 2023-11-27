@@ -65,14 +65,12 @@
 #define INFTIM -1
 #endif
 
-using namespace std;
-
 char MAJORVERSION[] = "2";
 char MINORVERSION[] = "0";
 char PATCHVERSION[] = "0";
 bool ServerLockdown = false;
 bool ServerShutdown = false;
-string ConfigurationBasicCredentials = "";
+std::string ConfigurationBasicCredentials = "";
 int ActiveConnections = 0;
 
 void InitateServerShutdown ( int ArgSignal )
@@ -119,7 +117,7 @@ std::string i2hex( unsigned int n, unsigned int minWidth, bool upperCase )
    return out;
 } 
 
-void URLEncode( string &ArgBuffer )
+void URLEncode( std::string &ArgBuffer )
 {
 	unsigned int iterator;
 	
@@ -131,7 +129,7 @@ void URLEncode( string &ArgBuffer )
 				(ArgBuffer[iterator] < 97 || ArgBuffer[iterator] > 122) )
 		{
 			// URL encode this character
-			string URLEncodedCharacter;
+			std::string URLEncodedCharacter;
 
 			URLEncodedCharacter = "%" + i2hex( (unsigned int) 
 					( (unsigned char) ArgBuffer[iterator] ), 2, true );
@@ -243,7 +241,7 @@ SOCKET InitalizeNetwork ( int ArgPort, int ArgBacklog )
 }
 
 void IncomingConnection ( int ArgSocket, int *ArgHighestIterator, struct pollfd ArgPoll[], 
-								vector<ClientConnection> *ArgList )
+								std::vector<ClientConnection> *ArgList )
 {
 	ClientConnection IncomingClient;
 
@@ -282,7 +280,7 @@ void IncomingConnection ( int ArgSocket, int *ArgHighestIterator, struct pollfd 
 }
 
 void TerminateConnection ( int ArgSocket, int ArgClient, int *ArgHighestIterator, 
-						struct pollfd ArgPoll[], vector <ClientConnection> *ArgList )
+						struct pollfd ArgPoll[], std::vector <ClientConnection> *ArgList )
 {
 	int NewHighestPollIterator = 0;
 	int OldPollIterator = 0;
@@ -343,7 +341,7 @@ char *TimeAndDate ( void )
 	return Output;
 }
 
-char LocateResource ( string Resource, ClientConnection *ArgClient, char *DstResource, char *DstResourceType )
+char LocateResource ( std::string Resource, ClientConnection *ArgClient, char *DstResource, char *DstResourceType )
 {
 	FILE *FileStream;
 	char FieldName[31];
@@ -457,7 +455,7 @@ void Buffer404 ( ClientConnection *ArgClient )
 
 	ArgClient->SendBuffer = "<HTML><HEAD><TITLE>Error: Resource not found</TITLE></HEAD><BODY><H1>Resource not found</H1>";
 	ArgClient->SendBuffer += "The resource you were trying to locate doesn't exist on this server.<br><br><HR>";
-	ArgClient->SendBuffer += "<I>DFileServer [Version " + string(MAJORVERSION) + "." + string(MINORVERSION) + "." + string(PATCHVERSION) + "]</I>";
+	ArgClient->SendBuffer += "<I>DFileServer [Version " + std::string(MAJORVERSION) + "." + std::string(MINORVERSION) + "." + std::string(PATCHVERSION) + "]</I>";
 	ArgClient->SendBuffer += "</BODY></HTML>";
 }
 
@@ -467,7 +465,7 @@ void Buffer401 ( ClientConnection *ArgClient )
          
 	ArgClient->SendBuffer = "<HTML><HEAD><TITLE>Error: Authorization Required</TITLE></HEAD><BODY><H1>Authorization Required</H1>";
 	ArgClient->SendBuffer += "The resource you were trying to locate requires authorization on this server.<br><br><HR>";
-	ArgClient->SendBuffer += "<I>DFileServer [Version " + string(MAJORVERSION) + "." + string(MINORVERSION) + "." + string(PATCHVERSION) + "]</I>";
+	ArgClient->SendBuffer += "<I>DFileServer [Version " + std::string(MAJORVERSION) + "." + std::string(MINORVERSION) + "." + std::string(PATCHVERSION) + "]</I>";
 	ArgClient->SendBuffer += "</BODY></HTML>";
 }
 
@@ -483,10 +481,10 @@ int main( int argc, char *argv[] )
    int ConfigurationShowConnections = 0;
 #ifndef _WINDOWS
    int ConfigurationSetUID = 0;
-   string ConfigurationChrootFolder;
+   std::string ConfigurationChrootFolder;
 #endif
    struct pollfd PollStruct[2048];
-   vector<ClientConnection> ConnectionList;
+   std::vector<ClientConnection> ConnectionList;
 
 #ifndef _WINDOWS
    // Catch SIGPIPE and ignore it.
@@ -554,7 +552,7 @@ int main( int argc, char *argv[] )
 	{
 		x++;
 
-		ConfigurationBasicCredentials = string ( argv[x] );
+		ConfigurationBasicCredentials = std::string ( argv[x] );
 
 		printf("Configuration: Required Authentication Credentials -> %s\n", argv[x] );
 	}
@@ -570,7 +568,7 @@ int main( int argc, char *argv[] )
 	{
 		x++;
 
-		ConfigurationChrootFolder = string(argv[x]);
+		ConfigurationChrootFolder = std::string(argv[x]);
 		printf("Configuration: chroot to %s\n", argv[x]);
 	}
 	else if ( strcasecmp( "-background", argv[x] ) == 0 )
@@ -666,7 +664,7 @@ int main( int argc, char *argv[] )
 			}
 			else
 			{ // Incoming data.
-				ConnectionList[ConnectionListIterator].BrowserRequest.ImportHeader ( string( DataBuffer ) );
+				ConnectionList[ConnectionListIterator].BrowserRequest.ImportHeader ( std::string( DataBuffer ) );
 
 				// Find what resource this person is after.
 				ConnectionList[ConnectionListIterator].Resource = ConnectionList[ConnectionListIterator].BrowserRequest.AccessPath;
@@ -778,7 +776,7 @@ int main( int argc, char *argv[] )
 						else
 						{ // Try to verify the authentication.
 							Base64 Base64Encoding;
-							string Base64Authorization;
+							std::string Base64Authorization;
 
 							Base64Authorization = ConnectionList[ConnectionListIterator].BrowserRequest.GetValue( "Authorization" );
 
@@ -802,13 +800,13 @@ int main( int argc, char *argv[] )
 
 					sprintf( Buffer, "DFileServer/%s.%s.%s", MAJORVERSION, MINORVERSION, PATCHVERSION );
 					
-					ConnectionList[ConnectionListIterator].ServerResponse.SetValue ( "Server", string( Buffer ) );
+					ConnectionList[ConnectionListIterator].ServerResponse.SetValue ( "Server", std::string( Buffer ) );
 					ConnectionList[ConnectionListIterator].ServerResponse.SetValue ( "Connection", "close" );
 
 					sprintf( Buffer, "%i", (int) ResourceSize );
 
-					ConnectionList[ConnectionListIterator].ServerResponse.SetValue ( "Content-Length", string ( Buffer ) );
-					ConnectionList[ConnectionListIterator].ServerResponse.SetValue ( "Content-Type", string ( ResourceType ) );
+					ConnectionList[ConnectionListIterator].ServerResponse.SetValue ( "Content-Length", std::string ( Buffer ) );
+					ConnectionList[ConnectionListIterator].ServerResponse.SetValue ( "Content-Type", std::string ( ResourceType ) );
 
 					ConnectionList[ConnectionListIterator].SendData( 
 						(char *) ConnectionList[ConnectionListIterator].ServerResponse.ExportHeader().c_str(), 0 );
@@ -869,9 +867,9 @@ int main( int argc, char *argv[] )
 						// Relocate the file pointer to match where we are.
 
 						int LocationOffset = BytesToRead - BytesRead;
-						ifstream::pos_type CurrentPosition = ConnectionList[ConnectionListIterator].FileStream->tellg();
+						std::ifstream::pos_type CurrentPosition = ConnectionList[ConnectionListIterator].FileStream->tellg();
 
-						ConnectionList[ConnectionListIterator].FileStream->seekg((CurrentPosition - (ifstream::pos_type) LocationOffset));
+						ConnectionList[ConnectionListIterator].FileStream->seekg((CurrentPosition - (std::ifstream::pos_type) LocationOffset));
 					}
 					else
 					{
