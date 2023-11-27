@@ -11,28 +11,28 @@
 class ClientConnection
 {
 	private:
-		int			NetworkSocket;
+		SOCKET				NetworkSocket;
 		struct sockaddr_in	SocketStruct;
-		time_t			LastAction;
+		time_t				LastAction;
 	public:
 		std::ifstream		*FileStream;
-		std::string             Resource;
-		int			BytesRemaining;
-		int			PollIterator;
+		std::string			Resource;
+		size_t				BytesRemaining;
+		int					PollIterator;
 
-		int			BandwidthLeft;
-		time_t			LastBandReset;
+		int					BandwidthLeft;
+		time_t				LastBandReset;
 
-		std::string		SendBuffer;
-		int			SendBufferIterator;
+		std::string			SendBuffer;
+		int					SendBufferIterator;
 
-		HTTPHeader		BrowserRequest;
-		HTTPHeader		ServerResponse;
+		HTTPHeader			BrowserRequest;
+		HTTPHeader			ServerResponse;
 
 		ClientConnection ();		// Constructor
-		int  GetSocket ( void );
+		SOCKET  GetSocket ( void );
 		char *GetIP ( void );
-		int OpenFile ( char * );
+		size_t OpenFile ( char * );
 		void CloseFile ( void );
 		char AcceptConnection ( int );
 		void DisconnectClient ( void );

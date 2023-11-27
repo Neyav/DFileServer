@@ -20,7 +20,7 @@
 #include <stdlib.h>
 
 typedef struct pollfd {
-    int fd;                         /* file desc to poll */
+    SOCKET fd;                      /* file desc to poll */
     short events;                   /* events of interest on fd */
     short revents;                  /* events that occurred on fd */
 } pollfd_t;
@@ -53,7 +53,7 @@ inline int poll(struct pollfd *pollSet, int pollCount, int pollTimeout)
     struct pollfd *pollEnd, *p;
     int selected;
     int result;
-    int maxFD;
+    SOCKET maxFD;
 
     if (!pollSet) {
         pollEnd = NULL;

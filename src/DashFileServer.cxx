@@ -145,7 +145,7 @@ void URLEncode( string &ArgBuffer )
 
 void ParseURLEncoding( char *ArgBuffer )
 {
-	int BufferLength = strlen(ArgBuffer);
+	size_t BufferLength = strlen(ArgBuffer);
 	int iterator1;
 	int iterator2 = 0;
 
@@ -188,10 +188,10 @@ void ParseURLEncoding( char *ArgBuffer )
 
 }
 
-int InitalizeNetwork ( int ArgPort, int ArgBacklog )
+SOCKET InitalizeNetwork ( int ArgPort, int ArgBacklog )
 {
 	struct sockaddr_in ListenAddr;
-	int NetworkSocket;
+	SOCKET NetworkSocket;
 	const char yes = 1;	
 #ifdef _WINDOWS
 	WSADATA wsaData;
@@ -636,8 +636,6 @@ int main( int argc, char *argv[] )
    // Main Program Loop
    while (1)
    {
-	list<ClientConnection>::iterator ConnectionListIterator;
-
 	poll ( PollStruct, HighestPollIterator + 1, INFTIM );
 
 	// Do we have an incoming connection?
@@ -685,7 +683,7 @@ int main( int argc, char *argv[] )
 			{
 				char Resource[151];
 				char ResourceType[151];
-				int ResourceSize = 0;
+				size_t ResourceSize = 0;
 
 				// We need to locate this resource.
 				if ( LocateResource ( ConnectionList[ConnectionListIterator].Resource, &ConnectionList[ConnectionListIterator], Resource, ResourceType) == -1)
@@ -807,7 +805,7 @@ int main( int argc, char *argv[] )
 					ConnectionList[ConnectionListIterator].ServerResponse.SetValue ( "Server", string( Buffer ) );
 					ConnectionList[ConnectionListIterator].ServerResponse.SetValue ( "Connection", "close" );
 
-					sprintf( Buffer, "%i", ResourceSize );
+					sprintf( Buffer, "%i", (int) ResourceSize );
 
 					ConnectionList[ConnectionListIterator].ServerResponse.SetValue ( "Content-Length", string ( Buffer ) );
 					ConnectionList[ConnectionListIterator].ServerResponse.SetValue ( "Content-Type", string ( ResourceType ) );

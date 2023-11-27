@@ -69,7 +69,7 @@ ClientConnection::ClientConnection ()
 	LastAction = time (NULL);
 }
 
-int ClientConnection::GetSocket ( void )
+SOCKET ClientConnection::GetSocket ( void )
 {
 	return NetworkSocket;
 }
@@ -79,7 +79,7 @@ char *ClientConnection::GetIP ( void )
 	return inet_ntoa(SocketStruct.sin_addr);
 }
 
-int ClientConnection::OpenFile ( char *ArgFilename )
+size_t ClientConnection::OpenFile ( char *ArgFilename )
 {
 	using namespace std;
 
@@ -154,7 +154,7 @@ void ClientConnection::DisconnectClient ( void )
 
 int ClientConnection::SendData ( char *ArgString, int ArgSize )
 {
-	unsigned int DataSize;
+	size_t DataSize;
 	size_t DataSent;
 
 	if (ArgSize == 0)
