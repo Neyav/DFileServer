@@ -24,6 +24,19 @@ namespace DFSMessaging
 
 	}
 	
+	bool MessangerChannel::operator==(const std::string &aOther) const
+	{
+		return (ChannelName == aOther);
+	}
+
+	MessangerChannel::MessangerChannel(std::string aName)
+	{
+		ChannelName = aName;
+#ifdef MESSAGE_DEBUG
+		std::cout << " -=Messanger Channel created. [" << ChannelName << "]" << std::endl;
+#endif
+	}
+
 	void MessangerServer::MessangerServerRuntime(void)
 	{
 		std::mutex queueMutex;
