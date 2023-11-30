@@ -497,13 +497,9 @@ int main( int argc, char *argv[] )
    signal( SIGTERM, InitateServerShutdown );
    signal( SIGINT, InitateServerShutdown );
 
-   //printf("DFileServer Version %s.%s.%s\n", MAJORVERSION, MINORVERSION, PATCHVERSION);
-   //printf("             Copyright 2005, 2018 Chris Laverdure\n");
-   //printf("-------------------------------------------------\n");
-
    // First we want to clear the screen.
    std::cout << "\u001B[2J\u001B[1;1H";
-   std::cout << "\u001B[41m\u001B[30mDFileServer Version " << MAJORVERSION << "." << MINORVERSION << "." << PATCHVERSION << "                                                                      **-]\u001B[0m" << std::endl;
+   std::cout << "\u001B[41m\u001B[30mDFileServer Version " << MAJORVERSION << "." << MINORVERSION << "." << PATCHVERSION << "  !!-[DEVELOPMENT VERSION]-!!                                         **-]\u001B[0m" << std::endl;
    std::cout << "\u001B[41m\u001B[30m                    (c) 2005, 2018, 2023 Christopher Laverdure                                 **-]\u001B[0m" << std::endl;
    std::cout << "\u001B[41m\u001B[30m                    All Rights Reserved.                                                       **-]\u001B[0m" << std::endl;
    std::cout << "In memorial for all the code that was lost that one day when Sylvia wrote her last bit." << std::endl;
