@@ -2,6 +2,7 @@
 #include <vector>
 #include <condition_variable>
 #include <mutex>
+#include <queue>
 
 #define MESSAGE_DEBUG
 
@@ -12,6 +13,14 @@
 
 namespace DFSMessaging
 {
+	struct MessagePacket
+	{
+		Messanger* Origin;
+		unsigned int securityKey;
+		std::string channelName;
+		std::string message;
+	};
+
 	class MessangerServer;
 
 	class Messanger
@@ -19,7 +28,13 @@ namespace DFSMessaging
 	private:
 		MessangerServer* parentServer;
 		unsigned int securityKey;
+
+		std::queue<MessagePacket> MessageQueue;
+
 	public:
+		void SendMessage(std::string aChannelName, std::string aMessage);
+		void SendMessage(Messanger *aMessanger, std::string aMessage);
+		void RecieveMessage(MessagePacket aMessage);
 
 		bool RegisterOnChannel(std::string aChannelName);
 
@@ -38,6 +53,8 @@ namespace DFSMessaging
 		// Override for == operator that compares it to a std::string of the channel name
 		bool operator==(const std::string &aString) const;
 
+		void DistributeMessage(MessagePacket aMessage);
+
 		// Channel registration functions
 		void RegisterOnChannel(Messanger* aMessanger);
 
@@ -55,6 +72,8 @@ namespace DFSMessaging
 	public:
 		std::condition_variable queueCondition;
 		
+		void DistributeMessage(MessagePacket aMessage);
+
 		bool RegisterOnChannel(unsigned int asecurityKey, Messanger* aMessanger, std::string aChannelName);
 
 		Messanger* ReceiveActiveMessanger(void);

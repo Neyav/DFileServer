@@ -14,6 +14,38 @@ namespace DFSMessaging
 		return parentServer->RegisterOnChannel(securityKey, this, aChannelName);
 	}
 
+    void Messanger::SendMessage(std::string aChannelName, std::string aMessage)
+	{
+		MessagePacket newMessage;
+		newMessage.securityKey = securityKey;
+		newMessage.message = aMessage;
+		newMessage.Origin = this;
+		newMessage.channelName = aChannelName;
+
+		parentServer->DistributeMessage(newMessage);
+	}
+
+	void Messanger::SendMessage(Messanger* aMessanger, std::string aMessage)
+	{
+		MessagePacket newMessage;
+		newMessage.securityKey = securityKey;
+		newMessage.message = aMessage;
+		newMessage.Origin = this;
+		newMessage.channelName = "";
+
+		aMessanger->RecieveMessage(newMessage);
+	}
+	
+	void Messanger::RecieveMessage(MessagePacket aMessage)
+	{
+		if (aMessage.securityKey != securityKey)
+		{
+			return;
+		}
+		// Add it to our message queue.
+		MessageQueue.push(aMessage);
+	}
+
 	void Messanger::PokeServer(void)
 	{
 		parentServer->queueCondition.notify_one();
@@ -29,6 +61,18 @@ namespace DFSMessaging
 
 	}
 	
+	void MessangerChannel::DistributeMessage(MessagePacket aMessage)
+	{
+		for (auto &messanger : Messangers)
+		{
+			if (messanger != aMessage.Origin)
+			{
+				messanger->RecieveMessage(aMessage);
+			}
+		}
+	
+	}
+
 	void MessangerChannel::RegisterOnChannel(Messanger* aMessanger)
 	{
 		Messangers.push_back(aMessanger);
@@ -45,6 +89,17 @@ namespace DFSMessaging
 #ifdef MESSAGE_DEBUG
 		std::cout << " -=Messanger Channel created. [" << ChannelName << "]" << std::endl;
 #endif
+	}
+
+	void MessangerServer::DistributeMessage(MessagePacket aMessage)
+	{
+		for (auto &channel : Channels)
+		{
+			if (channel == aMessage.channelName)
+			{
+				channel.DistributeMessage(aMessage);
+			}
+		}
 	}
 
 	bool MessangerServer::RegisterOnChannel(unsigned int asecurityKey, Messanger* aMessanger, std::string aChannelName)
