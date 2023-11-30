@@ -615,6 +615,12 @@ int main( int argc, char *argv[] )
 
    printf(" -=Listening on port: %i\n", ConfigurationPort );
 
+   DFSMessaging::Messanger* Messanger = nullptr;
+
+   Messanger = MessangerServer->ReceiveActiveMessanger();
+
+   Messanger->PokeServer();
+
 #ifndef _WINDOWS
 
    std::cout << " -=UNIX Specific configuration optionals..." << std::endl;

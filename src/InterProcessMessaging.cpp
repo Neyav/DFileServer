@@ -2,11 +2,17 @@
 #include <ctime>
 #include <random>
 #include <thread>
+#include <condition_variable>
+#include <mutex>
 
 #include "InterProcessMessaging.hxx"
 
 namespace DFSMessaging
 {
+	void Messanger::PokeServer(void)
+	{
+		parentServer->queueCondition.notify_one();
+	}
 
 	Messanger::Messanger(unsigned int aKey, MessangerServer *aParent)
 	{
@@ -20,12 +26,16 @@ namespace DFSMessaging
 	
 	void MessangerServer::MessangerServerRuntime(void)
 	{
+		std::mutex queueMutex;
+		std::unique_lock<std::mutex> queueLock(queueMutex);
+
 		std::cout << " -=Messanger Server Runtime started." << std::endl;
 
 		while (true)
 		{
 			// Do stuff here.
-			std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+			queueCondition.wait(queueLock);
+			std::cout << " -=Messanger Server Runtime woke up." << std::endl;
 		}
 	}
 
