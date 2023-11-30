@@ -619,9 +619,9 @@ int main( int argc, char *argv[] )
 
    Messanger = MessangerServer->ReceiveActiveMessanger();
 
-   Messanger->PokeServer();
-
    Messanger->RegisterOnChannel("LocalConsole");
+
+   Messanger->SendMessage("LocalConsole", "Message from DFileServer: Hello World!");
 
 #ifndef _WINDOWS
 

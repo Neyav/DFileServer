@@ -3,6 +3,11 @@
 #include <condition_variable>
 #include <mutex>
 #include <queue>
+#include <atomic>
+
+#ifdef SendMessage
+#undef SendMessage
+#endif
 
 #define MESSAGE_DEBUG
 
@@ -13,6 +18,9 @@
 
 namespace DFSMessaging
 {
+	class Messanger;
+	class MessangerServer;
+
 	struct MessagePacket
 	{
 		Messanger* Origin;
@@ -20,8 +28,6 @@ namespace DFSMessaging
 		std::string channelName;
 		std::string message;
 	};
-
-	class MessangerServer;
 
 	class Messanger
 	{
@@ -37,8 +43,6 @@ namespace DFSMessaging
 		void RecieveMessage(MessagePacket aMessage);
 
 		bool RegisterOnChannel(std::string aChannelName);
-
-		void PokeServer(void); // Testing function.
 
 		Messanger(unsigned int aKey, MessangerServer *aParent);
 		~Messanger();
@@ -67,11 +71,12 @@ namespace DFSMessaging
 		unsigned int securityKey;
 		std::vector<Messanger> Messangers;
 		std::vector<MessangerChannel> Channels;
+		std::condition_variable queueCondition;
+		std::mutex MessageQueueMutex;
+		std::queue<MessagePacket> MessageQueue;
 
 		void MessangerServerRuntime(void);
 	public:
-		std::condition_variable queueCondition;
-		
 		void DistributeMessage(MessagePacket aMessage);
 
 		bool RegisterOnChannel(unsigned int asecurityKey, Messanger* aMessanger, std::string aChannelName);

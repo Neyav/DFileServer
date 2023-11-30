@@ -46,11 +46,6 @@ namespace DFSMessaging
 		MessageQueue.push(aMessage);
 	}
 
-	void Messanger::PokeServer(void)
-	{
-		parentServer->queueCondition.notify_one();
-	}
-
 	Messanger::Messanger(unsigned int aKey, MessangerServer *aParent)
 	{
 		securityKey = aKey;
@@ -93,13 +88,10 @@ namespace DFSMessaging
 
 	void MessangerServer::DistributeMessage(MessagePacket aMessage)
 	{
-		for (auto &channel : Channels)
-		{
-			if (channel == aMessage.channelName)
-			{
-				channel.DistributeMessage(aMessage);
-			}
-		}
+		MessageQueueMutex.lock();
+		MessageQueue.push(aMessage);
+		MessageQueueMutex.unlock();
+		queueCondition.notify_one();
 	}
 
 	bool MessangerServer::RegisterOnChannel(unsigned int asecurityKey, Messanger* aMessanger, std::string aChannelName)
@@ -137,6 +129,30 @@ namespace DFSMessaging
 			// Do stuff here.
 			queueCondition.wait(queueLock);
 			std::cout << " -=Messanger Server Runtime woke up." << std::endl;
+
+			// Distribute any messages in the queue.
+			MessageQueueMutex.lock();
+			while (MessageQueue.size() > 0)
+			{
+				MessagePacket newMessage = MessageQueue.front();
+				MessageQueue.pop();
+
+				if (newMessage.channelName == "*")
+				{ // Send to all clients
+					// TODO:
+				}
+				else
+				{ // Send to specific channel 
+					for (auto& channel : Channels)
+					{
+						if (channel == newMessage.channelName)
+						{
+							channel.DistributeMessage(newMessage);
+						}
+					}
+				}
+			}
+			MessageQueueMutex.unlock();
 		}
 	}
 
