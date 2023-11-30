@@ -1,3 +1,8 @@
-extern char MAJORVERSION[];
-extern char MINORVERSION[];
-extern char PATCHVERSION[];
+#pragma once
+
+namespace Version
+{
+	extern int MAJORVERSION;
+	extern int MINORVERSION;
+	extern int PATCHVERSION;
+}

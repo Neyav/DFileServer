@@ -62,19 +62,26 @@
 #include "InterProcessMessaging.hxx"
 #include "MimeTypes.hxx"
 #include "contrib/Base64.h"
+#include "Version.hxx"
 
 #ifndef INFTIM
 #define INFTIM -1
 #endif
 
-char MAJORVERSION[] = "2";
-char MINORVERSION[] = "0";
-char PATCHVERSION[] = "0";
+#define MAXIDENTIFIERLEN 151
+
+namespace Version
+{
+	int MAJORVERSION = 2;
+	int MINORVERSION = 0;
+	int PATCHVERSION = 0;
+}
+
 bool ServerLockdown = false;
 bool ServerShutdown = false;
+
 std::string ConfigurationBasicCredentials = "";
 int ActiveConnections = 0;
-#define MAXIDENTIFIERLEN 151
 
 void InitateServerShutdown ( int ArgSignal )
 {
@@ -458,7 +465,7 @@ void Buffer404 ( ClientConnection *ArgClient )
 
 	ArgClient->SendBuffer = "<HTML><HEAD><TITLE>Error: Resource not found</TITLE></HEAD><BODY><H1>Resource not found</H1>";
 	ArgClient->SendBuffer += "The resource you were trying to locate doesn't exist on this server.<br><br><HR>";
-	ArgClient->SendBuffer += "<I>DFileServer [Version " + std::string(MAJORVERSION) + "." + std::string(MINORVERSION) + "." + std::string(PATCHVERSION) + "]</I>";
+	ArgClient->SendBuffer += "<I>DFileServer [Version " + std::to_string(Version::MAJORVERSION) + "." + std::to_string(Version::MINORVERSION) + "." + std::to_string(Version::PATCHVERSION) + "]</I>";
 	ArgClient->SendBuffer += "</BODY></HTML>";
 }
 
@@ -468,7 +475,7 @@ void Buffer401 ( ClientConnection *ArgClient )
          
 	ArgClient->SendBuffer = "<HTML><HEAD><TITLE>Error: Authorization Required</TITLE></HEAD><BODY><H1>Authorization Required</H1>";
 	ArgClient->SendBuffer += "The resource you were trying to locate requires authorization on this server.<br><br><HR>";
-	ArgClient->SendBuffer += "<I>DFileServer [Version " + std::string(MAJORVERSION) + "." + std::string(MINORVERSION) + "." + std::string(PATCHVERSION) + "]</I>";
+	ArgClient->SendBuffer += "<I>DFileServer [Version " + std::to_string(Version::MAJORVERSION) + "." + std::to_string(Version::MINORVERSION) + "." + std::to_string(Version::PATCHVERSION) + "]</I>";
 	ArgClient->SendBuffer += "</BODY></HTML>";
 }
 
@@ -499,7 +506,7 @@ int main( int argc, char *argv[] )
 
    // First we want to clear the screen.
    std::cout << "\u001B[2J\u001B[1;1H";
-   std::cout << "\u001B[41m\u001B[30mDFileServer Version " << MAJORVERSION << "." << MINORVERSION << "." << PATCHVERSION << "  !!-[DEVELOPMENT VERSION]-!!                                         **-]\u001B[0m" << std::endl;
+   std::cout << "\u001B[41m\u001B[30mDFileServer Version " << Version::MAJORVERSION << "." << Version::MINORVERSION << "." << Version::PATCHVERSION << "  !!-[DEVELOPMENT VERSION]-!!                                         **-]\u001B[0m" << std::endl;
    std::cout << "\u001B[41m\u001B[30m                    (c) 2005, 2018, 2023 Christopher Laverdure                                 **-]\u001B[0m" << std::endl;
    std::cout << "\u001B[41m\u001B[30m                    All Rights Reserved.                                                       **-]\u001B[0m" << std::endl;
    std::cout << "In memorial for all the code that was lost that one day when Sylvia wrote her last bit." << std::endl;
@@ -814,7 +821,7 @@ int main( int argc, char *argv[] )
 						}
 					}
 
-					sprintf( Buffer, "DFileServer/%s.%s.%s", MAJORVERSION, MINORVERSION, PATCHVERSION );
+					sprintf( Buffer, "DFileServer/%i.%i.%i", Version::MAJORVERSION, Version::MINORVERSION, Version::PATCHVERSION );
 					
 					ConnectionList[ConnectionListIterator].ServerResponse.SetValue ( "Server", std::string( Buffer ) );
 					ConnectionList[ConnectionListIterator].ServerResponse.SetValue ( "Connection", "close" );
