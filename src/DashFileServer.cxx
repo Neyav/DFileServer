@@ -59,6 +59,7 @@
 #include "ClientConnection.hxx"
 #include "CPathResolver.hxx"
 #include "DirectoryIndexing.hxx"
+#include "InterProcessMessaging.hxx"
 #include "MimeTypes.hxx"
 #include "contrib/Base64.h"
 
@@ -146,7 +147,7 @@ void URLEncode( std::string &ArgBuffer )
 void ParseURLEncoding( char *ArgBuffer )
 {
 	size_t BufferLength = strlen(ArgBuffer);
-	int iterator1;
+	size_t iterator1;
 	int iterator2 = 0;
 
 	// Iterator through the entire buffer.
@@ -487,6 +488,7 @@ int main( int argc, char *argv[] )
 #endif
    struct pollfd PollStruct[2048];
    std::vector<ClientConnection> ConnectionList;
+   DFSMessaging::MessangerServer *MessangerServer = nullptr;
 
 #ifndef _WINDOWS
    // Catch SIGPIPE and ignore it.
@@ -595,6 +597,8 @@ int main( int argc, char *argv[] )
 	}
 #endif
    }
+
+   MessangerServer = new DFSMessaging::MessangerServer();
 
    std::cout << " -=Initalize Network..." << std::endl;
 
