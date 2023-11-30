@@ -621,6 +621,8 @@ int main( int argc, char *argv[] )
 
    Messanger->PokeServer();
 
+   Messanger->RegisterOnChannel("LocalConsole");
+
 #ifndef _WINDOWS
 
    std::cout << " -=UNIX Specific configuration optionals..." << std::endl;

@@ -21,6 +21,8 @@ namespace DFSMessaging
 		unsigned int securityKey;
 	public:
 
+		bool RegisterOnChannel(std::string aChannelName);
+
 		void PokeServer(void); // Testing function.
 
 		Messanger(unsigned int aKey, MessangerServer *aParent);
@@ -36,6 +38,9 @@ namespace DFSMessaging
 		// Override for == operator that compares it to a std::string of the channel name
 		bool operator==(const std::string &aString) const;
 
+		// Channel registration functions
+		void RegisterOnChannel(Messanger* aMessanger);
+
 		MessangerChannel(std::string);
 	};
 
@@ -50,6 +55,8 @@ namespace DFSMessaging
 	public:
 		std::condition_variable queueCondition;
 		
+		bool RegisterOnChannel(unsigned int asecurityKey, Messanger* aMessanger, std::string aChannelName);
+
 		Messanger* ReceiveActiveMessanger(void);
 
 		MessangerServer();

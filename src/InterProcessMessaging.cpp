@@ -9,6 +9,11 @@
 
 namespace DFSMessaging
 {
+	bool Messanger::RegisterOnChannel(std::string aChannelName)
+	{
+		return parentServer->RegisterOnChannel(securityKey, this, aChannelName);
+	}
+
 	void Messanger::PokeServer(void)
 	{
 		parentServer->queueCondition.notify_one();
@@ -24,6 +29,11 @@ namespace DFSMessaging
 
 	}
 	
+	void MessangerChannel::RegisterOnChannel(Messanger* aMessanger)
+	{
+		Messangers.push_back(aMessanger);
+	}
+
 	bool MessangerChannel::operator==(const std::string &aOther) const
 	{
 		return (ChannelName == aOther);
@@ -35,6 +45,29 @@ namespace DFSMessaging
 #ifdef MESSAGE_DEBUG
 		std::cout << " -=Messanger Channel created. [" << ChannelName << "]" << std::endl;
 #endif
+	}
+
+	bool MessangerServer::RegisterOnChannel(unsigned int asecurityKey, Messanger* aMessanger, std::string aChannelName)
+	{
+		if (asecurityKey != securityKey)
+		{
+			return false;
+		}
+
+		for (auto &channel : Channels)
+		{
+			if (channel == aChannelName)
+			{
+				channel.RegisterOnChannel(aMessanger);
+				return true;
+			}
+		}
+
+		MessangerChannel newChannel(aChannelName);
+		newChannel.RegisterOnChannel(aMessanger);
+		Channels.push_back(newChannel);
+
+		return true;
 	}
 
 	void MessangerServer::MessangerServerRuntime(void)
