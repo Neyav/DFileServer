@@ -137,6 +137,7 @@
     <ClCompile Include="..\src\HTTPHeader.cxx" />
     <ClCompile Include="..\src\InterProcessMessaging.cpp" />
     <ClCompile Include="..\src\MimeTypes.cxx" />
+    <ClCompile Include="..\src\Networking.cxx" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\ClientConnection.hxx" />
@@ -147,6 +148,7 @@
     <ClInclude Include="..\src\HTTPHeader.hxx" />
     <ClInclude Include="..\src\InterProcessMessaging.hxx" />
     <ClInclude Include="..\src\MimeTypes.hxx" />
+    <ClInclude Include="..\src\Networking.hxx" />
     <ClInclude Include="..\src\Version.hxx" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
