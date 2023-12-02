@@ -36,11 +36,12 @@ namespace DFSMessaging
 		unsigned int securityKey;
 
 		std::queue<MessagePacket> MessageQueue;
-
 	public:
 		void SendMessage(std::string aChannelName, std::string aMessage);
 		void SendMessage(Messanger *aMessanger, std::string aMessage);
 		void RecieveMessage(MessagePacket aMessage);
+		bool HasMessages(void);
+		MessagePacket AcceptMessage(void);
 
 		bool RegisterOnChannel(std::string aChannelName);
 

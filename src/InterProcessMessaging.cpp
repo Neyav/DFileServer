@@ -9,6 +9,8 @@
 
 namespace DFSMessaging
 {
+	static std::mutex queueMutex;
+
 	bool Messanger::RegisterOnChannel(std::string aChannelName)
 	{
 		return parentServer->RegisterOnChannel(securityKey, this, aChannelName);
@@ -43,7 +45,33 @@ namespace DFSMessaging
 			return;
 		}
 		// Add it to our message queue.
+		queueMutex.lock();
 		MessageQueue.push(aMessage);
+		queueMutex.unlock();
+	}
+
+	MessagePacket Messanger::AcceptMessage(void)
+	{
+		MessagePacket newMessage;
+		queueMutex.lock();
+		if (MessageQueue.size() > 0)
+		{
+			newMessage = MessageQueue.front();
+			MessageQueue.pop();
+		}
+		queueMutex.unlock();
+		return newMessage;
+	}
+
+	bool Messanger::HasMessages(void)
+	{
+		int MessageCount = 0;
+
+		queueMutex.lock();
+		MessageCount = MessageQueue.size();
+		queueMutex.unlock();
+
+		return (MessageCount > 0);
 	}
 
 	Messanger::Messanger(unsigned int aKey, MessangerServer *aParent)

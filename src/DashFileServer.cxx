@@ -171,6 +171,7 @@ int main( int argc, char *argv[] )
 
    DFSMessaging::MessangerServer *MessangerServer = nullptr;
    DFSNetworking::NetworkDaemon NetworkDaemon;
+   DFSMessaging::Messanger *ConsoleMessanger = nullptr;
 
 
 #ifndef _WINDOWS
@@ -278,6 +279,9 @@ int main( int argc, char *argv[] )
    }
 
    MessangerServer = new DFSMessaging::MessangerServer();
+   
+   ConsoleMessanger = MessangerServer->ReceiveActiveMessanger();
+   ConsoleMessanger->RegisterOnChannel("Local Console");
 
    std::cout << " -=Initalize Network..." << std::endl;
 
@@ -341,6 +345,13 @@ int main( int argc, char *argv[] )
    // Main Program Loop
    while (1)
    {
+	   // Check for messages.
+	   while (ConsoleMessanger->HasMessages())
+	   {
+		   DFSMessaging::MessagePacket MessagePacket = ConsoleMessanger->AcceptMessage();
+
+		   std::cout << MessagePacket.channelName << ": " << MessagePacket.message << std::endl;
+	   }
 	   Sleep(1000);
    }
 

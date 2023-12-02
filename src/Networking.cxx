@@ -436,6 +436,8 @@ namespace DFSNetworking
 							strcpy(ResourceType, ReturnMimeType(Resource));
 						}
 
+						NetworkMessanger->SendMessage("Local Console", std::string(TimeAndDate()) + " " + ConnectionList[ConnectionListIterator].GetIP() + " - [" + ConnectionList[ConnectionListIterator].Resource + "]");
+
 						if (Configuration.ShowConnections)
 						{
 							printf("%s %s - [%s] (%s)\n", TimeAndDate(), ConnectionList[ConnectionListIterator].GetIP(),
