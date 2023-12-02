@@ -154,14 +154,14 @@ namespace DFSMessaging
 				{ // Send to specific channel
 					for (auto& messanger : Messangers)
 					{
-						if (&messanger == newMessage.Origin)
+						if (messanger == newMessage.Origin)
 						{
 							//MessageQueueMutex.lock();
 							continue;
 						}
-						if (messanger.isRegisteredOnChannel(newMessage.channel))
+						if (messanger->isRegisteredOnChannel(newMessage.channel))
 						{
-							messanger.RecieveMessage(newMessage);
+							messanger->RecieveMessage(newMessage);
 						}
 					}
 				}
@@ -174,11 +174,13 @@ namespace DFSMessaging
 
 	Messanger* MessangerServer::ReceiveActiveMessanger(void)
 	{
-		Messanger newMessager(securityKey, this);
+		Messanger* newMessanger;
+		
+		newMessanger = new Messanger(securityKey, this);
 
-		Messangers.push_back(newMessager);
+		Messangers.push_back(newMessanger);
 
-		return &Messangers.back();
+		return Messangers.back();
 	}
 
 	MessangerServer::MessangerServer()
@@ -207,6 +209,7 @@ namespace DFSMessaging
 
 		while (Messangers.size() > 0)
 		{
+			delete Messangers.back();
 			Messangers.pop_back();
 		}
 

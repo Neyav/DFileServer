@@ -58,7 +58,7 @@ namespace DFSMessaging
 	{
 	private:
 		unsigned int securityKey;
-		std::vector<Messanger> Messangers;
+		std::vector<Messanger*> Messangers;
 		std::condition_variable queueCondition;
 		std::mutex MessageQueueMutex;
 		std::queue<MessagePacket> MessageQueue;
