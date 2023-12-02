@@ -7,22 +7,51 @@
 
 #include "InterProcessMessaging.hxx"
 
+
 namespace DFSMessaging
 {
-	static std::mutex queueMutex;
+	std::mutex queueMutex;
+	std::mutex channelMutex;
 
-	bool Messanger::RegisterOnChannel(std::string aChannelName)
+	void Messanger::RegisterOnChannel(unsigned int aChannel)
 	{
-		return parentServer->RegisterOnChannel(securityKey, this, aChannelName);
+		// Check if we are registered on this channel.
+		channelMutex.lock();
+		for (auto& channel : RegisteredChannels)
+		{
+			if (channel == aChannel)
+			{
+				return;
+			}
+		}
+
+		// If we are not, register on it.
+		RegisteredChannels.push_back(aChannel);
+		channelMutex.unlock();
 	}
 
-    void Messanger::SendMessage(std::string aChannelName, std::string aMessage)
+	bool Messanger::isRegisteredOnChannel(unsigned int aChannel)
+	{
+		// Check if we are registered on this channel.
+		channelMutex.lock();
+		for (auto& channel : RegisteredChannels)
+		{
+			if (channel == aChannel)
+			{
+				channelMutex.unlock();
+				return true;
+			}
+		}
+		channelMutex.unlock();
+	}
+
+    void Messanger::SendMessage(unsigned int aChannel, std::string aMessage)
 	{
 		MessagePacket newMessage;
 		newMessage.securityKey = securityKey;
 		newMessage.message = aMessage;
 		newMessage.Origin = this;
-		newMessage.channelName = aChannelName;
+		newMessage.channel = aChannel;
 
 		parentServer->DistributeMessage(newMessage);
 	}
@@ -33,7 +62,7 @@ namespace DFSMessaging
 		newMessage.securityKey = securityKey;
 		newMessage.message = aMessage;
 		newMessage.Origin = this;
-		newMessage.channelName = "";
+		newMessage.channel = 0;
 
 		aMessanger->RecieveMessage(newMessage);
 	}
@@ -46,7 +75,7 @@ namespace DFSMessaging
 		}
 		// Add it to our message queue.
 		queueMutex.lock();
-		MessageQueue.push(aMessage);
+		MessageQueue.push_back(aMessage);
 		queueMutex.unlock();
 	}
 
@@ -57,7 +86,7 @@ namespace DFSMessaging
 		if (MessageQueue.size() > 0)
 		{
 			newMessage = MessageQueue.front();
-			MessageQueue.pop();
+			MessageQueue.erase(MessageQueue.begin()); 
 		}
 		queueMutex.unlock();
 		return newMessage;
@@ -83,36 +112,10 @@ namespace DFSMessaging
 	{
 
 	}
-	
-	void MessangerChannel::DistributeMessage(MessagePacket aMessage)
-	{
-		for (auto &messanger : Messangers)
-		{
-			if (messanger != aMessage.Origin)
-			{
-				messanger->RecieveMessage(aMessage);
-			}
-		}
-	
-	}
 
-	void MessangerChannel::RegisterOnChannel(Messanger* aMessanger)
-	{
-		Messangers.push_back(aMessanger);
-	}
-
-	bool MessangerChannel::operator==(const std::string &aOther) const
-	{
-		return (ChannelName == aOther);
-	}
-
-	MessangerChannel::MessangerChannel(std::string aName)
-	{
-		ChannelName = aName;
-#ifdef MESSAGE_DEBUG
-		std::cout << " -=Messanger Channel created. [" << ChannelName << "]" << std::endl;
-#endif
-	}
+	/*
+			-= Messanger Server =-
+	*/
 
 	void MessangerServer::DistributeMessage(MessagePacket aMessage)
 	{
@@ -120,29 +123,6 @@ namespace DFSMessaging
 		MessageQueue.push(aMessage);
 		MessageQueueMutex.unlock();
 		queueCondition.notify_one();
-	}
-
-	bool MessangerServer::RegisterOnChannel(unsigned int asecurityKey, Messanger* aMessanger, std::string aChannelName)
-	{
-		if (asecurityKey != securityKey)
-		{
-			return false;
-		}
-
-		for (auto &channel : Channels)
-		{
-			if (channel == aChannelName)
-			{
-				channel.RegisterOnChannel(aMessanger);
-				return true;
-			}
-		}
-
-		MessangerChannel newChannel(aChannelName);
-		newChannel.RegisterOnChannel(aMessanger);
-		Channels.push_back(newChannel);
-
-		return true;
 	}
 
 	void MessangerServer::MessangerServerRuntime(void)
@@ -159,28 +139,36 @@ namespace DFSMessaging
 			std::cout << " -=Messanger Server Runtime woke up." << std::endl;
 
 			// Distribute any messages in the queue.
-			MessageQueueMutex.lock();
+			//MessageQueueMutex.lock();
 			while (MessageQueue.size() > 0)
 			{
 				MessagePacket newMessage = MessageQueue.front();
 				MessageQueue.pop();
+				//MessageQueueMutex.unlock();
 
-				if (newMessage.channelName == "*")
+				if (newMessage.channel == MSG_TARGET_ALL)
 				{ // Send to all clients
 					// TODO:
 				}
 				else
-				{ // Send to specific channel 
-					for (auto& channel : Channels)
+				{ // Send to specific channel
+					for (auto& messanger : Messangers)
 					{
-						if (channel == newMessage.channelName)
+						if (&messanger == newMessage.Origin)
 						{
-							channel.DistributeMessage(newMessage);
+							//MessageQueueMutex.lock();
+							continue;
+						}
+						if (messanger.isRegisteredOnChannel(newMessage.channel))
+						{
+							messanger.RecieveMessage(newMessage);
 						}
 					}
 				}
+				//MessageQueueMutex.lock();
 			}
-			MessageQueueMutex.unlock();
+			//MessageQueueMutex.unlock();
+			
 		}
 	}
 

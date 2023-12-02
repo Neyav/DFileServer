@@ -334,7 +334,7 @@ namespace DFSNetworking
 	void NetworkDaemon::AddMessenger(DFSMessaging::Messanger* aMessanger)
 	{
 		NetworkMessanger = aMessanger;
-		NetworkMessanger->RegisterOnChannel("Network");
+		NetworkMessanger->RegisterOnChannel(MSG_TARGET_NETWORK);
 	}
 
 	void NetworkDaemon::NetworkLoop(void)
@@ -436,7 +436,7 @@ namespace DFSNetworking
 							strcpy(ResourceType, ReturnMimeType(Resource));
 						}
 
-						NetworkMessanger->SendMessage("Local Console", std::string(TimeAndDate()) + " " + ConnectionList[ConnectionListIterator].GetIP() + " - [" + ConnectionList[ConnectionListIterator].Resource + "]");
+						NetworkMessanger->SendMessage(MSG_TARGET_CONSOLE, std::string(TimeAndDate()) + " " + ConnectionList[ConnectionListIterator].GetIP() + " - [" + ConnectionList[ConnectionListIterator].Resource + "]");
 
 						if (Configuration.ShowConnections)
 						{

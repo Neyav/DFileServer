@@ -3,6 +3,7 @@
 #include <condition_variable>
 #include <mutex>
 #include <queue>
+#include <vector>
 #include <atomic>
 
 #ifdef SendMessage
@@ -11,8 +12,10 @@
 
 #define MESSAGE_DEBUG
 
-#define MSG_TARGET_ALL		0	// Message goes out to everyone except for ourselves.
-#define MSG_TARGET_SERVER	1	// Message goes to the MessangerServer only.
+#define MSG_TARGET_USER		0	// Message is for a particular messanger only.
+#define MSG_TARGET_ALL		1
+#define MSG_TARGET_CONSOLE  2
+#define MSG_TARGET_NETWORK  3
 
 #define MESSAGE_NOMESSAGE	0
 
@@ -25,7 +28,7 @@ namespace DFSMessaging
 	{
 		Messanger* Origin;
 		unsigned int securityKey;
-		std::string channelName;
+		unsigned int channel;
 		std::string message;
 	};
 
@@ -35,35 +38,20 @@ namespace DFSMessaging
 		MessangerServer* parentServer;
 		unsigned int securityKey;
 
-		std::queue<MessagePacket> MessageQueue;
+		std::vector<MessagePacket> MessageQueue;
+		std::vector<unsigned int> RegisteredChannels;
 	public:
-		void SendMessage(std::string aChannelName, std::string aMessage);
+		void SendMessage(unsigned int aChannel, std::string aMessage);
 		void SendMessage(Messanger *aMessanger, std::string aMessage);
 		void RecieveMessage(MessagePacket aMessage);
 		bool HasMessages(void);
 		MessagePacket AcceptMessage(void);
 
-		bool RegisterOnChannel(std::string aChannelName);
+		void RegisterOnChannel(unsigned int aChannel);
+		bool isRegisteredOnChannel(unsigned int aChannel);
 
 		Messanger(unsigned int aKey, MessangerServer *aParent);
 		~Messanger();
-	};
-
-	class MessangerChannel
-	{
-	private:
-		std::vector<Messanger*> Messangers;
-		std::string ChannelName;
-	public:
-		// Override for == operator that compares it to a std::string of the channel name
-		bool operator==(const std::string &aString) const;
-
-		void DistributeMessage(MessagePacket aMessage);
-
-		// Channel registration functions
-		void RegisterOnChannel(Messanger* aMessanger);
-
-		MessangerChannel(std::string);
 	};
 
 	class MessangerServer
@@ -71,7 +59,6 @@ namespace DFSMessaging
 	private:
 		unsigned int securityKey;
 		std::vector<Messanger> Messangers;
-		std::vector<MessangerChannel> Channels;
 		std::condition_variable queueCondition;
 		std::mutex MessageQueueMutex;
 		std::queue<MessagePacket> MessageQueue;
@@ -79,8 +66,6 @@ namespace DFSMessaging
 		void MessangerServerRuntime(void);
 	public:
 		void DistributeMessage(MessagePacket aMessage);
-
-		bool RegisterOnChannel(unsigned int asecurityKey, Messanger* aMessanger, std::string aChannelName);
 
 		Messanger* ReceiveActiveMessanger(void);
 

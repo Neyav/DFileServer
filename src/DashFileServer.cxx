@@ -281,7 +281,7 @@ int main( int argc, char *argv[] )
    MessangerServer = new DFSMessaging::MessangerServer();
    
    ConsoleMessanger = MessangerServer->ReceiveActiveMessanger();
-   ConsoleMessanger->RegisterOnChannel("Local Console");
+   ConsoleMessanger->RegisterOnChannel(MSG_TARGET_CONSOLE);
 
    std::cout << " -=Initalize Network..." << std::endl;
 
@@ -350,7 +350,7 @@ int main( int argc, char *argv[] )
 	   {
 		   DFSMessaging::MessagePacket MessagePacket = ConsoleMessanger->AcceptMessage();
 
-		   std::cout << MessagePacket.channelName << ": " << MessagePacket.message << std::endl;
+		   std::cout << MessagePacket.channel << ": " << MessagePacket.message << std::endl;
 	   }
 	   Sleep(1000);
    }
