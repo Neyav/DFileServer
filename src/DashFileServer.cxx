@@ -295,14 +295,6 @@ int main( int argc, char *argv[] )
 
    printf(" -=Listening on port: %i\n", Configuration.Port );
 
-   /*DFSMessaging::Messanger* Messanger = nullptr;
-
-   Messanger = MessangerServer->ReceiveActiveMessanger();
-
-   Messanger->RegisterOnChannel("LocalConsole");
-
-   Messanger->SendMessage("LocalConsole", "Message from DFileServer: Hello World!");*/
-
 #ifndef _WINDOWS
 
    std::cout << " -=UNIX Specific configuration optionals..." << std::endl;
