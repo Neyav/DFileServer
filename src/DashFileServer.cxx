@@ -197,21 +197,21 @@ int main( int argc, char *argv[] )
 		x++;
 
 		Configuration.Port = atoi(argv[x]);
-		printf("Configuration: Port -> %i\n", Configuration.Port);
+		printf(" -=Configuration: Port -> %i\n", Configuration.Port);
 	}
 	else if ( strcasecmp( "-backlog", argv[x] ) == 0 )
 	{
 		x++;
 
 		Configuration.BackLog = atoi(argv[x]);
-		printf("Configuration: BackLog -> %i\n", Configuration.BackLog);
+		printf(" -=Configuration: BackLog -> %i\n", Configuration.BackLog);
 	}
 	else if ( strcasecmp( "-maxconnections", argv[x] ) == 0 )
 	{
 		x++;
 
 		Configuration.MaxConnections = atoi(argv[x]);
-		printf("Configuration: MaxConnections -> %i\n", Configuration.MaxConnections);
+		printf(" -=Configuration: MaxConnections -> %i\n", Configuration.MaxConnections);
 	}
 	else if ( strcasecmp( "-maxbandwidth", argv[x] ) == 0 )
 	{
@@ -219,17 +219,17 @@ int main( int argc, char *argv[] )
 
 		Configuration.MaxBandwidth = atoi(argv[x]);
 		if ( Configuration.MaxBandwidth > 1048576 )
-			printf("Configuration: MaxBandwidth -> %.1f MB/s\n", (float) Configuration.MaxBandwidth / 1048576);
+			printf(" -=Configuration: MaxBandwidth -> %.1f MB/s\n", (float) Configuration.MaxBandwidth / 1048576);
 		else if ( Configuration.MaxBandwidth > 1024 )
-			printf("Configuration: MaxBandwidth -> %.1f KB/s\n", (float) Configuration.MaxBandwidth / 1024);
+			printf(" -=Configuration: MaxBandwidth -> %.1f KB/s\n", (float) Configuration.MaxBandwidth / 1024);
 		else
-			printf("Configuration: MaxBandwidth -> %i B/s\n", Configuration.MaxBandwidth);
+			printf(" -=Configuration: MaxBandwidth -> %i B/s\n", Configuration.MaxBandwidth);
 	}
 	else if ( strcasecmp( "-showconnections", argv[x] ) == 0 )
 	{
 		Configuration.ShowConnections = 1;
 
-		printf("Configuration: Show Connections\n");
+		printf(" -=Configuration: Show Connections\n");
 	}
 	else if ( strcasecmp( "-log", argv[x] ) == 0 )
 	{
@@ -238,7 +238,7 @@ int main( int argc, char *argv[] )
 		// Open the log file.
 		Configuration.LogFile = fopen( argv[x], "w+");
 
-		printf("Configuration: LogFile -> %s\n", argv[x] );
+		printf(" -=Configuration: LogFile -> %s\n", argv[x] );
 	}
 	else if ( strcasecmp( "-requireauth", argv[x] ) == 0 )
 	{
@@ -246,7 +246,7 @@ int main( int argc, char *argv[] )
 
 		Configuration.BasicCredentials = std::string ( argv[x] );
 
-		printf("Configuration: Required Authentication Credentials -> %s\n", argv[x] );
+		printf(" -=Configuration: Required Authentication Credentials -> %s\n", argv[x] );
 	}
 #ifndef _WINDOWS
 	else if ( strcasecmp( "-setuid", argv[x] ) == 0 )
@@ -254,22 +254,22 @@ int main( int argc, char *argv[] )
 		x++;
 
 		ConfigurationSetUID = atoi(argv[x]);
-		printf("Configuration: Set UID to %i\n", ConfigurationSetUID );
+		printf(" -=Configuration: Set UID to %i\n", ConfigurationSetUID );
 	}
 	else if ( strcasecmp( "-chroot", argv[x] ) == 0 )
 	{
 		x++;
 
 		ConfigurationChrootFolder = std::string(argv[x]);
-		printf("Configuration: chroot to %s\n", argv[x]);
+		printf(" -=Configuration: chroot to %s\n", argv[x]);
 	}
 	else if ( strcasecmp( "-background", argv[x] ) == 0 )
 	{
-		printf("Configuration: Dropping to background...\n");
+		printf(" -=Configuration: Dropping to background...\n");
 
 		if ( fork() != 0 )
 		{
-			printf("Configuration: Child process spawned.\n");
+			printf(" -=Configuration: Child process spawned.\n");
 			exit (0);
 		}
 
@@ -292,8 +292,6 @@ int main( int argc, char *argv[] )
    }
 
    NetworkDaemon.AddMessenger(MessangerServer->ReceiveActiveMessanger());
-
-   printf(" -=Listening on port: %i\n", Configuration.Port );
 
 #ifndef _WINDOWS
 
@@ -327,8 +325,6 @@ int main( int argc, char *argv[] )
 	}
    }
 #endif
-
-   std::cout << " -=Waiting for connections. Initalization complete." << std::endl;
 
    // Thread out and detach the network loop.
    std::thread NetworkThread( &DFSNetworking::NetworkDaemon::NetworkLoop, &NetworkDaemon );

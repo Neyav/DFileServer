@@ -326,6 +326,7 @@ namespace DFSNetworking
 		PollStruct[0].fd = NetworkSocket;
 		PollStruct[0].events = POLLIN;
 		HighestPollIterator = 0;
+		listenPort = aPort;
 
 		// We were successful, return the socket.
 		return true;
@@ -339,6 +340,8 @@ namespace DFSNetworking
 
 	void NetworkDaemon::NetworkLoop(void)
 	{
+		std::cout << " -=Network Loop activated: Listening on port " << listenPort << "..." << std::endl;
+
 		while (1)
 		{
 			poll(PollStruct, HighestPollIterator + 1, INFTIM);
