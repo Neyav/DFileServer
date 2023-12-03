@@ -22,6 +22,7 @@ namespace DFSMessaging
 		{
 			if (channel == aChannel)
 			{
+				MessangerchannelMutex.unlock();
 				return;
 			}
 		}
