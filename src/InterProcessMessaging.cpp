@@ -10,13 +10,14 @@
 
 namespace DFSMessaging
 {
-	std::mutex queueMutex;
-	std::mutex channelMutex;
+	std::mutex MessangerQueueMutex;
+	std::mutex MessangerchannelMutex;
+	std::mutex MessageServerQueueMutex;
 
 	void Messanger::RegisterOnChannel(unsigned int aChannel)
 	{
 		// Check if we are registered on this channel.
-		channelMutex.lock();
+		MessangerchannelMutex.lock();
 		for (auto& channel : RegisteredChannels)
 		{
 			if (channel == aChannel)
@@ -27,22 +28,22 @@ namespace DFSMessaging
 
 		// If we are not, register on it.
 		RegisteredChannels.push_back(aChannel);
-		channelMutex.unlock();
+		MessangerchannelMutex.unlock();
 	}
 
 	bool Messanger::isRegisteredOnChannel(unsigned int aChannel)
 	{
 		// Check if we are registered on this channel.
-		channelMutex.lock();
+		MessangerchannelMutex.lock();
 		for (auto& channel : RegisteredChannels)
 		{
 			if (channel == aChannel)
 			{
-				channelMutex.unlock();
+				MessangerchannelMutex.unlock();
 				return true;
 			}
 		}
-		channelMutex.unlock();
+		MessangerchannelMutex.unlock();
 	}
 
     void Messanger::SendMessage(unsigned int aChannel, std::string aMessage)
@@ -74,21 +75,21 @@ namespace DFSMessaging
 			return;
 		}
 		// Add it to our message queue.
-		queueMutex.lock();
+		MessangerQueueMutex.lock();
 		MessageQueue.push_back(aMessage);
-		queueMutex.unlock();
+		MessangerQueueMutex.unlock();
 	}
 
 	MessagePacket Messanger::AcceptMessage(void)
 	{
 		MessagePacket newMessage;
-		queueMutex.lock();
+		MessangerQueueMutex.lock();
 		if (MessageQueue.size() > 0)
 		{
 			newMessage = MessageQueue.front();
 			MessageQueue.erase(MessageQueue.begin()); 
 		}
-		queueMutex.unlock();
+		MessangerQueueMutex.unlock();
 		return newMessage;
 	}
 
@@ -96,9 +97,9 @@ namespace DFSMessaging
 	{
 		int MessageCount = 0;
 
-		queueMutex.lock();
+		MessangerQueueMutex.lock();
 		MessageCount = MessageQueue.size();
-		queueMutex.unlock();
+		MessangerQueueMutex.unlock();
 
 		return (MessageCount > 0);
 	}
@@ -119,9 +120,9 @@ namespace DFSMessaging
 
 	void MessangerServer::DistributeMessage(MessagePacket aMessage)
 	{
-		MessageQueueMutex.lock();
+		MessageServerQueueMutex.lock();
 		MessageQueue.push(aMessage);
-		MessageQueueMutex.unlock();
+		MessageServerQueueMutex.unlock();
 		queueCondition.notify_one();
 	}
 
@@ -139,12 +140,12 @@ namespace DFSMessaging
 			std::cout << " -=Messanger Server Runtime woke up." << std::endl;
 
 			// Distribute any messages in the queue.
-			//MessageQueueMutex.lock();
+			MessageServerQueueMutex.lock();
 			while (MessageQueue.size() > 0)
 			{
 				MessagePacket newMessage = MessageQueue.front();
 				MessageQueue.pop();
-				//MessageQueueMutex.unlock();
+				MessageServerQueueMutex.unlock();
 
 				if (newMessage.channel == MSG_TARGET_ALL)
 				{ // Send to all clients
@@ -156,7 +157,6 @@ namespace DFSMessaging
 					{
 						if (messanger == newMessage.Origin)
 						{
-							//MessageQueueMutex.lock();
 							continue;
 						}
 						if (messanger->isRegisteredOnChannel(newMessage.channel))
@@ -165,9 +165,9 @@ namespace DFSMessaging
 						}
 					}
 				}
-				//MessageQueueMutex.lock();
+				MessageServerQueueMutex.lock();
 			}
-			//MessageQueueMutex.unlock();
+			MessageServerQueueMutex.unlock();
 			
 		}
 	}
@@ -178,7 +178,9 @@ namespace DFSMessaging
 		
 		newMessanger = new Messanger(securityKey, this);
 
+		MessageServerQueueMutex.lock();
 		Messangers.push_back(newMessanger);
+		MessageServerQueueMutex.unlock();
 
 		return Messangers.back();
 	}
@@ -207,11 +209,13 @@ namespace DFSMessaging
 		// Start by destrying all Messangers
 		std::cout << " -=Messanging Service shutting down..." << std::endl;
 
+		MessageServerQueueMutex.lock();
 		while (Messangers.size() > 0)
 		{
 			delete Messangers.back();
 			Messangers.pop_back();
 		}
+		MessageServerQueueMutex.unlock();
 
 		std::cout << " -=Messanging Service shutdown complete." << std::endl;
 	}
