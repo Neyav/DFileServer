@@ -36,10 +36,10 @@
     <ClCompile Include="..\src\contrib\Base64.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\InterProcessMessaging.cpp">
+    <ClCompile Include="..\src\Networking.cxx">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\Networking.cxx">
+    <ClCompile Include="..\src\InterProcessMessaging.cxx">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
