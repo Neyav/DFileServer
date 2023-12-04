@@ -156,13 +156,6 @@ char *TimeAndDate ( void )
 
 int main( int argc, char *argv[] )
 {
-   Configuration.Port = 2000;
-   Configuration.BackLog = 100;
-   Configuration.MaxConnections = 0;
-   Configuration.MaxBandwidth = 0;
-   Configuration.ShowConnections = 0;
-   Configuration.LogFile = nullptr;
-   Configuration.BasicCredentials = "";
 
 #ifndef _WINDOWS
    int ConfigurationSetUID = 0;
