@@ -9,29 +9,13 @@ namespace DFSInternet
 	class HTMLDocument
 	{
 	private:
-		std::vector<HTMLElement> HTMLElements;
+		
 	public:
+		std::string Title;
 
 
 		HTMLDocument();
 		~HTMLDocument();
 	};
 
-	/* HTML Elements */
-
-	class HTMLElement
-	{
-	public:
-		std::vector<HTMLElement> childElements; // Unused in the base class, but can be used in derived classes
-		std::map<std::string,std::string> attributes;
-
-		std::string produceElement(void);
-	};
-
-	class HTMLHead : public HTMLElement
-	{
-	public:
-
-		virtual std::string produceElement(void);
-	};
 	}

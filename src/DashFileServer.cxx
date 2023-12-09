@@ -63,6 +63,7 @@ namespace Version
 	int MAJORVERSION = 2;
 	int MINORVERSION = 0;
 	int PATCHVERSION = 0;
+	std::string VERSIONTITLE = "The Port Colborne Comeback";
 }
 
 Configuration_t Configuration;
@@ -176,7 +177,7 @@ int main( int argc, char *argv[] )
 
    // First we want to clear the screen.
    std::cout << "\u001B[2J\u001B[1;1H";
-   std::cout << "\u001B[41m\u001B[30mDFileServer Version " << Version::MAJORVERSION << "." << Version::MINORVERSION << "." << Version::PATCHVERSION << "  !!-[DEVELOPMENT VERSION]-!!                                         **-]\u001B[0m" << std::endl;
+   std::cout << "\u001B[41m\u001B[30mDFileServer Version " << Version::MAJORVERSION << "." << Version::MINORVERSION << "." << Version::PATCHVERSION << " --> {" << Version::VERSIONTITLE << "}                                     **-]\u001B[0m" << std::endl;
    std::cout << "\u001B[41m\u001B[30m                    (c) 2005, 2018, 2023 Christopher Laverdure                                 **-]\u001B[0m" << std::endl;
    std::cout << "\u001B[41m\u001B[30m                    All Rights Reserved.                                                       **-]\u001B[0m" << std::endl;
    std::cout << "In memorial for all the code that was lost that one day when Sylvia wrote her last bit." << std::endl;

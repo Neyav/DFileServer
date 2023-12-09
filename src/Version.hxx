@@ -16,6 +16,7 @@ namespace Version
 	extern int MAJORVERSION;
 	extern int MINORVERSION;
 	extern int PATCHVERSION;
+	extern std::string VERSIONTITLE;
 }
 
 // The method for doing this is different depending on the platform.
