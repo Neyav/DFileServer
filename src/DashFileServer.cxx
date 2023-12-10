@@ -164,7 +164,7 @@ int main( int argc, char *argv[] )
 #endif
 
    DFSMessaging::MessangerServer *MessangerServer = nullptr;
-   DFSNetworking::NetworkDaemon NetworkDaemon;
+   DFSNetworking::NetworkDaemon *NetworkDaemon = nullptr;
    DFSMessaging::Messanger *ConsoleMessanger = nullptr;
 
 
@@ -273,19 +273,20 @@ int main( int argc, char *argv[] )
    }
 
    MessangerServer = new DFSMessaging::MessangerServer();
+   NetworkDaemon = new DFSNetworking::NetworkDaemon();
    
    ConsoleMessanger = MessangerServer->ReceiveActiveMessanger();
    ConsoleMessanger->RegisterOnChannel(MSG_TARGET_CONSOLE);
 
    std::cout << " -=Initalize Network..." << std::endl;
 
-   if (NetworkDaemon.initalizeNetwork(Configuration.Port, Configuration.BackLog) == false)
+   if (NetworkDaemon->initalizeNetwork(Configuration.Port, Configuration.BackLog) == false)
    {
 	   std::cout << "CRITICAL ERROR: Couldn't initalize listening socket on port " << Configuration.Port << std::endl;
 	   exit(-1); // TODO: Replace with an exit function that cleans up after itself.
    }
 
-   NetworkDaemon.AddMessenger(MessangerServer->ReceiveActiveMessanger());
+   NetworkDaemon->AddMessenger(MessangerServer->ReceiveActiveMessanger());
 
 #ifndef _WINDOWS
 
@@ -321,7 +322,7 @@ int main( int argc, char *argv[] )
 #endif
 
    // Thread out and detach the network loop.
-   std::thread NetworkThread( &DFSNetworking::NetworkDaemon::NetworkLoop, &NetworkDaemon );
+   std::thread NetworkThread( &DFSNetworking::NetworkDaemon::NetworkLoop, NetworkDaemon );
    NetworkThread.detach();
 
    // Main Program Loop
