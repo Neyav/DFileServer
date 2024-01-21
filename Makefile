@@ -3,12 +3,12 @@ CC = c++
 STRIP = strip
 RM = rm
 
-CFLAGS = -O2
+CFLAGS = -O2 -std=c++17
 LINKERFLAGS =
 
 # The default build target. This is the console test engine.
-dfileserver: CPathResolver.o DirectoryIndexing.o ClientConnection.o HTTPHeader.o DashFileServer.o Mimetypes.o Base64.o
-	$(CC) -o dfileserver CPathResolver.o DirectoryIndexing.o ClientConnection.o HTTPHeader.o DashFileServer.o MimeTypes.o Base64.o $(LINKERFLAGS)
+dfileserver: CPathResolver.o DirectoryIndexing.o ClientConnection.o HTTPHeader.o DashFileServer.o MimeTypes.o Base64.o HTMLEncoding.o InterProcessMessaging.o Networking.o
+	$(CC) -o dfileserver CPathResolver.o DirectoryIndexing.o ClientConnection.o HTTPHeader.o DashFileServer.o MimeTypes.o Base64.o HTMLEncoding.o InterProcessMessaging.o Networking.o $(LINKERFLAGS)
 	$(STRIP) --strip-all dfileserver
 
 CPathResolver.o: src/CPathResolver.cxx
@@ -26,11 +26,20 @@ HTTPHeader.o: src/HTTPHeader.cxx
 DashFileServer.o: src/DashFileServer.cxx
 	$(CC) $(CFLAGS) -o DashFileServer.o -c src/DashFileServer.cxx
 	
-Mimetypes.o: src/MimeTypes.o
+MimeTypes.o: src/MimeTypes.cxx
 	$(CC) $(CFLAGS) -o MimeTypes.o -c src/MimeTypes.cxx
 	
 Base64.o: src/contrib/Base64.cpp
 	$(CC) $(CFLAGS) -o Base64.o -c src/contrib/Base64.cpp
+	
+HTMLEncoding.o: src/HTMLEncoding.cxx
+	$(CC) $(CFLAGS) -o HTMLEncoding.o -c src/HTMLEncoding.cxx
+	
+InterProcessMessaging.o: src/InterProcessMessaging.cxx
+	$(CC) $(CFLAGS) -o InterProcessMessaging.o -c src/InterProcessMessaging.cxx
+	
+Networking.o: src/Networking.cxx
+	$(CC) $(CFLAGS) -o Networking.o -c src/Networking.cxx
 
 clean:
 	$(RM) *.o

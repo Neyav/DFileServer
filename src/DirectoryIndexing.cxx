@@ -40,6 +40,8 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/param.h>
+#define _close close
+#define _open open
 #endif
 #include <string>
 #include <fstream>

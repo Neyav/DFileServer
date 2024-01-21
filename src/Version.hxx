@@ -1,12 +1,19 @@
 #pragma once
 #include <string>
 
+#ifdef _WINDOWS
 #define strncasecmp _strnicmp
 #define strcasecmp _stricmp
 #define strncpy strncpy_s
+#endif
 
 #ifndef INFTIM
 #define INFTIM -1
+#endif
+
+#ifndef _WINDOWS
+#include <termios.h>
+#include <sys/ioctl.h>
 #endif
 
 #define MAXIDENTIFIERLEN 151

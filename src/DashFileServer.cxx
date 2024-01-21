@@ -1,4 +1,4 @@
-﻿/*
+/*
 ** ($Header: /var/www/cvsroot/DFileServer/src/DashFileServer.cxx,v 1.61.2.19 2005/10/23 19:51:28 incubus Exp $)
 **
 ** Copyright 2005, 2018 Chris Laverdure
@@ -47,6 +47,9 @@
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #include <sys/wait.h>
+
+#define Sleep sleep
+
 #endif
 #include <vector>
 #include <iterator>

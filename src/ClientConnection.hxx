@@ -1,5 +1,6 @@
 #ifndef _WINDOWS
 #include <netinet/in.h>
+#define SOCKET int
 #endif
 
 #include <time.h>
@@ -30,7 +31,7 @@ class ClientConnection
 		HTTPHeader			ServerResponse;
 
 		ClientConnection ();		// Constructor
-		SOCKET  GetSocket ( void );
+		SOCKET GetSocket ( void );
 		char *GetIP ( void );
 		size_t OpenFile ( char * );
 		void CloseFile ( void );
