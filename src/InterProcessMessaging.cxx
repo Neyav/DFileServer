@@ -124,7 +124,7 @@ namespace DFSMessaging
 		MessageServerQueueMutex.lock();
 		MessageQueue.push(aMessage);
 		MessageServerQueueMutex.unlock();
-		queueCondition.notify_one();
+		queueCondition.notify_all();
 	}
 
 	void MessangerServer::MessangerServerRuntime(void)
