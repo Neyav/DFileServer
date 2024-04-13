@@ -61,6 +61,8 @@
 #include "Networking.hxx"
 #include "Version.hxx"
 
+DFSMessaging::MessangerServer* MessangerServer = nullptr;
+
 namespace Version
 {
 	int MAJORVERSION = 2;
@@ -78,6 +80,15 @@ int ActiveConnections = 0;
 
 void InitateServerShutdown ( int ArgSignal )
 {
+	if (MessangerServer)
+	{
+		DFSMessaging::Messanger* ServerShutdownMessanger;
+
+		ServerShutdownMessanger = MessangerServer->ReceiveActiveMessanger();
+	
+	}
+
+	/*
 	printf("Recieved Signal %i\n", ArgSignal );
 
 	// First lockdown the server and close when all the connections are done.
@@ -89,7 +100,7 @@ void InitateServerShutdown ( int ArgSignal )
 		ServerLockdown = true;
 
 		printf( "Initating Server Lockdown, waiting on %i Client(s).\n", ActiveConnections );
-	}
+	}*/
 }
 
 // This function contributed by Markus Thiele
@@ -166,7 +177,6 @@ int main( int argc, char *argv[] )
    std::string ConfigurationChrootFolder;
 #endif
 
-   DFSMessaging::MessangerServer *MessangerServer = nullptr;
    DFSNetworking::NetworkDaemon *NetworkDaemon = nullptr;
    DFSMessaging::Messanger *ConsoleMessanger = nullptr;
 

@@ -45,8 +45,6 @@ void HTTPHeader::ImportHeader ( std::string ArgHTTPHeader )
 	// Grab the basics first.
 	stringStream >> AccessType >> AccessPath >> AccessProtocol;	
 
-	std::cout << ArgHTTPHeader << std::endl;
-
 	while ( 1 )
 	{
 
