@@ -47,6 +47,13 @@ namespace DFSMessaging
 		MessangerchannelMutex.unlock();
 	}
 
+	void Messanger::unRegisterAllChannels(void)
+	{
+		MessangerchannelMutex.lock();
+		RegisteredChannels.clear();
+		MessangerchannelMutex.unlock();
+	}
+
     void Messanger::SendMessage(unsigned int aChannel, std::string aMessage)
 	{
 		MessagePacket newMessage;
@@ -184,6 +191,21 @@ namespace DFSMessaging
 		MessageServerQueueMutex.unlock();
 
 		return Messangers.back();
+	}
+
+	void MessangerServer::DeactivateActiveMessanger(Messanger* aMessanger)
+	{
+		MessageServerQueueMutex.lock();
+		for (int i = 0; i < Messangers.size(); i++)
+		{
+			if (Messangers[i] == aMessanger)
+			{
+				delete Messangers[i];
+				Messangers.erase(Messangers.begin() + i);
+				break;
+			}
+		}
+		MessageServerQueueMutex.unlock();
 	}
 
 	MessangerServer::MessangerServer()

@@ -49,6 +49,7 @@ namespace DFSMessaging
 
 		void RegisterOnChannel(unsigned int aChannel);
 		bool isRegisteredOnChannel(unsigned int aChannel);
+		void unRegisterAllChannels(void);
 
 		Messanger(unsigned int aKey, MessangerServer *aParent);
 		~Messanger();
@@ -67,6 +68,7 @@ namespace DFSMessaging
 		void DistributeMessage(MessagePacket aMessage);
 
 		Messanger* ReceiveActiveMessanger(void);
+		void DeactivateActiveMessanger(Messanger* aMessanger);
 
 		MessangerServer();
 		~MessangerServer();
