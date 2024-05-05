@@ -119,7 +119,10 @@ namespace DFSMessaging
 	}
 	Messanger::~Messanger()
 	{
-
+		if (parentServer != nullptr)
+		{
+			parentServer->DeactivateActiveMessanger(this);
+		}
 	}
 
 	/*
@@ -200,7 +203,9 @@ namespace DFSMessaging
 		{
 			if (Messangers[i] == aMessanger)
 			{
-				delete Messangers[i];
+				// This function is called in the destructor of the Messanger class, so we don't need to delete it here.
+				// Just keep in mind that deactivating it doesn't delete it.
+				//delete Messangers[i];
 				Messangers.erase(Messangers.begin() + i);
 				break;
 			}
@@ -229,7 +234,7 @@ namespace DFSMessaging
 	MessangerServer::~MessangerServer()
 	{
 		// Destroy Messanger Server
-		// Start by destrying all Messangers
+		// Start by destroying all Messangers
 		std::cout << " -=Messanging Service shutting down..." << std::endl;
 
 		MessageServerQueueMutex.lock();

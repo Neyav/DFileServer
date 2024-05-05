@@ -299,8 +299,6 @@ int main( int argc, char *argv[] )
 	   exit(-1); // TODO: Replace with an exit function that cleans up after itself.
    }
 
-   NetworkDaemon->AddMessenger(MessangerServer->ReceiveActiveMessanger());
-
 #ifndef _WINDOWS
 
    std::cout << " -=UNIX Specific configuration optionals..." << std::endl;

@@ -332,12 +332,6 @@ namespace DFSNetworking
 		return true;
 	}
 
-	void NetworkDaemon::AddMessenger(DFSMessaging::Messanger* aMessanger)
-	{
-		NetworkMessanger = aMessanger;
-		NetworkMessanger->RegisterOnChannel(MSG_TARGET_NETWORK);
-	}
-
 	void NetworkDaemon::NetworkLoop(void)
 	{
 		std::cout << " -=Network Loop activated: Listening on port " << listenPort << "..." << std::endl;
@@ -650,9 +644,13 @@ namespace DFSNetworking
 		listenPort = 0;
 		backLog = 0;
 		HighestPollIterator = 0;
+
+		if (MessangerServer)
+			NetworkMessanger = MessangerServer->ReceiveActiveMessanger();
 	}
 	NetworkDaemon::~NetworkDaemon()
 	{
-
+		if (NetworkMessanger)
+			delete NetworkMessanger;
 	}
 }

@@ -20,6 +20,8 @@
 
 char* TimeAndDate(void);
 
+extern DFSMessaging::MessangerServer* MessangerServer;
+
 namespace DFSNetworking
 {
 	class NetworkDaemon
@@ -43,7 +45,6 @@ namespace DFSNetworking
 		void ParseURLEncoding(char* ArgBuffer);
 	public:
 		bool initalizeNetwork(unsigned int aPort, unsigned int aBackLog);
-		void AddMessenger(DFSMessaging::Messanger* aMessanger);
 
 		void NetworkLoop();
 
