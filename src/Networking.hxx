@@ -18,8 +18,6 @@
 #include "ClientConnection.hxx"
 #include "InterProcessMessaging.hxx"
 
-char* TimeAndDate(void);
-
 extern DFSMessaging::MessangerServer* MessangerServer;
 
 namespace DFSNetworking

@@ -41,6 +41,8 @@ namespace DFSMessaging
 		std::vector<MessagePacket> MessageQueue;
 		std::vector<unsigned int> RegisteredChannels;
 	public:
+		std::string Name;
+
 		void SendMessage(unsigned int aChannel, std::string aMessage);
 		void SendMessage(Messanger *aMessanger, std::string aMessage);
 		void RecieveMessage(MessagePacket aMessage);

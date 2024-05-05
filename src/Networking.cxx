@@ -359,6 +359,9 @@ namespace DFSNetworking
 					if ((DataRecved = ConnectionList[ConnectionListIterator].RecvData(DataBuffer, sizeof(DataBuffer))) < 1)
 					{ // Disconnection or error. Terminate client.
 
+						if (Configuration.ShowConnections)
+							NetworkMessanger->SendMessage(MSG_TARGET_CONSOLE, std::string(ConnectionList[ConnectionListIterator].GetIP()) + " - Disconnected w/o complete data.");
+
 						TerminateConnection(ConnectionListIterator);
 						ConnectionListIterator--;
 						if (ConnectionListIterator < 0)
@@ -433,17 +436,15 @@ namespace DFSNetworking
 							strcpy(ResourceType, ReturnMimeType(Resource));
 						}
 
-						NetworkMessanger->SendMessage(MSG_TARGET_CONSOLE, std::string(TimeAndDate()) + " " + ConnectionList[ConnectionListIterator].GetIP() + " - [" + ConnectionList[ConnectionListIterator].Resource + "]");
-
 						if (Configuration.ShowConnections)
 						{
-							printf("%s %s - [%s] (%s)\n", TimeAndDate(), ConnectionList[ConnectionListIterator].GetIP(),
-								ConnectionList[ConnectionListIterator].Resource.c_str(), Resource);
+							NetworkMessanger->SendMessage(MSG_TARGET_CONSOLE, std::string(ConnectionList[ConnectionListIterator].GetIP()) + " - [" + ConnectionList[ConnectionListIterator].Resource + "]");
+							NetworkMessanger->SendMessage(MSG_TARGET_CONSOLE, "Resolved resource to: -> " + std::string(Resource));							
 						}
 
 						if (Configuration.LogFile != nullptr)
 						{
-							fprintf(Configuration.LogFile, "%s %s - [%s] (%s)\n", TimeAndDate(), ConnectionList[ConnectionListIterator].GetIP(),
+							fprintf(Configuration.LogFile, "%s - [%s] (%s)\n", ConnectionList[ConnectionListIterator].GetIP(),
 								ConnectionList[ConnectionListIterator].Resource.c_str(), Resource);
 
 							// Make sure it gets written to disk.
@@ -646,7 +647,10 @@ namespace DFSNetworking
 		HighestPollIterator = 0;
 
 		if (MessangerServer)
+		{
 			NetworkMessanger = MessangerServer->ReceiveActiveMessanger();
+			NetworkMessanger->Name = "Network";
+		}
 	}
 	NetworkDaemon::~NetworkDaemon()
 	{

@@ -191,7 +191,7 @@ int main( int argc, char *argv[] )
    // First we want to clear the screen.
    std::cout << "\u001B[2J\u001B[1;1H";
    std::cout << "\u001B[41m\u001B[30mDFileServer Version " << Version::MAJORVERSION << "." << Version::MINORVERSION << "." << Version::PATCHVERSION << " --> {" << Version::VERSIONTITLE << "}                                     **-]\u001B[0m" << std::endl;
-   std::cout << "\u001B[41m\u001B[30m                    (c) 2005, 2018, 2023 Christopher Laverdure                                 **-]\u001B[0m" << std::endl;
+   std::cout << "\u001B[41m\u001B[30m                    (c) 2005, 2018, 2023-2024 Christopher Laverdure                            **-]\u001B[0m" << std::endl;
    std::cout << "\u001B[41m\u001B[30m                    All Rights Reserved.                                                       **-]\u001B[0m" << std::endl;
    std::cout << "In memorial for all the code that was lost that one day when Sylvia wrote her last bit." << std::endl;
    std::cout << "Initalizing..." << std::endl;
@@ -232,7 +232,7 @@ int main( int argc, char *argv[] )
 		else
 			printf(" -=Configuration: MaxBandwidth -> %i B/s\n", Configuration.MaxBandwidth);
 	}
-	else if ( strcasecmp( "-showconnections", argv[x] ) == 0 )
+	else if ( strcasecmp( "-showconnections", argv[x] ) == 0)
 	{
 		Configuration.ShowConnections = 1;
 
@@ -285,10 +285,13 @@ int main( int argc, char *argv[] )
 #endif
    }
 
+   Configuration.ShowConnections = 1;
+
    MessangerServer = new DFSMessaging::MessangerServer();
    NetworkDaemon = new DFSNetworking::NetworkDaemon();
    
    ConsoleMessanger = MessangerServer->ReceiveActiveMessanger();
+   ConsoleMessanger->Name = "Console";
    ConsoleMessanger->RegisterOnChannel(MSG_TARGET_CONSOLE);
 
    std::cout << " -=Initalize Network..." << std::endl;
@@ -343,8 +346,8 @@ int main( int argc, char *argv[] )
 	   while (ConsoleMessanger->HasMessages())
 	   {
 		   DFSMessaging::MessagePacket MessagePacket = ConsoleMessanger->AcceptMessage();
-
-		   std::cout << MessagePacket.channel << ": " << MessagePacket.message << std::endl;
+		   
+		   std::cout << std::string(TimeAndDate()) << " [" << MessagePacket.Origin->Name << "]: " << MessagePacket.message << std::endl;
 	   }
 	   Sleep(1000);
    }
