@@ -67,6 +67,30 @@ ClientConnection::ClientConnection ()
 	Resource = "";
 
 	LastAction = time (NULL);
+
+	Messanger = MessangerServer->ReceiveActiveMessanger();
+	Messanger->Name = "Inactive Client Connection";
+}
+
+ClientConnection::~ClientConnection()
+{
+	if (FileStream)
+	{
+		FileStream->close();
+		delete FileStream;
+	}
+
+	if (NetworkSocket)
+	{
+#ifdef _WINDOWS
+		closesocket(NetworkSocket);
+#else
+		close(NetworkSocket);
+#endif
+	}
+
+	if (Messanger)
+		MessangerServer->DeactivateActiveMessanger(Messanger);
 }
 
 SOCKET ClientConnection::GetSocket ( void )
@@ -132,9 +156,12 @@ char ClientConnection::AcceptConnection ( int ArgSocket )
 	if ( ( NetworkSocket = accept(ArgSocket, (struct sockaddr *)&SocketStruct,
 			&sin_size)) == -1 )
 	{
-		perror("ClientConnection::AcceptConnection -- accept()");
+		Messanger->SendMessage(MSG_TARGET_CONSOLE, "ClientConnection::AcceptConnection -- accept() failed.");
+	
 		return -1;
 	}
+
+	Messanger->Name = "Client: " + std::string(inet_ntoa(SocketStruct.sin_addr));
 
 	return 0;
 }
@@ -147,7 +174,9 @@ void ClientConnection::DisconnectClient ( void )
 #else
 	if ( close (NetworkSocket) == -1 )
 #endif
-	perror("ClientConnection::DisconnectClient -- close()");
+	{
+		Messanger->SendMessage(MSG_TARGET_CONSOLE, "ClientConnection::DisconnectClient -- close() failed.");
+	}
 
 	NetworkSocket = -1;
 }
@@ -164,7 +193,7 @@ int ClientConnection::SendData ( char *Argstring, int ArgSize )
 
 	if ( (DataSent = send( NetworkSocket, Argstring, DataSize, 0 )) == -1)
 	{
-		perror("ClientConnection::SendData -- send()");
+		Messanger->SendMessage(MSG_TARGET_CONSOLE, "ClientConnection::SendData -- send() failed.");
 		return 0;
 	}
 
@@ -182,7 +211,7 @@ size_t ClientConnection::RecvData ( char *Argstring, size_t ArgDataSize )
 
 	if ( (DataRecv = recv( NetworkSocket, Argstring, ArgDataSize-1, 0 )) == -1)
 	{
-		perror("ClientConnection::RecvData -- recv()");
+		Messanger->SendMessage(MSG_TARGET_CONSOLE, "ClientConnection::RecvData -- recv() failed.");
 		return -1;
 	}
 

@@ -351,6 +351,8 @@ namespace DFSNetworking
 	{
 		std::cout << " -=Network Loop activated: Listening on port " << listenPort << "..." << std::endl;
 
+		std::vector<NetworkHandler> NetworkHandlers;
+
 		while (1)
 		{
 			poll(PollStruct, HighestPollIterator + 1, INFTIM);

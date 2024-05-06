@@ -8,6 +8,9 @@
 #include <string>
 
 #include "HTTPHeader.hxx"
+#include "InterProcessMessaging.hxx"
+
+extern DFSMessaging::MessangerServer* MessangerServer;
 
 class ClientConnection
 {
@@ -15,6 +18,7 @@ class ClientConnection
 		SOCKET				NetworkSocket;
 		struct sockaddr_in	SocketStruct;
 		time_t				LastAction;
+		DFSMessaging::Messanger* Messanger;
 	public:
 		std::ifstream		*FileStream;
 		std::string			Resource;
@@ -31,6 +35,7 @@ class ClientConnection
 		HTTPHeader			ServerResponse;
 
 		ClientConnection ();		// Constructor
+		~ClientConnection();
 		SOCKET GetSocket ( void );
 		char *GetIP ( void );
 		size_t OpenFile ( char * );
