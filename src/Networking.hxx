@@ -22,13 +22,29 @@ extern DFSMessaging::MessangerServer* MessangerServer;
 
 namespace DFSNetworking
 {
+	class NetworkHandler
+	{
+	private:
+		int HighestPollIterator;
+		struct pollfd PollStruct[512];
+		std::vector<ClientConnection> ConnectionList;
+		DFSMessaging::Messanger* NetworkHandlerMessanger;
+
+	public:
+		void NetworkHandlerLoop(void);
+
+		NetworkHandler();
+		~NetworkHandler();
+	};
+
 	class NetworkDaemon
 	{
 	private:
 		unsigned int listenPort;
 		unsigned int backLog;
 		int HighestPollIterator;
-		struct pollfd PollStruct[512];
+		
+		struct pollfd PollStruct[10];
 		std::vector<ClientConnection> ConnectionList;
 		DFSMessaging::Messanger* NetworkMessanger;
 

@@ -13,6 +13,21 @@ extern bool ServerLockdown;
 
 namespace DFSNetworking
 {
+	void NetworkHandler::NetworkHandlerLoop(void)
+	{
+
+	}
+
+	NetworkHandler::NetworkHandler()
+	{
+
+	}
+
+	NetworkHandler::~NetworkHandler()
+	{
+	
+	}
+
 	void NetworkDaemon::IncomingConnection(void)
 	{
 		ClientConnection IncomingClient;
