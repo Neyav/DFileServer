@@ -522,6 +522,7 @@ namespace DFSNetworking
 						char Buffer[4096];
 						int BytesToRead, BytesRead;
 
+						// Clear the buffer.
 						memset(Buffer, '\0', sizeof(Buffer));
 
 						BytesToRead = sizeof(Buffer) - 1;
@@ -645,12 +646,15 @@ namespace DFSNetworking
 		listenPort = 0;
 		backLog = 0;
 		HighestPollIterator = 0;
+		NetworkSocket = 0;
 
 		if (MessangerServer)
 		{
 			NetworkMessanger = MessangerServer->ReceiveActiveMessanger();
 			NetworkMessanger->Name = "Network";
 		}
+		else
+			NetworkMessanger = nullptr;
 	}
 	NetworkDaemon::~NetworkDaemon()
 	{

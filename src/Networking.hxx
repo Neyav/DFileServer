@@ -28,7 +28,7 @@ namespace DFSNetworking
 		unsigned int listenPort;
 		unsigned int backLog;
 		int HighestPollIterator;
-		struct pollfd PollStruct[2048];
+		struct pollfd PollStruct[512];
 		std::vector<ClientConnection> ConnectionList;
 		DFSMessaging::Messanger* NetworkMessanger;
 
