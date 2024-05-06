@@ -232,11 +232,11 @@ int main( int argc, char *argv[] )
 		else
 			printf(" -=Configuration: MaxBandwidth -> %i B/s\n", Configuration.MaxBandwidth);
 	}
-	else if ( strcasecmp( "-showconnections", argv[x] ) == 0)
+	else if ( strcasecmp( "-verbose", argv[x] ) == 0)
 	{
-		Configuration.ShowConnections = 1;
+		Configuration.Verbose = true;
 
-		printf(" -=Configuration: Show Connections\n");
+		printf(" -=Configuration: Verbose Console Messages Enabled.\n");
 	}
 	else if ( strcasecmp( "-log", argv[x] ) == 0 )
 	{
@@ -284,8 +284,6 @@ int main( int argc, char *argv[] )
 	}
 #endif
    }
-
-   Configuration.ShowConnections = 1;
 
    MessangerServer = new DFSMessaging::MessangerServer();
    NetworkDaemon = new DFSNetworking::NetworkDaemon();
@@ -347,7 +345,14 @@ int main( int argc, char *argv[] )
 	   {
 		   DFSMessaging::MessagePacket MessagePacket = ConsoleMessanger->AcceptMessage();
 		   
-		   std::cout << std::string(TimeAndDate()) << " [" << MessagePacket.Origin->Name << "]: " << MessagePacket.message << std::endl;
+		   if ( Configuration.Verbose ) // If we are in verbose mode, then we want to print out the message.
+				std::cout << std::string(TimeAndDate()) << " [" << MessagePacket.Origin->Name << "]: " << MessagePacket.message << std::endl;
+
+		   if ( Configuration.LogFile)
+		   {
+			   fprintf(Configuration.LogFile, "%s [%s]: %s\n", TimeAndDate(), MessagePacket.Origin->Name.c_str(), MessagePacket.message.c_str());
+			   fflush(Configuration.LogFile);
+		   }
 	   }
 	   Sleep(1000);
    }

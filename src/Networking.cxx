@@ -374,8 +374,7 @@ namespace DFSNetworking
 					if ((DataRecved = ConnectionList[ConnectionListIterator].RecvData(DataBuffer, sizeof(DataBuffer))) < 1)
 					{ // Disconnection or error. Terminate client.
 
-						if (Configuration.ShowConnections)
-							NetworkMessanger->SendMessage(MSG_TARGET_CONSOLE, std::string(ConnectionList[ConnectionListIterator].GetIP()) + " - Disconnected w/o complete data.");
+						NetworkMessanger->SendMessage(MSG_TARGET_CONSOLE, std::string(ConnectionList[ConnectionListIterator].GetIP()) + " - Disconnected w/o complete data.");
 
 						TerminateConnection(ConnectionListIterator);
 						ConnectionListIterator--;
@@ -451,20 +450,8 @@ namespace DFSNetworking
 							strcpy(ResourceType, ReturnMimeType(Resource));
 						}
 
-						if (Configuration.ShowConnections)
-						{
-							NetworkMessanger->SendMessage(MSG_TARGET_CONSOLE, std::string(ConnectionList[ConnectionListIterator].GetIP()) + " - [" + ConnectionList[ConnectionListIterator].Resource + "]");
-							NetworkMessanger->SendMessage(MSG_TARGET_CONSOLE, "Resolved resource to: -> " + std::string(Resource));							
-						}
-
-						if (Configuration.LogFile != nullptr)
-						{
-							fprintf(Configuration.LogFile, "%s - [%s] (%s)\n", ConnectionList[ConnectionListIterator].GetIP(),
-								ConnectionList[ConnectionListIterator].Resource.c_str(), Resource);
-
-							// Make sure it gets written to disk.
-							fflush(Configuration.LogFile);
-						}
+						NetworkMessanger->SendMessage(MSG_TARGET_CONSOLE, std::string(ConnectionList[ConnectionListIterator].GetIP()) + " - [" + ConnectionList[ConnectionListIterator].Resource + "]");
+						NetworkMessanger->SendMessage(MSG_TARGET_CONSOLE, "Resolved resource to: -> " + std::string(Resource));							
 
 						// If there is no sendbuffer, try to open the file, and if you can't, terminate the connection.
 						if (ConnectionList[ConnectionListIterator].SendBuffer.empty() &&
