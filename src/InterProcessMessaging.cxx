@@ -57,6 +57,8 @@ namespace DFSMessaging
     void Messanger::SendMessage(unsigned int aChannel, std::string aMessage)
 	{
 		MessagePacket newMessage;
+
+		newMessage.Pointer = nullptr;
 		newMessage.securityKey = securityKey;
 		newMessage.message = aMessage;
 		newMessage.Origin = this;
@@ -68,8 +70,23 @@ namespace DFSMessaging
 	void Messanger::SendMessage(Messanger* aMessanger, std::string aMessage)
 	{
 		MessagePacket newMessage;
+		
+		newMessage.Pointer = nullptr;
 		newMessage.securityKey = securityKey;
 		newMessage.message = aMessage;
+		newMessage.Origin = this;
+		newMessage.channel = 0;
+
+		aMessanger->RecieveMessage(newMessage);
+	}
+
+	void Messanger::SendPointer(Messanger* aMessanger, void* aTransferPointer)
+	{
+		MessagePacket newMessage;
+
+		newMessage.Pointer = aTransferPointer;
+		newMessage.securityKey = securityKey;
+		newMessage.message = "";
 		newMessage.Origin = this;
 		newMessage.channel = 0;
 

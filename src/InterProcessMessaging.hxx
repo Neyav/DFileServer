@@ -26,7 +26,9 @@ namespace DFSMessaging
 
 	struct MessagePacket
 	{
+		bool isPointer;
 		Messanger* Origin;
+		void* Pointer;
 		unsigned int securityKey;
 		unsigned int channel;
 		std::string message;
@@ -45,6 +47,7 @@ namespace DFSMessaging
 
 		void SendMessage(unsigned int aChannel, std::string aMessage);
 		void SendMessage(Messanger *aMessanger, std::string aMessage);
+		void SendPointer(Messanger* aMessanger, void* aTransferPointer);
 		void RecieveMessage(MessagePacket aMessage);
 		bool HasMessages(void);
 		MessagePacket AcceptMessage(void);
