@@ -30,16 +30,18 @@ namespace DFSNetworking
 
 	void NetworkDaemon::IncomingConnection(void)
 	{
-		ClientConnection IncomingClient;
+		ClientConnection *IncomingClient;
+
+		IncomingClient = new ClientConnection;
 
 		// Accept the connection and break if there was an error.
-		if (IncomingClient.AcceptConnection(NetworkSocket) == -1)
+		if (IncomingClient->AcceptConnection(NetworkSocket) == -1)
 			return;
 
 		// If we're in serverlockdown, close the connection right away.
 		if (ServerLockdown)
 		{
-			IncomingClient.DisconnectClient();
+			IncomingClient->DisconnectClient();
 
 			return;
 		}
@@ -50,16 +52,16 @@ namespace DFSNetworking
 		for (int x = 0; x < 2048; x++)
 			if (PollStruct[x].fd <= 0)
 			{
-				IncomingClient.PollIterator = x;
+				IncomingClient->PollIterator = x;
 				break;
 			}
 
-		if (IncomingClient.PollIterator > HighestPollIterator)
-			HighestPollIterator = IncomingClient.PollIterator;
+		if (IncomingClient->PollIterator > HighestPollIterator)
+			HighestPollIterator = IncomingClient->PollIterator;
 
 		// Add it to the Poll Structure so it gets polled.
-		PollStruct[IncomingClient.PollIterator].fd = IncomingClient.GetSocket();
-		PollStruct[IncomingClient.PollIterator].events = (POLLIN | POLLOUT);
+		PollStruct[IncomingClient->PollIterator].fd = IncomingClient->GetSocket();
+		PollStruct[IncomingClient->PollIterator].events = (POLLIN | POLLOUT);
 
 		// Add it to the linked list.
 		ConnectionList.push_back(IncomingClient);
@@ -70,6 +72,7 @@ namespace DFSNetworking
 	{
 		int NewHighestPollIterator = 0;
 		int OldPollIterator = 0;
+		ClientConnection* deleteClient = ConnectionList[aConnectionIndex];
 
 		ActiveConnections--;
 
@@ -84,17 +87,20 @@ namespace DFSNetworking
 
 		// Keep track of the old iterator. Previously I just used ArgClient->PollIterator in this function, but that doesn't
 		// appear safe to do after the ArgList->erase command. It's causing crashes on some platforms (i.e. FreeBSD 6.x )
-		OldPollIterator = ConnectionList[aConnectionIndex].PollIterator;
+		OldPollIterator = ConnectionList[aConnectionIndex]->PollIterator;
 
 		// Remove this client from the Poll structure so it doesn't get polled.
 		PollStruct[OldPollIterator].fd = 0;
 		PollStruct[OldPollIterator].events = 0;
 
 		// Close the socket and possibly do some other Misc shutdown stuff.
-		ConnectionList[aConnectionIndex].DisconnectClient();
+		ConnectionList[aConnectionIndex]->DisconnectClient();
 
 		// Remove the client from the linked list.
 		ConnectionList.erase(ConnectionList.begin() + aConnectionIndex);
+		
+		delete deleteClient; // Had to reference it seperately to avoid chicken/egg problem with remove from list versus
+							// delete or delete then remove from list.
 
 		// This Client had the highest descriptor..
 		if (OldPollIterator == HighestPollIterator)
@@ -104,12 +110,13 @@ namespace DFSNetworking
 				ConnectionListIterator < ConnectionList.size();
 				ConnectionListIterator++)
 			{
-				if (ConnectionList[ConnectionListIterator].PollIterator > NewHighestPollIterator)
-					NewHighestPollIterator = ConnectionList[ConnectionListIterator].PollIterator;
+				if (ConnectionList[ConnectionListIterator]->PollIterator > NewHighestPollIterator)
+					NewHighestPollIterator = ConnectionList[ConnectionListIterator]->PollIterator;
 			}
 
 			HighestPollIterator = NewHighestPollIterator;
 		}
+
 		return;
 	}
 
@@ -368,15 +375,15 @@ namespace DFSNetworking
 			for (int ConnectionListIterator = 0; ConnectionListIterator < ConnectionList.size(); ConnectionListIterator++)
 			{
 				// This socket has incoming data.
-				if (PollStruct[ConnectionList[ConnectionListIterator].PollIterator].revents & POLLIN)
+				if (PollStruct[ConnectionList[ConnectionListIterator]->PollIterator].revents & POLLIN)
 				{
 					char DataBuffer[500]; // 500 should be big enough.
 					size_t DataRecved;
 
-					if ((DataRecved = ConnectionList[ConnectionListIterator].RecvData(DataBuffer, sizeof(DataBuffer))) < 1)
+					if ((DataRecved = ConnectionList[ConnectionListIterator]->RecvData(DataBuffer, sizeof(DataBuffer))) < 1)
 					{ // Disconnection or error. Terminate client.
 
-						NetworkMessanger->SendMessage(MSG_TARGET_CONSOLE, std::string(ConnectionList[ConnectionListIterator].GetIP()) + " - Disconnected w/o complete data.");
+						NetworkMessanger->SendMessage(MSG_TARGET_CONSOLE, std::string(ConnectionList[ConnectionListIterator]->GetIP()) + " - Disconnected w/o complete data.");
 
 						TerminateConnection(ConnectionListIterator);
 						ConnectionListIterator--;
@@ -386,30 +393,30 @@ namespace DFSNetworking
 					}
 					else
 					{ // Incoming data.
-						ConnectionList[ConnectionListIterator].BrowserRequest.ImportHeader(std::string(DataBuffer));
+						ConnectionList[ConnectionListIterator]->BrowserRequest.ImportHeader(std::string(DataBuffer));
 
 						// Find what resource this person is after.
-						ConnectionList[ConnectionListIterator].Resource = ConnectionList[ConnectionListIterator].BrowserRequest.AccessPath;
+						ConnectionList[ConnectionListIterator]->Resource = ConnectionList[ConnectionListIterator]->BrowserRequest.AccessPath;
 					}
 
 				} // [/END] Incoming Data on socket.
 
-				if (ConnectionListIterator < ConnectionList.size() && !ConnectionList[ConnectionListIterator].Resource.empty() &&
-					PollStruct[ConnectionList[ConnectionListIterator].PollIterator].revents & POLLOUT)
+				if (ConnectionListIterator < ConnectionList.size() && !ConnectionList[ConnectionListIterator]->Resource.empty() &&
+					PollStruct[ConnectionList[ConnectionListIterator]->PollIterator].revents & POLLOUT)
 				{
 
-					if (!ConnectionList[ConnectionListIterator].FileStream
-						&& ConnectionList[ConnectionListIterator].SendBuffer.empty())
+					if (!ConnectionList[ConnectionListIterator]->FileStream
+						&& ConnectionList[ConnectionListIterator]->SendBuffer.empty())
 					{
 						char Resource[151];
 						char ResourceType[151];
 						size_t ResourceSize = 0;
 
 						// We need to locate this resource.
-						if (LocateResource(ConnectionList[ConnectionListIterator].Resource, &ConnectionList[ConnectionListIterator], Resource, ResourceType) == -1)
+						if (LocateResource(ConnectionList[ConnectionListIterator]->Resource, ConnectionList[ConnectionListIterator], Resource, ResourceType) == -1)
 						{ // Resource wasn't found.
-							Buffer404(&ConnectionList[ConnectionListIterator]);
-							ResourceSize = ConnectionList[ConnectionListIterator].BytesRemaining = ConnectionList[ConnectionListIterator].SendBuffer.size();
+							Buffer404(ConnectionList[ConnectionListIterator]);
+							ResourceSize = ConnectionList[ConnectionListIterator]->BytesRemaining = ConnectionList[ConnectionListIterator]->SendBuffer.size();
 							strcpy(Resource, "--404--");
 							strcpy(ResourceType, "text/html");
 
@@ -423,21 +430,21 @@ namespace DFSNetworking
 						{
 							char direrror;
 
-							direrror = GenerateFolderIndex(ConnectionList[ConnectionListIterator].Resource, Resource, ConnectionList[ConnectionListIterator].SendBuffer);
+							direrror = GenerateFolderIndex(ConnectionList[ConnectionListIterator]->Resource, Resource, ConnectionList[ConnectionListIterator]->SendBuffer);
 
 							if (direrror == -1)
 							{ // File/Folder doesn't exist
-								Buffer404(&ConnectionList[ConnectionListIterator]);
-								ResourceSize = ConnectionList[ConnectionListIterator].BytesRemaining = ConnectionList[ConnectionListIterator].SendBuffer.size();
+								Buffer404(ConnectionList[ConnectionListIterator]);
+								ResourceSize = ConnectionList[ConnectionListIterator]->BytesRemaining = ConnectionList[ConnectionListIterator]->SendBuffer.size();
 								strcpy(Resource, "--404--");
 								strcpy(ResourceType, "text/html");
 							}
 							else if (direrror)
 							{ // It generated an index for us.
 
-								ConnectionList[ConnectionListIterator].SendBufferIterator = 0;
+								ConnectionList[ConnectionListIterator]->SendBufferIterator = 0;
 
-								ResourceSize = ConnectionList[ConnectionListIterator].BytesRemaining = ConnectionList[ConnectionListIterator].SendBuffer.size();
+								ResourceSize = ConnectionList[ConnectionListIterator]->BytesRemaining = ConnectionList[ConnectionListIterator]->SendBuffer.size();
 
 								strcpy(ResourceType, "text/html");
 							}
@@ -452,12 +459,12 @@ namespace DFSNetworking
 							strcpy(ResourceType, ReturnMimeType(Resource));
 						}
 
-						NetworkMessanger->SendMessage(MSG_TARGET_CONSOLE, std::string(ConnectionList[ConnectionListIterator].GetIP()) + " - [" + ConnectionList[ConnectionListIterator].Resource + "]");
+						NetworkMessanger->SendMessage(MSG_TARGET_CONSOLE, std::string(ConnectionList[ConnectionListIterator]->GetIP()) + " - [" + ConnectionList[ConnectionListIterator]->Resource + "]");
 						NetworkMessanger->SendMessage(MSG_TARGET_CONSOLE, "Resolved resource to: -> " + std::string(Resource));							
 
 						// If there is no sendbuffer, try to open the file, and if you can't, terminate the connection.
-						if (ConnectionList[ConnectionListIterator].SendBuffer.empty() &&
-							((ResourceSize = ConnectionList[ConnectionListIterator].OpenFile(Resource)) == -1))
+						if (ConnectionList[ConnectionListIterator]->SendBuffer.empty() &&
+							((ResourceSize = ConnectionList[ConnectionListIterator]->OpenFile(Resource)) == -1))
 						{ // File couldn't be opened.
 							TerminateConnection(ConnectionListIterator);
 							ConnectionListIterator--;
@@ -470,36 +477,36 @@ namespace DFSNetworking
 							// Send the HTTP header.
 							char Buffer[500];
 
-							ConnectionList[ConnectionListIterator].ServerResponse.AccessType = "HTTP/1.1";
-							ConnectionList[ConnectionListIterator].ServerResponse.AccessPath = "200";
-							ConnectionList[ConnectionListIterator].ServerResponse.AccessProtocol = "OK";
+							ConnectionList[ConnectionListIterator]->ServerResponse.AccessType = "HTTP/1.1";
+							ConnectionList[ConnectionListIterator]->ServerResponse.AccessPath = "200";
+							ConnectionList[ConnectionListIterator]->ServerResponse.AccessProtocol = "OK";
 
 							if (!Configuration.BasicCredentials.empty()) // Authentication Required
 							{
-								if (ConnectionList[ConnectionListIterator].BrowserRequest.GetValue("Authorization").empty())
+								if (ConnectionList[ConnectionListIterator]->BrowserRequest.GetValue("Authorization").empty())
 								{ // Authentication wasn't attempted, send the request.
-									ConnectionList[ConnectionListIterator].ServerResponse.SetValue("WWW-Authenticate",
+									ConnectionList[ConnectionListIterator]->ServerResponse.SetValue("WWW-Authenticate",
 										"Basic realm=\"DFileServer\"");
-									ConnectionList[ConnectionListIterator].ServerResponse.AccessPath = "401"; // Authorization Required
+									ConnectionList[ConnectionListIterator]->ServerResponse.AccessPath = "401"; // Authorization Required
 								}
 								else
 								{ // Try to verify the authentication.
 									Base64 Base64Encoding;
 									std::string Base64Authorization;
 
-									Base64Authorization = ConnectionList[ConnectionListIterator].BrowserRequest.GetValue("Authorization");
+									Base64Authorization = ConnectionList[ConnectionListIterator]->BrowserRequest.GetValue("Authorization");
 
 									Base64Authorization.erase(0, 6); // Remove the beginning "Basic "
 
 									if (Base64Encoding.decode(Base64Authorization) != Configuration.BasicCredentials)
 									{
-										ConnectionList[ConnectionListIterator].ServerResponse.AccessPath = "401"; // Authorization Required
+										ConnectionList[ConnectionListIterator]->ServerResponse.AccessPath = "401"; // Authorization Required
 
-										ConnectionList[ConnectionListIterator].CloseFile(); // Make sure we close the resource.
+										ConnectionList[ConnectionListIterator]->CloseFile(); // Make sure we close the resource.
 
 										// Prepare the 401...
-										Buffer401(&ConnectionList[ConnectionListIterator]);
-										ResourceSize = ConnectionList[ConnectionListIterator].BytesRemaining = ConnectionList[ConnectionListIterator].SendBuffer.size();
+										Buffer401(ConnectionList[ConnectionListIterator]);
+										ResourceSize = ConnectionList[ConnectionListIterator]->BytesRemaining = ConnectionList[ConnectionListIterator]->SendBuffer.size();
 										strcpy(Resource, "--401--");
 										strcpy(ResourceType, "text/html");
 									}
@@ -509,16 +516,16 @@ namespace DFSNetworking
 
 							sprintf(Buffer, "DFileServer/%i.%i.%i", Version::MAJORVERSION, Version::MINORVERSION, Version::PATCHVERSION);
 
-							ConnectionList[ConnectionListIterator].ServerResponse.SetValue("Server", std::string(Buffer));
-							ConnectionList[ConnectionListIterator].ServerResponse.SetValue("Connection", "close");
+							ConnectionList[ConnectionListIterator]->ServerResponse.SetValue("Server", std::string(Buffer));
+							ConnectionList[ConnectionListIterator]->ServerResponse.SetValue("Connection", "close");
 
 							sprintf(Buffer, "%i", (int)ResourceSize);
 
-							ConnectionList[ConnectionListIterator].ServerResponse.SetValue("Content-Length", std::string(Buffer));
-							ConnectionList[ConnectionListIterator].ServerResponse.SetValue("Content-Type", std::string(ResourceType));
+							ConnectionList[ConnectionListIterator]->ServerResponse.SetValue("Content-Length", std::string(Buffer));
+							ConnectionList[ConnectionListIterator]->ServerResponse.SetValue("Content-Type", std::string(ResourceType));
 
-							ConnectionList[ConnectionListIterator].SendData(
-								(char*)ConnectionList[ConnectionListIterator].ServerResponse.ExportHeader().c_str(), 0);
+							ConnectionList[ConnectionListIterator]->SendData(
+								(char*)ConnectionList[ConnectionListIterator]->ServerResponse.ExportHeader().c_str(), 0);
 						}
 					}
 					else
@@ -534,52 +541,52 @@ namespace DFSNetworking
 						if (Configuration.MaxBandwidth)
 						{
 							// -- Bandwidth Control --
-							if (ConnectionList[ConnectionListIterator].LastBandReset != time(NULL))
+							if (ConnectionList[ConnectionListIterator]->LastBandReset != time(NULL))
 							{
-								ConnectionList[ConnectionListIterator].BandwidthLeft = Configuration.MaxBandwidth / ActiveConnections;
+								ConnectionList[ConnectionListIterator]->BandwidthLeft = Configuration.MaxBandwidth / ActiveConnections;
 
-								ConnectionList[ConnectionListIterator].LastBandReset = time(NULL);
+								ConnectionList[ConnectionListIterator]->LastBandReset = time(NULL);
 							}
 
-							if (BytesToRead > ConnectionList[ConnectionListIterator].BandwidthLeft)
-								BytesToRead = ConnectionList[ConnectionListIterator].BandwidthLeft;
+							if (BytesToRead > ConnectionList[ConnectionListIterator]->BandwidthLeft)
+								BytesToRead = ConnectionList[ConnectionListIterator]->BandwidthLeft;
 
-							ConnectionList[ConnectionListIterator].BandwidthLeft -= BytesToRead;
+							ConnectionList[ConnectionListIterator]->BandwidthLeft -= BytesToRead;
 							// / -- Bandwidth Control --
 						}
 
-						if (BytesToRead > ConnectionList[ConnectionListIterator].BytesRemaining)
-							BytesToRead = ConnectionList[ConnectionListIterator].BytesRemaining;
+						if (BytesToRead > ConnectionList[ConnectionListIterator]->BytesRemaining)
+							BytesToRead = ConnectionList[ConnectionListIterator]->BytesRemaining;
 
-						if (ConnectionList[ConnectionListIterator].FileStream)
+						if (ConnectionList[ConnectionListIterator]->FileStream)
 						{ // Read from a file
-							ConnectionList[ConnectionListIterator].FileStream->read(Buffer, BytesToRead);
+							ConnectionList[ConnectionListIterator]->FileStream->read(Buffer, BytesToRead);
 						}
 						else
 						{ // Send from the buffer
 
-							strcpy(Buffer, ConnectionList[ConnectionListIterator].SendBuffer.substr(
-								ConnectionList[ConnectionListIterator].SendBufferIterator, BytesToRead).c_str());
+							strcpy(Buffer, ConnectionList[ConnectionListIterator]->SendBuffer.substr(
+								ConnectionList[ConnectionListIterator]->SendBufferIterator, BytesToRead).c_str());
 
 							// Increment Iterator
-							ConnectionList[ConnectionListIterator].SendBufferIterator += BytesToRead;
+							ConnectionList[ConnectionListIterator]->SendBufferIterator += BytesToRead;
 						}
 
-						BytesRead = ConnectionList[ConnectionListIterator].SendData(Buffer, BytesToRead);
+						BytesRead = ConnectionList[ConnectionListIterator]->SendData(Buffer, BytesToRead);
 
-						ConnectionList[ConnectionListIterator].BytesRemaining -= BytesRead;
+						ConnectionList[ConnectionListIterator]->BytesRemaining -= BytesRead;
 
 						// It hasn't sent all the bytes we've read.
 						if (BytesRead != BytesToRead)
 						{
-							if (ConnectionList[ConnectionListIterator].FileStream)
+							if (ConnectionList[ConnectionListIterator]->FileStream)
 							{
 								// Relocate the file pointer to match where we are.
 
 								int LocationOffset = BytesToRead - BytesRead;
-								std::ifstream::pos_type CurrentPosition = ConnectionList[ConnectionListIterator].FileStream->tellg();
+								std::ifstream::pos_type CurrentPosition = ConnectionList[ConnectionListIterator]->FileStream->tellg();
 
-								ConnectionList[ConnectionListIterator].FileStream->seekg((CurrentPosition - (std::ifstream::pos_type)LocationOffset));
+								ConnectionList[ConnectionListIterator]->FileStream->seekg((CurrentPosition - (std::ifstream::pos_type)LocationOffset));
 							}
 							else
 							{
@@ -587,12 +594,12 @@ namespace DFSNetworking
 
 								int LocationOffset = BytesToRead - BytesRead;
 
-								ConnectionList[ConnectionListIterator].SendBufferIterator -= LocationOffset;
+								ConnectionList[ConnectionListIterator]->SendBufferIterator -= LocationOffset;
 							}
 						}
 
 						// End of the file?
-						if (ConnectionList[ConnectionListIterator].BytesRemaining == 0)
+						if (ConnectionList[ConnectionListIterator]->BytesRemaining == 0)
 						{
 							TerminateConnection(ConnectionListIterator);
 							ConnectionListIterator--;
@@ -606,7 +613,7 @@ namespace DFSNetworking
 				} // [/END] Socket can accept data.
 
 				// Connection was idle for too long, remove the jerk.
-				if (ConnectionList[ConnectionListIterator].SecondsIdle() > 15)
+				if (ConnectionList[ConnectionListIterator]->SecondsIdle() > 15)
 				{
 					TerminateConnection(ConnectionListIterator);
 					ConnectionListIterator--;
