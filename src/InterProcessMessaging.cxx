@@ -13,6 +13,7 @@ namespace DFSMessaging
 	std::mutex MessangerQueueMutex;
 	std::mutex MessangerchannelMutex;
 	std::mutex MessageServerQueueMutex;
+	std::mutex MessageServerMutex;
 
 	void Messanger::RegisterOnChannel(unsigned int aChannel)
 	{
@@ -62,6 +63,7 @@ namespace DFSMessaging
 		newMessage.securityKey = securityKey;
 		newMessage.message = aMessage;
 		newMessage.Origin = this;
+		newMessage.OriginName = this->Name;
 		newMessage.channel = aChannel;
 
 		parentServer->DistributeMessage(newMessage);
@@ -75,8 +77,14 @@ namespace DFSMessaging
 		newMessage.securityKey = securityKey;
 		newMessage.message = aMessage;
 		newMessage.Origin = this;
+		newMessage.OriginName = this->Name;
 		newMessage.channel = 0;
 
+		// TODO: Might need a mutex here. Probably need a mutex here. 
+		if (parentServer->ValidateMessanger(aMessanger) == false)
+		{
+			return; // The target messanger is not valid.
+		}
 		aMessanger->RecieveMessage(newMessage);
 	}
 
@@ -154,6 +162,21 @@ namespace DFSMessaging
 		queueCondition.notify_all();
 	}
 
+	bool MessangerServer::ValidateMessanger(Messanger *aMessanger)
+	{
+		MessageServerQueueMutex.lock();
+		for (auto& messanger : Messangers)
+		{
+			if (messanger == aMessanger)
+			{
+				MessageServerQueueMutex.unlock();
+				return true;
+			}
+		}
+		MessageServerQueueMutex.unlock();
+		return false;
+	}
+
 	void MessangerServer::MessangerServerRuntime(void)
 	{
 		std::mutex queueMutex;
@@ -181,6 +204,7 @@ namespace DFSMessaging
 				}
 				else
 				{ // Send to specific channel
+					MessageServerQueueMutex.lock();
 					for (auto& messanger : Messangers)
 					{
 						if (messanger == newMessage.Origin)
@@ -192,6 +216,7 @@ namespace DFSMessaging
 							messanger->RecieveMessage(newMessage);
 						}
 					}
+					MessageServerQueueMutex.unlock();
 				}
 				MessageServerQueueMutex.lock();
 			}
@@ -206,28 +231,28 @@ namespace DFSMessaging
 		
 		newMessanger = new Messanger(securityKey, this);
 
-		MessageServerQueueMutex.lock();
+		MessageServerMutex.lock();
 		Messangers.push_back(newMessanger);
-		MessageServerQueueMutex.unlock();
+		MessageServerMutex.unlock();
 
 		return Messangers.back();
 	}
 
 	void MessangerServer::DeactivateActiveMessanger(Messanger* aMessanger)
 	{
-		MessageServerQueueMutex.lock();
+		MessageServerMutex.lock();
 		for (int i = 0; i < Messangers.size(); i++)
 		{
 			if (Messangers[i] == aMessanger)
 			{
-				// This function is called in the destructor of the Messanger class, so we don't need to delete it here.
-				// Just keep in mind that deactivating it doesn't delete it.
+				// The destructor of a Messanger will call this to ensure it is removed from the server.
+				// Thus it is unwise to delete it here. This should therefore NEVER be called elsewhere.
 				//delete Messangers[i];
 				Messangers.erase(Messangers.begin() + i);
 				break;
 			}
 		}
-		MessageServerQueueMutex.unlock();
+		MessageServerMutex.unlock();
 	}
 
 	MessangerServer::MessangerServer()
@@ -254,13 +279,13 @@ namespace DFSMessaging
 		// Start by destroying all Messangers
 		std::cout << " -=Messanging Service shutting down..." << std::endl;
 
-		MessageServerQueueMutex.lock();
+		MessageServerMutex.lock();
 		while (Messangers.size() > 0)
 		{
 			delete Messangers.back();
 			Messangers.pop_back();
 		}
-		MessageServerQueueMutex.unlock();
+		MessageServerMutex.unlock();
 
 		std::cout << " -=Messanging Service shutdown complete." << std::endl;
 	}

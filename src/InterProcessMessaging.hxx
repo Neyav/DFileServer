@@ -28,6 +28,7 @@ namespace DFSMessaging
 	{
 		bool isPointer;
 		Messanger* Origin;
+		std::string OriginName; // We need this here because sometimes the origin messanger is deleted before the message is processed.
 		void* Pointer;
 		unsigned int securityKey;
 		unsigned int channel;
@@ -71,6 +72,8 @@ namespace DFSMessaging
 		void MessangerServerRuntime(void);
 	public:
 		void DistributeMessage(MessagePacket aMessage);
+
+		bool ValidateMessanger(Messanger *aMessanger);
 
 		Messanger* ReceiveActiveMessanger(void);
 		void DeactivateActiveMessanger(Messanger* aMessanger);

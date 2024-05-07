@@ -346,11 +346,11 @@ int main( int argc, char *argv[] )
 		   DFSMessaging::MessagePacket MessagePacket = ConsoleMessanger->AcceptMessage();
 		   
 		   if ( Configuration.Verbose ) // If we are in verbose mode, then we want to print out the message.
-				std::cout << std::string(TimeAndDate()) << " [" << MessagePacket.Origin->Name << "]: " << MessagePacket.message << std::endl;
+				std::cout << std::string(TimeAndDate()) << " [" << MessagePacket.OriginName << "]: " << MessagePacket.message << std::endl;
 
 		   if ( Configuration.LogFile)
 		   {
-			   fprintf(Configuration.LogFile, "%s [%s]: %s\n", TimeAndDate(), MessagePacket.Origin->Name.c_str(), MessagePacket.message.c_str());
+			   fprintf(Configuration.LogFile, "%s [%s]: %s\n", TimeAndDate(), MessagePacket.OriginName.c_str(), MessagePacket.message.c_str());
 			   fflush(Configuration.LogFile);
 		   }
 	   }

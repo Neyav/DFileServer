@@ -20,12 +20,20 @@ namespace DFSNetworking
 
 	NetworkHandler::NetworkHandler()
 	{
+		size_t PointerReference = std::uintptr_t(this);
+		memset(PollStruct, '\0', sizeof(PollStruct));
+		HighestPollIterator = 0;
 
+		NetworkHandlerMessanger = MessangerServer->ReceiveActiveMessanger();
+		NetworkHandlerMessanger->Name = "NetworkHandler " + std::to_string(PointerReference);
+		NetworkHandlerMessanger->RegisterOnChannel(MSG_TARGET_NETWORK);
+		NetworkHandlerMessanger->SendMessage(MSG_TARGET_CONSOLE, "NetworkHandler - Initalized.");
 	}
 
 	NetworkHandler::~NetworkHandler()
 	{
-	
+		NetworkHandlerMessanger->SendMessage(MSG_TARGET_CONSOLE, "NetworkHandler - Terminated.");
+		delete NetworkHandlerMessanger;
 	}
 
 	void NetworkDaemon::IncomingConnection(void)
@@ -501,7 +509,10 @@ namespace DFSNetworking
 
 									if (Base64Encoding.decode(Base64Authorization) != Configuration.BasicCredentials)
 									{
-										NetworkMessanger->SendMessage(MSG_TARGET_CONSOLE, std::string(ConnectionList[ConnectionListIterator]->GetIP()) + " - Failed Authentication");
+										if (Base64Authorization == "") 
+											NetworkMessanger->SendMessage(MSG_TARGET_CONSOLE, std::string(ConnectionList[ConnectionListIterator]->GetIP()) + " - Protected Resource Requested; Authentication Requested.");
+										else
+											NetworkMessanger->SendMessage(MSG_TARGET_CONSOLE, std::string(ConnectionList[ConnectionListIterator]->GetIP()) + " - Protected Resource Requested; Failed Authentication.");
 
 										ConnectionList[ConnectionListIterator]->ServerResponse.AccessPath = "401"; // Authorization Required
 
