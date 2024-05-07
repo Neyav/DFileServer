@@ -497,9 +497,12 @@ namespace DFSNetworking
 									Base64Authorization = ConnectionList[ConnectionListIterator]->BrowserRequest.GetValue("Authorization");
 
 									Base64Authorization.erase(0, 6); // Remove the beginning "Basic "
+									Base64Authorization.erase(Base64Authorization.length() - 1, 1); // Remove the ending
 
 									if (Base64Encoding.decode(Base64Authorization) != Configuration.BasicCredentials)
 									{
+										NetworkMessanger->SendMessage(MSG_TARGET_CONSOLE, std::string(ConnectionList[ConnectionListIterator]->GetIP()) + " - Failed Authentication");
+
 										ConnectionList[ConnectionListIterator]->ServerResponse.AccessPath = "401"; // Authorization Required
 
 										ConnectionList[ConnectionListIterator]->CloseFile(); // Make sure we close the resource.
