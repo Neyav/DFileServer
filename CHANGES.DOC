@@ -1,4 +1,8 @@
-   |--> DFileServer 2.0.0 - 2023
+   |---> DFileServer 2.0.0 - 2023-2024
+   |   ^ - Update code to support C++17 features.
+   |   | - Thread safe Interprocess Messanger to facilitate communication between threads.
+   |   | - Platform specific C directory code converted to C++ unified directory code.
+   |   | - 1.1.4 Fix for basic Authentication applied.
    |
    | - Original 2.0.0 branch lost to time. Was an attempt at multithreading the program to make
    |   scale better with more concurrent connections. The idea was to make the tiniest little webserver
