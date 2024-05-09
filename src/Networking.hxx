@@ -25,8 +25,7 @@ namespace DFSNetworking
 	class NetworkHandler
 	{
 	private:
-		int HighestPollIterator;
-		struct pollfd PollStruct[512];
+		std::vector<struct pollfd> PollStruct;
 		std::vector<ClientConnection*> ConnectionList;
 		DFSMessaging::Messanger* NetworkHandlerMessanger;
 
@@ -42,9 +41,8 @@ namespace DFSNetworking
 	private:
 		unsigned int listenPort;
 		unsigned int backLog;
-		int HighestPollIterator;
 		
-		struct pollfd PollStruct[10];
+		std::vector<struct pollfd> PollStruct;
 		std::vector<ClientConnection*> ConnectionList;
 		DFSMessaging::Messanger* NetworkMessanger;
 

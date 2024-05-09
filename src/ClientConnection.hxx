@@ -19,11 +19,11 @@ class ClientConnection
 		struct sockaddr_in	SocketStruct;
 		time_t				LastAction;
 		DFSMessaging::Messanger* Messanger;
-	public:
+	public:	
+
 		std::ifstream		*FileStream;
 		std::string			Resource;
 		size_t				BytesRemaining;
-		int					PollIterator;
 
 		int					BandwidthLeft;
 		time_t				LastBandReset;

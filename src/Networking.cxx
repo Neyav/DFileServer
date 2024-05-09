@@ -21,8 +21,6 @@ namespace DFSNetworking
 	NetworkHandler::NetworkHandler()
 	{
 		size_t PointerReference = std::uintptr_t(this);
-		memset(PollStruct, '\0', sizeof(PollStruct));
-		HighestPollIterator = 0;
 
 		NetworkHandlerMessanger = MessangerServer->ReceiveActiveMessanger();
 		NetworkHandlerMessanger->Name = "NetworkHandler " + std::to_string(PointerReference);
@@ -59,31 +57,25 @@ namespace DFSNetworking
 
 		ActiveConnections++;
 
-		// Find the next free slot.
-		for (int x = 0; x < 2048; x++)
-			if (PollStruct[x].fd <= 0)
-			{
-				IncomingClient->PollIterator = x;
-				break;
-			}
+		// Get the next free slot in the Poll Structure.
 
-		if (IncomingClient->PollIterator > HighestPollIterator)
-			HighestPollIterator = IncomingClient->PollIterator;
+		struct pollfd PollFDTemp;
+		memset (&PollFDTemp, 0, sizeof(struct pollfd));
 
 		// Add it to the Poll Structure so it gets polled.
-		PollStruct[IncomingClient->PollIterator].fd = IncomingClient->GetSocket();
-		PollStruct[IncomingClient->PollIterator].events = (POLLIN | POLLOUT);
+		PollFDTemp.fd = IncomingClient->GetSocket();
+		PollFDTemp.events = (POLLIN | POLLOUT);
 
-		// Add it to the linked list.
+		// Add the relevant information to the relevant vectors.
 		ConnectionList.push_back(IncomingClient);
+		PollStruct.push_back(PollFDTemp);
 
 	}
 
 	void NetworkDaemon::TerminateConnection(int aConnectionIndex)
 	{
 		int NewHighestPollIterator = 0;
-		int OldPollIterator = 0;
-		ClientConnection* deleteClient = ConnectionList[aConnectionIndex];
+		ClientConnection* deleteClient = ConnectionList[aConnectionIndex]; // TODO: This may not be necessary now...
 
 		ActiveConnections--;
 
@@ -96,34 +88,21 @@ namespace DFSNetworking
 				printf("Client Disconnected; %i remaining...\n", ActiveConnections);
 		}
 
-		// Keep track of the old iterator. Previously I just used ArgClient->PollIterator in this function, but that doesn't
-		// appear safe to do after the ArgList->erase command. It's causing crashes on some platforms (i.e. FreeBSD 6.x )
-		OldPollIterator = ConnectionList[aConnectionIndex]->PollIterator;
-
-		// Remove this client from the Poll structure so it doesn't get polled.
-		PollStruct[OldPollIterator].fd = 0;
-		PollStruct[OldPollIterator].events = 0;
+		// Iterate through the poll structure to find one that matches our clients socket, and remove it.
+		for (int PollStructIterator = 0; PollStructIterator < PollStruct.size(); PollStructIterator++)
+		{
+			if (PollStruct[PollStructIterator].fd == deleteClient->GetSocket())
+			{
+				PollStruct.erase(PollStruct.begin() + PollStructIterator);
+				break;
+			}
+		}
 
 		// Remove the client from the linked list.
 		ConnectionList.erase(ConnectionList.begin() + aConnectionIndex);
 		
 		delete deleteClient; // Had to reference it seperately to avoid chicken/egg problem with remove from list versus
 							// delete or delete then remove from list.
-
-		// This Client had the highest descriptor..
-		if (OldPollIterator == HighestPollIterator)
-		{
-			// Traverse through the active connections to find the new highest file descriptor
-			for (int ConnectionListIterator = 0;
-				ConnectionListIterator < ConnectionList.size();
-				ConnectionListIterator++)
-			{
-				if (ConnectionList[ConnectionListIterator]->PollIterator > NewHighestPollIterator)
-					NewHighestPollIterator = ConnectionList[ConnectionListIterator]->PollIterator;
-			}
-
-			HighestPollIterator = NewHighestPollIterator;
-		}
 
 		return;
 	}
@@ -316,8 +295,6 @@ namespace DFSNetworking
 #endif
 		std::cout << " -=Initalizing Network Daemon..." << std::endl;
 
-		memset(PollStruct, '\0', sizeof(PollStruct));
-
 		// Grab the master socket.
 		if ((NetworkSocket = socket(AF_INET, SOCK_STREAM, 0)) == -1)
 		{
@@ -355,7 +332,6 @@ namespace DFSNetworking
 
 		PollStruct[0].fd = NetworkSocket;
 		PollStruct[0].events = POLLIN;
-		HighestPollIterator = 0;
 		listenPort = aPort;
 
 		// We were successful, return the socket.
@@ -370,8 +346,9 @@ namespace DFSNetworking
 
 		while (1)
 		{
-			poll(PollStruct, HighestPollIterator + 1, INFTIM);
-
+			// As of C++11, vectors are guaranteed to be contiguous in memory. So this new hackery works.
+			struct pollfd *CPollStruct = &PollStruct[0];
+			poll(CPollStruct, PollStruct.size(), INFTIM);
 
 			// Do we have an incoming connection?
 			if ((PollStruct[0].revents & POLLIN) && (ActiveConnections != Configuration.MaxConnections || !Configuration.MaxConnections))
@@ -383,8 +360,9 @@ namespace DFSNetworking
 			// Go through the list looking for connections that have incoming data.
 			for (int ConnectionListIterator = 0; ConnectionListIterator < ConnectionList.size(); ConnectionListIterator++)
 			{
-				// This socket has incoming data.
-				if (PollStruct[ConnectionList[ConnectionListIterator]->PollIterator].revents & POLLIN)
+				// This socket has incoming data. Here I'm counting on PollStruct and ConnectionList being in the same
+				// order as each other, as they only EVER get deleted together, and added together.
+				if (PollStruct[ConnectionListIterator + 1].revents & POLLIN)
 				{
 					char DataBuffer[500]; // 500 should be big enough.
 					size_t DataRecved;
@@ -411,7 +389,7 @@ namespace DFSNetworking
 				} // [/END] Incoming Data on socket.
 
 				if (ConnectionListIterator < ConnectionList.size() && !ConnectionList[ConnectionListIterator]->Resource.empty() &&
-					PollStruct[ConnectionList[ConnectionListIterator]->PollIterator].revents & POLLOUT)
+					PollStruct[ConnectionListIterator + 1].revents & POLLOUT)
 				{
 
 					if (!ConnectionList[ConnectionListIterator]->FileStream
@@ -671,8 +649,11 @@ namespace DFSNetworking
 	{
 		listenPort = 0;
 		backLog = 0;
-		HighestPollIterator = 0;
 		NetworkSocket = 0;
+		struct pollfd PollFDTemp;
+		memset(&PollFDTemp, 0, sizeof(struct pollfd));
+
+		PollStruct.push_back(PollFDTemp); // Add the master socket to the poll structure.
 
 		if (MessangerServer)
 		{

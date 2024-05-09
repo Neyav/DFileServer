@@ -60,8 +60,6 @@ ClientConnection::ClientConnection ()
 
 	NetworkSocket = -1;
 
-	PollIterator = -1;
-
 	LastBandReset = 0;
 
 	Resource = "";
