@@ -74,20 +74,8 @@ ClientConnection::ClientConnection ()
 
 ClientConnection::~ClientConnection()
 {
-	if (FileStream)
-	{
-		FileStream->close();
-		delete FileStream;
-	}
-
-	if (NetworkSocket)
-	{
-#ifdef _WINDOWS
-		closesocket(NetworkSocket);
-#else
-		close(NetworkSocket);
-#endif
-	}
+	this->CloseFile();
+	this->DisconnectClient();
 
 	if (Messanger)
 		MessangerServer->DeactivateActiveMessanger(Messanger);

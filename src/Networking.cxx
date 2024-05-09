@@ -44,12 +44,15 @@ namespace DFSNetworking
 
 		// Accept the connection and break if there was an error.
 		if (IncomingClient->AcceptConnection(NetworkSocket) == -1)
+		{
+			delete IncomingClient;
 			return;
+		}
 
 		// If we're in serverlockdown, close the connection right away.
 		if (ServerLockdown)
 		{
-			IncomingClient->DisconnectClient();
+			delete IncomingClient;
 
 			return;
 		}
@@ -100,9 +103,6 @@ namespace DFSNetworking
 		// Remove this client from the Poll structure so it doesn't get polled.
 		PollStruct[OldPollIterator].fd = 0;
 		PollStruct[OldPollIterator].events = 0;
-
-		// Close the socket and possibly do some other Misc shutdown stuff.
-		ConnectionList[aConnectionIndex]->DisconnectClient();
 
 		// Remove the client from the linked list.
 		ConnectionList.erase(ConnectionList.begin() + aConnectionIndex);
@@ -371,6 +371,7 @@ namespace DFSNetworking
 		while (1)
 		{
 			poll(PollStruct, HighestPollIterator + 1, INFTIM);
+
 
 			// Do we have an incoming connection?
 			if ((PollStruct[0].revents & POLLIN) && (ActiveConnections != Configuration.MaxConnections || !Configuration.MaxConnections))
