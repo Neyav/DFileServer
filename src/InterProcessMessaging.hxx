@@ -12,7 +12,6 @@
 
 #define MESSAGE_DEBUG
 
-#define MSG_TARGET_USER		0	// Message is for a particular messanger only.
 #define MSG_TARGET_ALL		1
 #define MSG_TARGET_CONSOLE  2
 #define MSG_TARGET_NETWORK  3

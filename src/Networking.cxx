@@ -57,12 +57,9 @@ namespace DFSNetworking
 
 		ActiveConnections++;
 
-		// Get the next free slot in the Poll Structure.
-
+		// Create a pollfd struct for the new client.
 		struct pollfd PollFDTemp;
 		memset (&PollFDTemp, 0, sizeof(struct pollfd));
-
-		// Add it to the Poll Structure so it gets polled.
 		PollFDTemp.fd = IncomingClient->GetSocket();
 		PollFDTemp.events = (POLLIN | POLLOUT);
 
@@ -361,7 +358,7 @@ namespace DFSNetworking
 			for (int ConnectionListIterator = 0; ConnectionListIterator < ConnectionList.size(); ConnectionListIterator++)
 			{
 				// This socket has incoming data. Here I'm counting on PollStruct and ConnectionList being in the same
-				// order as each other, as they only EVER get deleted together, and added together.
+				// order as each other, as they only EVER get deleted together, and added together. 
 				if (PollStruct[ConnectionListIterator + 1].revents & POLLIN)
 				{
 					char DataBuffer[500]; // 500 should be big enough.

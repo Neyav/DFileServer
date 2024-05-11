@@ -188,7 +188,6 @@ namespace DFSMessaging
 		{
 			// Do stuff here.
 			queueCondition.wait(queueLock);
-			std::cout << " -=Messanger Server Runtime woke up." << std::endl;
 
 			// Distribute any messages in the queue.
 			MessageServerQueueMutex.lock();
