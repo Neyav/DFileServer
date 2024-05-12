@@ -46,6 +46,8 @@ namespace DFSMessaging
 			}
 		}
 		MessangerchannelMutex.unlock();
+
+		return false;
 	}
 
 	void Messanger::unRegisterAllChannels(void)
