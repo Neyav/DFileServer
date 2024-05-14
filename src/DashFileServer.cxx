@@ -169,6 +169,12 @@ char *TimeAndDate ( void )
 	return Output;
 }
 
+inline void DisplayBannerString(std::string ArgBannerString)
+{
+	int ConsoleBlankSpace = Configuration.Console.Width() - ArgBannerString.size() - 4;
+	std::cout << ArgBannerString << std::string(ConsoleBlankSpace, ' ');
+}
+
 int main( int argc, char *argv[] )
 {
 
@@ -188,11 +194,31 @@ int main( int argc, char *argv[] )
    signal( SIGTERM, InitateServerShutdown );
    signal( SIGINT, InitateServerShutdown );
 
-   // First we want to clear the screen.
-   std::cout << "\u001B[2J\u001B[1;1H";
-   std::cout << "\u001B[41m\u001B[30mDFileServer Version " << Version::MAJORVERSION << "." << Version::MINORVERSION << "." << Version::PATCHVERSION << " --> {" << Version::VERSIONTITLE << "}                                     **-]\u001B[0m" << std::endl;
-   std::cout << "\u001B[41m\u001B[30m                    (c) 2005, 2018, 2023-2024 Christopher Laverdure                            **-]\u001B[0m" << std::endl;
-   std::cout << "\u001B[41m\u001B[30m                    All Rights Reserved.                                                       **-]\u001B[0m" << std::endl;
+   // FileServer Name/Version Banner
+   {
+	   std::string VersionBanner;
+	   std::string CopyrightBanner;
+	   std::string CopyrightBanner2;
+
+	   VersionBanner = "DFileServer Version " + std::to_string(Version::MAJORVERSION) + "." + std::to_string(Version::MINORVERSION) + "." + std::to_string(Version::PATCHVERSION) + " --> {" + Version::VERSIONTITLE + "}";
+	   CopyrightBanner = "                    (c) 2005, 2018, 2023-2024 Christopher Laverdure";
+	   CopyrightBanner2 = "                    All Rights Reserved.";
+
+	   // First we want to clear the screen.
+	   std::cout << "\u001B[2J\u001B[1;1H";
+	   std::cout << "\u001B[41m\u001B[30m";
+	   DisplayBannerString(VersionBanner);
+	   std::cout << "**-]\u001B[0m" << std::endl;
+
+	   std::cout << "\u001B[41m\u001B[30m";
+	   DisplayBannerString(CopyrightBanner);
+	   std::cout << "**-]\u001B[0m" << std::endl;
+
+	   std::cout << "\u001B[41m\u001B[30m";
+	   DisplayBannerString(CopyrightBanner2);
+	   std::cout << "**-]\u001B[0m" << std::endl;
+   }
+
    std::cout << "In memorial for all the code that was lost that one day when Sylvia wrote her last bit." << std::endl;
    std::cout << "Initalizing..." << std::endl;
    std::cout << " -=Parameters..." << std::endl;

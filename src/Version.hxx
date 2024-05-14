@@ -53,7 +53,7 @@ private:
 		struct winsize w;
 
 public:
-int Width()
+	int Width()
 	{
 		ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
 		return w.ws_col;
