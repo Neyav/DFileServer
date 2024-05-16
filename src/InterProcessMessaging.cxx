@@ -201,7 +201,16 @@ namespace DFSMessaging
 
 				if (newMessage.channel == MSG_TARGET_ALL)
 				{ // Send to all clients
-					// TODO:
+					MessageServerQueueMutex.lock();
+					for (auto& messanger : Messangers)
+					{
+						if (messanger == newMessage.Origin)
+						{
+							continue;
+						}
+						messanger->RecieveMessage(newMessage);
+					}
+					MessageServerQueueMutex.unlock();					
 				}
 				else
 				{ // Send to specific channel
