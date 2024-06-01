@@ -203,6 +203,16 @@ static std::string InsertIndexTable ( std::string *ArgVirtualPath, std::string A
 	// Top Table row.
 	Buffer += "<table id=\"DFS_table\">\n<tr class=\"DFS_headertablerow\"><th class=\"DFS_entrytype\">Entry Type</th><th class=\"DFS_entryname\">Entry Name</th><th class=\"DFS_entrysize\">Entry Size</th></tr>\n";
          
+	{
+		// Ensure we have a .. entry.
+		DirectoryEntryStruct DirectoryEntry;
+		DirectoryEntry.Name = "..";
+		DirectoryEntry.CompletePath = FullPath(*ArgVirtualPath, "..");
+		DirectoryEntry.Folder = true;
+		DirectoryEntry.Size = 0;
+		Directoryvector.push_back(DirectoryEntry);
+	}
+
 	// Walk through the folder grabbing files and adding them to our std::vector, using the new filesystem library.
     for (const auto& entry : filesystem::directory_iterator(ArgPath))
 	{
