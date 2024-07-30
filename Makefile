@@ -32,9 +32,6 @@ MimeTypes.o: src/MimeTypes.cxx
 Base64.o: src/contrib/Base64.cpp
 	$(CC) $(CFLAGS) -o Base64.o -c src/contrib/Base64.cpp
 	
-HTMLEncoding.o: src/HTMLEncoding.cxx
-	$(CC) $(CFLAGS) -o HTMLEncoding.o -c src/HTMLEncoding.cxx
-	
 InterProcessMessaging.o: src/InterProcessMessaging.cxx
 	$(CC) $(CFLAGS) -o InterProcessMessaging.o -c src/InterProcessMessaging.cxx
 	
