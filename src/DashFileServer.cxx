@@ -67,7 +67,7 @@ namespace Version
 {
 	int MAJORVERSION = 2;
 	int MINORVERSION = 0;
-	int PATCHVERSION = 0;
+	int PATCHVERSION = 1;
 	std::string VERSIONTITLE = "The Port Colborne Comeback";
 }
 
