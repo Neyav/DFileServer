@@ -66,9 +66,9 @@ DFSMessaging::MessangerServer* MessangerServer = nullptr;
 namespace Version
 {
 	int MAJORVERSION = 2;
-	int MINORVERSION = 0;
+	int MINORVERSION = 1;
 	int PATCHVERSION = 0;
-	std::string VERSIONTITLE = "The Port Colborne Comeback";
+	std::string VERSIONTITLE = "The Red Deer Redemption";
 }
 
 Configuration_t Configuration;
