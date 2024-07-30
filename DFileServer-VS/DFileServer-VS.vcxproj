@@ -134,7 +134,6 @@
     <ClCompile Include="..\src\CPathResolver.cxx" />
     <ClCompile Include="..\src\DashFileServer.cxx" />
     <ClCompile Include="..\src\DirectoryIndexing.cxx" />
-    <ClCompile Include="..\src\HTMLEncoding.cxx" />
     <ClCompile Include="..\src\HTTPHeader.cxx" />
     <ClCompile Include="..\src\InterProcessMessaging.cxx" />
     <ClCompile Include="..\src\MimeTypes.cxx" />
@@ -146,7 +145,6 @@
     <ClInclude Include="..\src\contrib\fakepoll.h" />
     <ClInclude Include="..\src\CPathResolver.hxx" />
     <ClInclude Include="..\src\DirectoryIndexing.hxx" />
-    <ClInclude Include="..\src\HTMLEncoding.hxx" />
     <ClInclude Include="..\src\HTTPHeader.hxx" />
     <ClInclude Include="..\src\InterProcessMessaging.hxx" />
     <ClInclude Include="..\src\MimeTypes.hxx" />

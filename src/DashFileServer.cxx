@@ -206,15 +206,15 @@ int main( int argc, char *argv[] )
 
 	   // First we want to clear the screen.
 	   std::cout << "\u001B[2J\u001B[1;1H";
-	   std::cout << "\u001B[41m\u001B[30m";
+	   std::cout << "\u001B[44m\u001B[37m";
 	   DisplayBannerString(VersionBanner);
 	   std::cout << "**-]\u001B[0m" << std::endl;
 
-	   std::cout << "\u001B[41m\u001B[30m";
+	   std::cout << "\u001B[44m\u001B[37m";
 	   DisplayBannerString(CopyrightBanner);
 	   std::cout << "**-]\u001B[0m" << std::endl;
 
-	   std::cout << "\u001B[41m\u001B[30m";
+	   std::cout << "\u001B[44m\u001B[37m";
 	   DisplayBannerString(CopyrightBanner2);
 	   std::cout << "**-]\u001B[0m" << std::endl;
    }
