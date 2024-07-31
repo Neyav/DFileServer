@@ -27,7 +27,7 @@ namespace DFSNetworking
 	private:
 		std::vector<struct pollfd> PollStruct;
 		std::vector<ClientConnection*> ConnectionList;
-		DFSMessaging::Messanger* NetworkHandlerMessanger;
+		DFSMessaging::Messenger* NetworkHandlerMessanger;
 
 	public:
 		void NetworkHandlerLoop(void);
@@ -44,7 +44,7 @@ namespace DFSNetworking
 		
 		std::vector<struct pollfd> PollStruct;
 		std::vector<ClientConnection*> ConnectionList;
-		DFSMessaging::Messanger* NetworkMessanger;
+		DFSMessaging::Messenger* NetworkMessanger;
 
 		SOCKET NetworkSocket;
 

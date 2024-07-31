@@ -20,21 +20,21 @@
 
 namespace DFSMessaging
 {
-	class Messanger;
+	class Messenger;
 	class MessengerServer;
 
 	struct MessagePacket
 	{
 		bool isPointer;
-		Messanger* Origin;
-		std::string OriginName; // We need this here because sometimes the origin messanger is deleted before the message is processed.
+		Messenger* Origin;
+		std::string OriginName; // We need this here because sometimes the origin messenger is deleted before the message is processed.
 		void* Pointer;
 		unsigned int securityKey;
 		unsigned int channel;
 		std::string message;
 	};
 
-	class Messanger
+	class Messenger
 	{
 	private:
 		MessengerServer* parentServer;
@@ -46,9 +46,9 @@ namespace DFSMessaging
 		std::string Name;
 
 		void SendMessage(unsigned int aChannel, std::string aMessage);
-		void SendMessage(Messanger *aMessanger, std::string aMessage);
-		void SendPointer(Messanger* aMessanger, void* aTransferPointer);
-		void RecieveMessage(MessagePacket aMessage);
+		void SendMessage(Messenger *aMessanger, std::string aMessage);
+		void SendPointer(Messenger* aMessanger, void* aTransferPointer);
+		void ReceiveMessage(MessagePacket aMessage);
 		bool HasMessages(void);
 		MessagePacket AcceptMessage(void);
 
@@ -56,26 +56,26 @@ namespace DFSMessaging
 		bool isRegisteredOnChannel(unsigned int aChannel);
 		void unRegisterAllChannels(void);
 
-		Messanger(unsigned int aKey, MessengerServer *aParent);
-		~Messanger();
+		Messenger(unsigned int aKey, MessengerServer *aParent);
+		~Messenger();
 	};
 
 	class MessengerServer
 	{
 	private:
 		unsigned int securityKey;
-		std::vector<Messanger*> Messangers;
+		std::vector<Messenger*> Messengers;
 		std::condition_variable queueCondition;
 		std::queue<MessagePacket> MessageQueue;
 
-		void MessangerServerRuntime(void);
+		void MessengerServerRuntime(void);
 	public:
 		void DistributeMessage(MessagePacket aMessage);
 
-		bool ValidateMessanger(Messanger *aMessanger);
+		bool ValidateMessenger(Messenger *aMessanger);
 
-		Messanger* ReceiveActiveMessenger(void);
-		void DeactivateActiveMessenger(Messanger* aMessanger);
+		Messenger* ReceiveActiveMessenger(void);
+		void DeactivateActiveMessenger(Messenger* aMessanger);
 
 		MessengerServer();
 		~MessengerServer();

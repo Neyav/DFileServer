@@ -82,7 +82,7 @@ void InitateServerShutdown ( int ArgSignal )
 {
 	if (MessangerServer)
 	{
-		DFSMessaging::Messanger* ServerShutdownMessanger;
+		DFSMessaging::Messenger* ServerShutdownMessanger;
 
 		ServerShutdownMessanger = MessangerServer->ReceiveActiveMessenger();
 	
@@ -184,7 +184,7 @@ int main( int argc, char *argv[] )
 #endif
 
    DFSNetworking::NetworkDaemon *NetworkDaemon = nullptr;
-   DFSMessaging::Messanger *ConsoleMessanger = nullptr;
+   DFSMessaging::Messenger *ConsoleMessanger = nullptr;
 
 
 #ifndef _WINDOWS
