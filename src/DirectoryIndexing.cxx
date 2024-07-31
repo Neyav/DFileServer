@@ -360,7 +360,7 @@ static std::string ParseTemplate ( ifstream &ArgFile, std::string *ArgVirtualPat
 		stringPosition = TemplateData.find ("$$SERVERVERSION$$", LowestMatch);
 		if ( stringPosition != std::string::npos )
 		{
-			std::string Versionstring("DFileServer [Version " + std::to_string(Version::MAJORVERSION) + "." + std::to_string(Version::MINORVERSION) + "." + std::to_string(Version::PATCHVERSION) + "]");
+			std::string Versionstring("DFileServer [Version " + std::to_string(Version::MAJORVERSION) + "." + std::to_string(Version::MINORVERSION) + "." + std::to_string(Version::PATCHVERSION) + "] -{" + Version::VERSIONTITLE + "}-");
 
 			TemplateData.replace( stringPosition, sizeof("$$SERVERVERSION$$") - 1, Versionstring );
 
@@ -517,7 +517,7 @@ char GenerateFolderIndex( std::string ArgVirtualPath, char *ArgPath, std::string
 		// Insert the table.
 		ArgBuffer += InsertIndexTable( &ArgVirtualPath, std::string( ArgPath ), Filler );
 		// Server Version Information.
-		ArgBuffer += "<hr><i>DFileServer [Version " + std::to_string(Version::MAJORVERSION) + "." + std::to_string(Version::MINORVERSION) + "." + std::to_string(Version::PATCHVERSION) + "]</i>\n";
+		ArgBuffer += "<hr><i>DFileServer [Version " + std::to_string(Version::MAJORVERSION) + "." + std::to_string(Version::MINORVERSION) + "." + std::to_string(Version::PATCHVERSION) + "] -{" + Version::VERSIONTITLE + "}-</i>\n";
 		// End the index
 		ArgBuffer += "</body>\n</html>\n"; 
 	}
