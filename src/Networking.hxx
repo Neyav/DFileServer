@@ -18,7 +18,7 @@
 #include "ClientConnection.hxx"
 #include "InterProcessMessaging.hxx"
 
-extern DFSMessaging::MessangerServer* MessangerServer;
+extern DFSMessaging::MessengerServer* MessangerServer;
 
 namespace DFSNetworking
 {

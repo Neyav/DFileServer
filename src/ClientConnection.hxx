@@ -10,7 +10,7 @@
 #include "HTTPHeader.hxx"
 #include "InterProcessMessaging.hxx"
 
-extern DFSMessaging::MessangerServer* MessangerServer;
+extern DFSMessaging::MessengerServer* MessangerServer;
 
 class ClientConnection
 {

@@ -21,7 +21,7 @@
 namespace DFSMessaging
 {
 	class Messanger;
-	class MessangerServer;
+	class MessengerServer;
 
 	struct MessagePacket
 	{
@@ -37,7 +37,7 @@ namespace DFSMessaging
 	class Messanger
 	{
 	private:
-		MessangerServer* parentServer;
+		MessengerServer* parentServer;
 		unsigned int securityKey;
 
 		std::vector<MessagePacket> MessageQueue;
@@ -56,11 +56,11 @@ namespace DFSMessaging
 		bool isRegisteredOnChannel(unsigned int aChannel);
 		void unRegisterAllChannels(void);
 
-		Messanger(unsigned int aKey, MessangerServer *aParent);
+		Messanger(unsigned int aKey, MessengerServer *aParent);
 		~Messanger();
 	};
 
-	class MessangerServer
+	class MessengerServer
 	{
 	private:
 		unsigned int securityKey;
@@ -74,10 +74,10 @@ namespace DFSMessaging
 
 		bool ValidateMessanger(Messanger *aMessanger);
 
-		Messanger* ReceiveActiveMessanger(void);
-		void DeactivateActiveMessanger(Messanger* aMessanger);
+		Messanger* ReceiveActiveMessenger(void);
+		void DeactivateActiveMessenger(Messanger* aMessanger);
 
-		MessangerServer();
-		~MessangerServer();
+		MessengerServer();
+		~MessengerServer();
 	};
 }

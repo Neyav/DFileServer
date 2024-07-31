@@ -61,7 +61,7 @@
 #include "Networking.hxx"
 #include "Version.hxx"
 
-DFSMessaging::MessangerServer* MessangerServer = nullptr;
+DFSMessaging::MessengerServer* MessangerServer = nullptr;
 
 namespace Version
 {
@@ -84,7 +84,7 @@ void InitateServerShutdown ( int ArgSignal )
 	{
 		DFSMessaging::Messanger* ServerShutdownMessanger;
 
-		ServerShutdownMessanger = MessangerServer->ReceiveActiveMessanger();
+		ServerShutdownMessanger = MessangerServer->ReceiveActiveMessenger();
 	
 	}
 
@@ -311,10 +311,10 @@ int main( int argc, char *argv[] )
 #endif
    }
 
-   MessangerServer = new DFSMessaging::MessangerServer();
+   MessangerServer = new DFSMessaging::MessengerServer();
    NetworkDaemon = new DFSNetworking::NetworkDaemon();
    
-   ConsoleMessanger = MessangerServer->ReceiveActiveMessanger();
+   ConsoleMessanger = MessangerServer->ReceiveActiveMessenger();
    ConsoleMessanger->Name = "Console";
    ConsoleMessanger->RegisterOnChannel(MSG_TARGET_CONSOLE);
 

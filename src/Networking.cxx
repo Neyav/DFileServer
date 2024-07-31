@@ -22,7 +22,7 @@ namespace DFSNetworking
 	{
 		size_t PointerReference = std::uintptr_t(this);
 
-		NetworkHandlerMessanger = MessangerServer->ReceiveActiveMessanger();
+		NetworkHandlerMessanger = MessangerServer->ReceiveActiveMessenger();
 		NetworkHandlerMessanger->Name = "NetworkHandler " + std::to_string(PointerReference);
 		NetworkHandlerMessanger->RegisterOnChannel(MSG_TARGET_NETWORK);
 		NetworkHandlerMessanger->SendMessage(MSG_TARGET_CONSOLE, "NetworkHandler - Initalized.");
@@ -654,7 +654,7 @@ namespace DFSNetworking
 
 		if (MessangerServer)
 		{
-			NetworkMessanger = MessangerServer->ReceiveActiveMessanger();
+			NetworkMessanger = MessangerServer->ReceiveActiveMessenger();
 			NetworkMessanger->Name = "Network";
 		}
 		else

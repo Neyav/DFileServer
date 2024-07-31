@@ -139,7 +139,7 @@ namespace DFSMessaging
 		return (MessageCount > 0);
 	}
 
-	Messanger::Messanger(unsigned int aKey, MessangerServer *aParent)
+	Messanger::Messanger(unsigned int aKey, MessengerServer *aParent)
 	{
 		securityKey = aKey;
 		parentServer = aParent;
@@ -148,7 +148,7 @@ namespace DFSMessaging
 	{
 		if (parentServer != nullptr)
 		{
-			parentServer->DeactivateActiveMessanger(this);
+			parentServer->DeactivateActiveMessenger(this);
 		}
 	}
 
@@ -156,7 +156,7 @@ namespace DFSMessaging
 			-= Messanger Server =-
 	*/
 
-	void MessangerServer::DistributeMessage(MessagePacket aMessage)
+	void MessengerServer::DistributeMessage(MessagePacket aMessage)
 	{
 		MessageServerQueueMutex.lock();
 		MessageQueue.push(aMessage);
@@ -164,7 +164,7 @@ namespace DFSMessaging
 		queueCondition.notify_all();
 	}
 
-	bool MessangerServer::ValidateMessanger(Messanger *aMessanger)
+	bool MessengerServer::ValidateMessanger(Messanger *aMessanger)
 	{
 		MessageServerQueueMutex.lock();
 		for (auto& messanger : Messangers)
@@ -179,7 +179,7 @@ namespace DFSMessaging
 		return false;
 	}
 
-	void MessangerServer::MessangerServerRuntime(void)
+	void MessengerServer::MessangerServerRuntime(void)
 	{
 		std::mutex queueMutex;
 		std::unique_lock<std::mutex> queueLock(queueMutex);
@@ -235,29 +235,28 @@ namespace DFSMessaging
 		}
 	}
 
-	Messanger* MessangerServer::ReceiveActiveMessanger(void)
+	Messanger* MessengerServer::ReceiveActiveMessenger(void)
 	{
-		Messanger* newMessanger;
+		Messanger* newMessenger;
 		
-		newMessanger = new Messanger(securityKey, this);
+		newMessenger = new Messanger(securityKey, this);
 
 		MessageServerMutex.lock();
-		Messangers.push_back(newMessanger);
+		Messangers.push_back(newMessenger);
 		MessageServerMutex.unlock();
 
 		return Messangers.back();
 	}
 
-	void MessangerServer::DeactivateActiveMessanger(Messanger* aMessanger)
+	void MessengerServer::DeactivateActiveMessenger(Messanger* aMessenger)
 	{
 		MessageServerMutex.lock();
 		for (int i = 0; i < Messangers.size(); i++)
 		{
-			if (Messangers[i] == aMessanger)
+			if (Messangers[i] == aMessenger)
 			{
-				// The destructor of a Messanger will call this to ensure it is removed from the server.
-				// Thus it is unwise to delete it here. This should therefore NEVER be called elsewhere.
-				//delete Messangers[i];
+				// The destructor of a Messenger will call this to ensure it is removed from the server.
+				// Thus it is unwise to delete it here. This should therefore NEVER be called elsewhere.				
 				Messangers.erase(Messangers.begin() + i);
 				break;
 			}
@@ -265,10 +264,10 @@ namespace DFSMessaging
 		MessageServerMutex.unlock();
 	}
 
-	MessangerServer::MessangerServer()
+	MessengerServer::MessengerServer()
 	{
-		// Initalize Messanger Server
-		std::cout << " -=Messaging Service Initalizing..." << std::endl;
+		// Initialize Messenger Server
+		std::cout << " -=Messaging Service Initializing..." << std::endl;
 
 		std::random_device rd;
 		std::mt19937 gen(rd());
@@ -277,17 +276,17 @@ namespace DFSMessaging
 
 		securityKey = dis(gen);
 	
-		std::cout << " -=Messanger Service Security Key generated. [" << securityKey << "]" << std::endl;
+		std::cout << " -=Messenger Service Security Key generated. [" << securityKey << "]" << std::endl;
 
-		// Start Messanger Server Runtime
-		std::thread MessangerServerThread(&MessangerServer::MessangerServerRuntime, this);
-		MessangerServerThread.detach();
+		// Start Messenger Server Runtime
+		std::thread MessengerServerThread(&MessengerServer::MessangerServerRuntime, this);
+		MessengerServerThread.detach();
 	}
-	MessangerServer::~MessangerServer()
+	MessengerServer::~MessengerServer()
 	{
-		// Destroy Messanger Server
-		// Start by destroying all Messangers
-		std::cout << " -=Messanging Service shutting down..." << std::endl;
+		// Destroy Messenger Server
+		// Start by destroying all Messengers
+		std::cout << " -=Messaging Service shutting down..." << std::endl;
 
 		MessageServerMutex.lock();
 		while (Messangers.size() > 0)
@@ -297,6 +296,6 @@ namespace DFSMessaging
 		}
 		MessageServerMutex.unlock();
 
-		std::cout << " -=Messanging Service shutdown complete." << std::endl;
+		std::cout << " -=Messaging Service shutdown complete." << std::endl;
 	}
 }
