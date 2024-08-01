@@ -420,6 +420,7 @@ char GenerateFolderIndex( std::string ArgVirtualPath, char *ArgPath, std::string
             padding: 10px;
             text-align: center;
             background-color: #fff;
+			box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
         .file-grid .file-item .file-name {
             font-weight: bold;
@@ -443,15 +444,12 @@ char GenerateFolderIndex( std::string ArgVirtualPath, char *ArgPath, std::string
 	ArgBuffer += "DFileServer [" + std::to_string(Version::MAJORVERSION) + "." + std::to_string(Version::MINORVERSION) + "." + std::to_string(Version::PATCHVERSION) + "] " + ArgVirtualPath;
 	ArgBuffer += R"(
 	</div>
-            <div class="buttons">
-                <div style="background-color: #ff5f56;"></div>
-                <div style="background-color: #ffbd2e;"></div>
-                <div style="background-color: #27c93f;"></div>
-            </div>
-            <div class="version">)";
+            <div class="right-section">
+				<div class="version">)";
 	ArgBuffer += Version::VERSIONTITLE;
 	ArgBuffer += R"(
-            </div>
+				</div>
+			</div>
         </div>
         <div class="window-location">)";
 	ArgBuffer += ArgVirtualPath;
