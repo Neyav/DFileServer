@@ -71,7 +71,7 @@ namespace DFSMessaging
 		parentServer->DistributeMessage(newMessage);
 	}
 
-	void Messenger::SendMessage(Messenger* aMessanger, std::string aMessage)
+	void Messenger::SendMessage(Messenger* aMessenger, std::string aMessage)
 	{
 		MessagePacket newMessage;
 		
@@ -83,14 +83,14 @@ namespace DFSMessaging
 		newMessage.channel = 0;
 
 		// TODO: Might need a mutex here. Probably need a mutex here. 
-		if (parentServer->ValidateMessenger(aMessanger) == false)
+		if (parentServer->ValidateMessenger(aMessenger) == false)
 		{
-			return; // The target messanger is not valid.
+			return; // The target messenger is not valid.
 		}
-		aMessanger->ReceiveMessage(newMessage);
+		aMessenger->ReceiveMessage(newMessage);
 	}
 
-	void Messenger::SendPointer(Messenger* aMessanger, void* aTransferPointer)
+	void Messenger::SendPointer(Messenger* aMessenger, void* aTransferPointer)
 	{
 		MessagePacket newMessage;
 
@@ -100,7 +100,7 @@ namespace DFSMessaging
 		newMessage.Origin = this;
 		newMessage.channel = 0;
 
-		aMessanger->ReceiveMessage(newMessage);
+		aMessenger->ReceiveMessage(newMessage);
 	}
 	
 	void Messenger::ReceiveMessage(MessagePacket aMessage)
@@ -153,7 +153,7 @@ namespace DFSMessaging
 	}
 
 	/*
-			-= Messanger Server =-
+			-= Messenger Server =-
 	*/
 
 	void MessengerServer::DistributeMessage(MessagePacket aMessage)
@@ -164,12 +164,12 @@ namespace DFSMessaging
 		queueCondition.notify_all();
 	}
 
-	bool MessengerServer::ValidateMessenger(Messenger *aMessanger)
+	bool MessengerServer::ValidateMessenger(Messenger *aMessenger)
 	{
 		MessageServerQueueMutex.lock();
-		for (auto& messanger : Messengers)
+		for (auto& messenger : Messengers)
 		{
-			if (messanger == aMessanger)
+			if (messenger == aMessenger)
 			{
 				MessageServerQueueMutex.unlock();
 				return true;
@@ -184,7 +184,7 @@ namespace DFSMessaging
 		std::mutex queueMutex;
 		std::unique_lock<std::mutex> queueLock(queueMutex);
 
-		std::cout << " -=Messanger Server Runtime started." << std::endl;
+		std::cout << " -=Messenger Server Runtime started." << std::endl;
 
 		while (true)
 		{
@@ -202,28 +202,28 @@ namespace DFSMessaging
 				if (newMessage.channel == MSG_TARGET_ALL)
 				{ // Send to all clients
 					MessageServerQueueMutex.lock();
-					for (auto& messanger : Messengers)
+					for (auto& messenger : Messengers)
 					{
-						if (messanger == newMessage.Origin)
+						if (messenger == newMessage.Origin)
 						{
 							continue;
 						}
-						messanger->ReceiveMessage(newMessage);
+						messenger->ReceiveMessage(newMessage);
 					}
 					MessageServerQueueMutex.unlock();					
 				}
 				else
 				{ // Send to specific channel
 					MessageServerQueueMutex.lock();
-					for (auto& messanger : Messengers)
+					for (auto& messenger : Messengers)
 					{
-						if (messanger == newMessage.Origin)
+						if (messenger == newMessage.Origin)
 						{
 							continue;
 						}
-						if (messanger->isRegisteredOnChannel(newMessage.channel))
+						if (messenger->isRegisteredOnChannel(newMessage.channel))
 						{
-							messanger->ReceiveMessage(newMessage);
+							messenger->ReceiveMessage(newMessage);
 						}
 					}
 					MessageServerQueueMutex.unlock();
