@@ -3,6 +3,7 @@
 #include <condition_variable>
 #include <mutex>
 #include <queue>
+#include <map>
 #include <vector>
 #include <atomic>
 
@@ -23,15 +24,28 @@ namespace DFSMessaging
 	class Messenger;
 	class MessengerServer;
 
-	struct MessagePacket
+	class Message
 	{
+	private:		
 		bool isPointer;
+		bool deleteOnReceive;
+		unsigned int securityKey;
 		Messenger* Origin;
+
+	public:
+		unsigned int sendTime;
 		std::string OriginName; // We need this here because sometimes the origin messenger is deleted before the message is processed.
 		void* Pointer;
-		unsigned int securityKey;
+		
 		unsigned int channel;
 		std::string message;
+
+		Messenger *identifyOrigin(void);
+
+		Message(bool aisPointer, bool adeleteOnRecieve, Messenger *aOrigin, unsigned int asecurityKey);
+		Message();
+		~Message();
+		
 	};
 
 	class Messenger
@@ -40,17 +54,15 @@ namespace DFSMessaging
 		MessengerServer* parentServer;
 		unsigned int securityKey;
 
-		std::vector<MessagePacket> MessageQueue;
+		std::vector<unsigned int> waitingMessageIDs;
 		std::vector<unsigned int> RegisteredChannels;
 	public:
 		std::string Name;
 
+		void AlertMessageID(unsigned int aMessageID);
 		void SendMessage(unsigned int aChannel, std::string aMessage);
-		void SendMessage(Messenger *aMessanger, std::string aMessage);
-		void SendPointer(Messenger* aMessanger, void* aTransferPointer);
-		void ReceiveMessage(MessagePacket aMessage);
 		bool HasMessages(void);
-		MessagePacket AcceptMessage(void);
+		Message AcceptMessage(void);
 
 		void RegisterOnChannel(unsigned int aChannel);
 		bool isRegisteredOnChannel(unsigned int aChannel);
@@ -64,15 +76,20 @@ namespace DFSMessaging
 	{
 	private:
 		unsigned int securityKey;
+		unsigned int nextMessageID;
 		std::vector<Messenger*> Messengers;
 		std::condition_variable queueCondition;
-		std::queue<MessagePacket> MessageQueue;
+		std::queue<Message> MessageQueue;
+		std::map<unsigned int, Message> sentMessages;
+
+		void PruneOldMessages(unsigned int atimeout);
 
 		void MessengerServerRuntime(void);
 	public:
-		void DistributeMessage(MessagePacket aMessage);
-
+		void DistributeMessage(Message aMessage);
 		bool ValidateMessenger(Messenger *aMessanger);
+
+		Message GetMessage(unsigned int aMessageID);
 
 		Messenger* ReceiveActiveMessenger(void);
 		void DeactivateActiveMessenger(Messenger* aMessanger);

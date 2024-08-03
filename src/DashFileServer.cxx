@@ -369,7 +369,7 @@ int main( int argc, char *argv[] )
 	   // Check for messages.
 	   while (ConsoleMessanger->HasMessages())
 	   {
-		   DFSMessaging::MessagePacket MessagePacket = ConsoleMessanger->AcceptMessage();
+		   DFSMessaging::Message MessagePacket = ConsoleMessanger->AcceptMessage();
 		   
 		   if ( Configuration.Verbose ) // If we are in verbose mode, then we want to print out the message.
 				std::cout << std::string(TimeAndDate()) << " [" << MessagePacket.OriginName << "]: " << MessagePacket.message << std::endl;
