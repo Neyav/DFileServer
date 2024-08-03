@@ -10,8 +10,8 @@
 
 namespace DFSMessaging
 {
-	std::mutex MessangerQueueMutex;
-	std::mutex MessangerchannelMutex;
+	std::mutex MessengerQueueMutex;
+	std::mutex MessengerChannelMutex;
 	std::mutex MessageServerQueueMutex;
 	std::mutex MessageServerMutex;
 
@@ -46,50 +46,50 @@ namespace DFSMessaging
 	void Messenger::RegisterOnChannel(unsigned int aChannel)
 	{
 		// Check if we are registered on this channel.
-		MessangerchannelMutex.lock();
+		MessengerChannelMutex.lock();
 		for (auto& channel : RegisteredChannels)
 		{
 			if (channel == aChannel)
 			{
-				MessangerchannelMutex.unlock();
+				MessengerChannelMutex.unlock();
 				return;
 			}
 		}
 
 		// If we are not, register on it.
 		RegisteredChannels.push_back(aChannel);
-		MessangerchannelMutex.unlock();
+		MessengerChannelMutex.unlock();
 	}
 
 	bool Messenger::isRegisteredOnChannel(unsigned int aChannel)
 	{
 		// Check if we are registered on this channel.
-		MessangerchannelMutex.lock();
+		MessengerChannelMutex.lock();
 		for (auto& channel : RegisteredChannels)
 		{
 			if (channel == aChannel)
 			{
-				MessangerchannelMutex.unlock();
+				MessengerChannelMutex.unlock();
 				return true;
 			}
 		}
-		MessangerchannelMutex.unlock();
+		MessengerChannelMutex.unlock();
 
 		return false;
 	}
 
 	void Messenger::unRegisterAllChannels(void)
 	{
-		MessangerchannelMutex.lock();
+		MessengerChannelMutex.lock();
 		RegisteredChannels.clear();
-		MessangerchannelMutex.unlock();
+		MessengerChannelMutex.unlock();
 	}
 
 	void Messenger::AlertMessageID(unsigned int aMessageID)
 	{
-		MessangerQueueMutex.lock();
+		MessengerQueueMutex.lock();
 		waitingMessageIDs.push_back(aMessageID);
-		MessangerQueueMutex.unlock();
+		MessengerQueueMutex.unlock();
 	}
 
     void Messenger::SendMessage(unsigned int aChannel, std::string aMessage)
@@ -105,13 +105,13 @@ namespace DFSMessaging
 	Message Messenger::AcceptMessage(void)
 	{
 		Message newMessage;
-		MessangerQueueMutex.lock();
+		MessengerQueueMutex.lock();
 		if (waitingMessageIDs.size() > 0)
 		{
 			newMessage = parentServer->GetMessage(waitingMessageIDs[0]);
 			waitingMessageIDs.erase(waitingMessageIDs.begin());
 		}
-		MessangerQueueMutex.unlock();
+		MessengerQueueMutex.unlock();
 		return newMessage;
 	}
 
@@ -119,9 +119,9 @@ namespace DFSMessaging
 	{
 		int MessageCount = 0;
 
-		MessangerQueueMutex.lock();
+		MessengerQueueMutex.lock();
 		MessageCount = this->waitingMessageIDs.size();
-		MessangerQueueMutex.unlock();
+		MessengerQueueMutex.unlock();
 
 		return (MessageCount > 0);
 	}
