@@ -31,6 +31,8 @@ namespace DFSMessaging
 		bool deleteOnReceive;
 		unsigned int securityKey;
 		Messenger* Origin;
+		unsigned int Outgoing; // This is how many copies of this message are out there.
+		friend class MessengerServer;
 
 	public:
 		unsigned int sendTime;

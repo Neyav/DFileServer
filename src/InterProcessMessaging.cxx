@@ -27,6 +27,7 @@ namespace DFSMessaging
 		Origin = aOrigin;
 		OriginName = aOrigin->Name;
 		securityKey = asecurityKey;
+		Outgoing = 0;
 	}
 
 	Message::Message()
@@ -171,7 +172,12 @@ namespace DFSMessaging
 		MessageServerQueueMutex.lock();
 		if (sentMessages.find(aMessageID) != sentMessages.end())
 		{
-			newMessage = sentMessages[aMessageID];			
+			newMessage = sentMessages[aMessageID];
+			if (sentMessages[aMessageID].Outgoing-- == 0)
+			{	// The last reciepient has recieved the message.
+				sentMessages.erase(aMessageID);
+			} 
+			
 		}
 		MessageServerQueueMutex.unlock();
 		return newMessage;
@@ -212,16 +218,8 @@ namespace DFSMessaging
 			MessageServerQueueMutex.lock();
 			while (MessageQueue.size() > 0)
 			{
-				unsigned int messageID = 0;
-
 				Message newMessage = MessageQueue.front();
 				MessageQueue.pop();
-
-				// Add the message to the map.
-				newMessage.sendTime = std::time(nullptr);
-				sentMessages[nextMessageID] = newMessage;
-				messageID = nextMessageID;
-				nextMessageID++;
 
 				if (newMessage.channel == MSG_TARGET_ALL)
 				{ // Send to all clients
@@ -232,7 +230,8 @@ namespace DFSMessaging
 							continue;
 						}
 
-						messenger->AlertMessageID(messageID);
+						messenger->AlertMessageID(nextMessageID);
+						newMessage.Outgoing++;
 					}				
 				}
 				else
@@ -245,13 +244,19 @@ namespace DFSMessaging
 						}
 						if (messenger->isRegisteredOnChannel(newMessage.channel))
 						{
-							messenger->AlertMessageID(messageID);
+							messenger->AlertMessageID(nextMessageID);
+							newMessage.Outgoing++;
 						}
 					}
 				}
 
-				// Dispose of any messages that have been around for longer than 10 seconds.
-				this->PruneOldMessages(10);
+				// Add the message to the map.
+				newMessage.sendTime = std::time(nullptr);
+				sentMessages[nextMessageID] = newMessage;
+				nextMessageID++;
+
+				// Dispose of any messages that have been around for longer than 60 seconds.
+				this->PruneOldMessages(60);
 
 			}
 			MessageServerQueueMutex.unlock();
