@@ -20,6 +20,39 @@ namespace DFSMessaging
 		return Origin;
 	}
 
+	bool Message::acceptTask(void)
+	{
+		// Check if the message is still valid. Delete it and return true, otherwise return false.
+		if (Origin == nullptr)
+		{
+			return false;
+		}
+
+		if (Origin->securityKey != securityKey)
+		{
+			return false;
+		}
+	
+		if (deleteOnReceive)
+		{
+			return false;
+		}
+
+		MessengerServer *parentServer = Origin->parentServer;
+
+		MessageServerMutex.lock();
+		// Check if the message is in the map, if so, delete it and return true.
+		if (parentServer->sentMessages.find(messageID) != parentServer->sentMessages.end())
+		{
+			parentServer->sentMessages.erase(messageID);
+			MessageServerMutex.unlock();
+			return true;
+		}
+		MessageServerMutex.unlock();
+
+		return false;
+	}
+
 	Message::Message(bool aisPointer, bool adeleteOnRecieve, Messenger* aOrigin, unsigned int asecurityKey)
 	{
 		isPointer = aisPointer;
@@ -28,14 +61,16 @@ namespace DFSMessaging
 		OriginName = aOrigin->Name;
 		securityKey = asecurityKey;
 		Outgoing = 0;
+		messageID = 0;
 	}
 
 	Message::Message()
 	{
 		isPointer = false;
-		deleteOnReceive = false;
+		deleteOnReceive = true;
 		Origin = nullptr;
-		securityKey = 0;		
+		securityKey = 0;
+		messageID = 0;
 	}
 
 	Message::~Message()
@@ -94,7 +129,7 @@ namespace DFSMessaging
 
     void Messenger::SendMessage(unsigned int aChannel, std::string aMessage)
 	{
-		Message newMessage(false, false, this, securityKey);
+		Message newMessage(false, true, this, securityKey);
 
 		newMessage.message = aMessage;
 		newMessage.channel = aChannel;
@@ -175,7 +210,8 @@ namespace DFSMessaging
 			newMessage = sentMessages[aMessageID];
 			if (sentMessages[aMessageID].Outgoing-- == 0)
 			{	// The last reciepient has recieved the message.
-				sentMessages.erase(aMessageID);
+				if (sentMessages[aMessageID].deleteOnReceive)
+					sentMessages.erase(aMessageID);
 			} 
 			
 		}
@@ -252,6 +288,7 @@ namespace DFSMessaging
 
 				// Add the message to the map.
 				newMessage.sendTime = std::time(nullptr);
+				newMessage.messageID = nextMessageID;
 				sentMessages[nextMessageID] = newMessage;
 				nextMessageID++;
 

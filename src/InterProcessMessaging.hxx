@@ -30,10 +30,11 @@ namespace DFSMessaging
 		bool isPointer;
 		bool deleteOnReceive;
 		unsigned int securityKey;
+		unsigned int messageID;
 		Messenger* Origin;
 		unsigned int Outgoing; // This is how many copies of this message are out there.
+		
 		friend class MessengerServer;
-
 	public:
 		unsigned int sendTime;
 		std::string OriginName; // We need this here because sometimes the origin messenger is deleted before the message is processed.
@@ -43,6 +44,7 @@ namespace DFSMessaging
 		std::string message;
 
 		Messenger *identifyOrigin(void);
+		bool acceptTask(void);
 
 		Message(bool aisPointer, bool adeleteOnRecieve, Messenger *aOrigin, unsigned int asecurityKey);
 		Message();
@@ -58,6 +60,8 @@ namespace DFSMessaging
 
 		std::vector<unsigned int> waitingMessageIDs;
 		std::vector<unsigned int> RegisteredChannels;
+
+		friend class Message;
 	public:
 		std::string Name;
 
@@ -87,6 +91,8 @@ namespace DFSMessaging
 		void PruneOldMessages(unsigned int atimeout);
 
 		void MessengerServerRuntime(void);
+
+		friend class Message;
 	public:
 		void DistributeMessage(Message aMessage);
 		bool ValidateMessenger(Messenger *aMessanger);
