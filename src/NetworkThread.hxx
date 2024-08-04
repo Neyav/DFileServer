@@ -27,7 +27,7 @@ namespace DFSNetworking
 	class NetworkThread
 	{
 	private:
-		unsigned int NetworkThreadID;
+		size_t NetworkThreadID;
 		bool primeThread;
 
 		std::vector<struct pollfd> PollStruct;

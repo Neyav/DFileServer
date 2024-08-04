@@ -5,13 +5,13 @@ namespace DFSNetworking
 {
 	NetworkThread::NetworkThread()
 	{
-		//NetworkThreadID = (unsigned int)this;
+		NetworkThreadID = (size_t)this;
 		primeThread = false;
 	}
 
 	NetworkThread::NetworkThread(bool aprimeThread)
 	{
-		//NetworkThreadID = (unsigned int)this;
+		NetworkThreadID = (size_t)this;
 		primeThread = aprimeThread;
 	}
 
