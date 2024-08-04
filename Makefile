@@ -6,9 +6,9 @@ RM = rm
 CFLAGS = -O2 -std=c++17
 LINKERFLAGS =
 
-# The default build target. This is the console test engine.
-dfileserver: CPathResolver.o DirectoryIndexing.o ClientConnection.o HTTPHeader.o DashFileServer.o MimeTypes.o Base64.o HTMLEncoding.o InterProcessMessaging.o Networking.o
-	$(CC) -o dfileserver CPathResolver.o DirectoryIndexing.o ClientConnection.o HTTPHeader.o DashFileServer.o MimeTypes.o Base64.o HTMLEncoding.o InterProcessMessaging.o Networking.o $(LINKERFLAGS)
+# The default build target.
+dfileserver: CPathResolver.o DirectoryIndexing.o ClientConnection.o HTTPHeader.o DashFileServer.o MimeTypes.o Base64.o HTMLEncoding.o InterProcessMessaging.o Networking.o NetworkThread.o
+	$(CC) -o dfileserver CPathResolver.o DirectoryIndexing.o ClientConnection.o HTTPHeader.o DashFileServer.o MimeTypes.o Base64.o HTMLEncoding.o InterProcessMessaging.o Networking.o NetworkThread.o $(LINKERFLAGS)
 	$(STRIP) --strip-all dfileserver
 
 CPathResolver.o: src/CPathResolver.cxx
@@ -40,6 +40,9 @@ InterProcessMessaging.o: src/InterProcessMessaging.cxx
 	
 Networking.o: src/Networking.cxx
 	$(CC) $(CFLAGS) -o Networking.o -c src/Networking.cxx
+
+NetworkThread.o: src/NetworkThread.cxx
+	$(CC) $(CFLAGS) -o NetworkThread.o -c src/NetworkThread.cxx
 
 clean:
 	$(RM) *.o
