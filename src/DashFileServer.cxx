@@ -380,7 +380,11 @@ int main( int argc, char *argv[] )
 			   fflush(Configuration.LogFile);
 		   }
 	   }
+#ifdef _WINDOWS
 	   Sleep(1000);
+#else
+	   sleep(1);
+#endif
    }
 
    return 0;
