@@ -286,23 +286,23 @@ namespace DFSNetworking
 
 		if (WSAStartup(MAKEWORD(1, 1), &wsaData) != 0)
 		{
-			perror("InitalizeNetwork -- WSAStartup()");
+			perror("InitializeNetwork -- WSAStartup()");
 			return false;
 		}
 #endif
-		std::cout << " -=Initalizing Network Daemon..." << std::endl;
+		std::cout << " -=Initializing Network Daemon..." << std::endl;
 
 		// Grab the master socket.
 		if ((NetworkSocket = socket(AF_INET, SOCK_STREAM, 0)) == -1)
 		{
-			perror("InitalizeNetwork -- socket()");
+			perror("InitializeNetwork -- socket()");
 			return false;
 		}
 
 		// Clear the socket incase it hasn't been properly closed so that we may use it.
 		if (setsockopt(NetworkSocket, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int)) == -1)
 		{
-			perror("InitalizeNetwork -- setsockopt()");
+			perror("InitializeNetwork -- setsockopt()");
 			return false;
 		}
 
@@ -316,14 +316,14 @@ namespace DFSNetworking
 		if (bind(NetworkSocket, (struct sockaddr*)&ListenAddr,
 			sizeof(struct sockaddr)) == -1)
 		{
-			perror("InitalizeNetwork -- bind()");
+			perror("InitializeNetwork -- bind()");
 			return false;
 		}
 
 		// Start listening
 		if (listen(NetworkSocket, aBackLog) == -1)
 		{
-			perror("InitalizeNetwork -- listen()");
+			perror("InitializeNetwork -- listen()");
 			return false;
 		}
 
