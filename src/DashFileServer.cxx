@@ -79,7 +79,7 @@ bool ServerShutdown = false;
 int ActiveConnections = 0;
 
 #ifdef _WINDOWS
-BOOL WINAPI InitateServerShutdown(DWORD ArgSignal)
+BOOL WINAPI InitiateServerShutdown(DWORD ArgSignal)
 {
 	if (signal != CTRL_C_EVENT)
 		return FALSE;
@@ -222,7 +222,7 @@ int main( int argc, char *argv[] )
    signal(SIGINT, InitateServerShutdown);
    signal(SIGQUIT, InitateServerShutdown);
 #else
-   if (!SetConsoleCtrlHandler(InitateServerShutdown, TRUE)) {
+   if (!SetConsoleCtrlHandler(InitiateServerShutdown, TRUE)) {
 	   std::cout << " -=Control Handler capture failed." << std::endl;
 	   return 1;
    }
@@ -352,11 +352,11 @@ int main( int argc, char *argv[] )
    ConsoleMessanger->Name = "Console";
    ConsoleMessanger->RegisterOnChannel(MSG_TARGET_CONSOLE);
 
-   std::cout << " -=Initalize Network..." << std::endl;
+   std::cout << " -=Initialize Network..." << std::endl;
 
    if (NetworkDaemon->initializeNetwork(Configuration.Port, Configuration.BackLog) == false)
    {
-	   std::cout << "CRITICAL ERROR: Couldn't initalize listening socket on port " << Configuration.Port << std::endl;
+	   std::cout << "CRITICAL ERROR: Couldn't initialize listening socket on port " << Configuration.Port << std::endl;
 	   exit(-1); // TODO: Replace with an exit function that cleans up after itself.
    }
 
