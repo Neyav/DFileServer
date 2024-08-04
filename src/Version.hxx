@@ -1,5 +1,6 @@
 #pragma once
 #include <string>
+#include <cstring>
 
 #ifdef _WINDOWS
 #define strncasecmp _strnicmp
