@@ -139,6 +139,7 @@
     <ClCompile Include="..\src\InterProcessMessaging.cxx" />
     <ClCompile Include="..\src\MimeTypes.cxx" />
     <ClCompile Include="..\src\Networking.cxx" />
+    <ClCompile Include="..\src\NetworkThread.cxx" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\ClientConnection.hxx" />
@@ -151,6 +152,7 @@
     <ClInclude Include="..\src\InterProcessMessaging.hxx" />
     <ClInclude Include="..\src\MimeTypes.hxx" />
     <ClInclude Include="..\src\Networking.hxx" />
+    <ClInclude Include="..\src\NetworkThread.hxx" />
     <ClInclude Include="..\src\Version.hxx" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

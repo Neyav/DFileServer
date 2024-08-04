@@ -66,7 +66,7 @@ ClientConnection::ClientConnection ()
 
 	LastAction = time (NULL);
 
-	Messanger = MessangerServer->ReceiveActiveMessenger();
+	Messanger = MessengerServer->ReceiveActiveMessenger();
 	Messanger->Name = "Inactive Client Connection";
 }
 
@@ -76,7 +76,7 @@ ClientConnection::~ClientConnection()
 	this->DisconnectClient();
 
 	if (Messanger)
-		MessangerServer->DeactivateActiveMessenger(Messanger);
+		MessengerServer->DeactivateActiveMessenger(Messanger);
 }
 
 SOCKET ClientConnection::GetSocket ( void )

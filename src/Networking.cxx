@@ -13,7 +13,7 @@ extern bool ServerLockdown;
 
 namespace DFSNetworking
 {
-	void NetworkHandler::NetworkHandlerLoop(void)
+	/*void NetworkHandler::NetworkHandlerLoop(void)
 	{
 
 	}
@@ -22,7 +22,7 @@ namespace DFSNetworking
 	{
 		size_t PointerReference = std::uintptr_t(this);
 
-		NetworkHandlerMessanger = MessangerServer->ReceiveActiveMessenger();
+		NetworkHandlerMessanger = MessengerServer->ReceiveActiveMessenger();
 		NetworkHandlerMessanger->Name = "NetworkHandler " + std::to_string(PointerReference);
 		NetworkHandlerMessanger->RegisterOnChannel(MSG_TARGET_NETWORK);
 		NetworkHandlerMessanger->SendMessage(MSG_TARGET_CONSOLE, "NetworkHandler - Initalized.");
@@ -32,7 +32,7 @@ namespace DFSNetworking
 	{
 		NetworkHandlerMessanger->SendMessage(MSG_TARGET_CONSOLE, "NetworkHandler - Terminated.");
 		delete NetworkHandlerMessanger;
-	}
+	}*/
 
 	void NetworkDaemon::IncomingConnection(void)
 	{
@@ -277,7 +277,7 @@ namespace DFSNetworking
 
 	}
 
-	bool NetworkDaemon::initalizeNetwork(unsigned int aPort, unsigned int aBackLog)
+	bool NetworkDaemon::initializeNetwork(unsigned int aPort, unsigned int aBackLog)
 	{
 		struct sockaddr_in ListenAddr;
 		const char yes = 1;
@@ -338,8 +338,6 @@ namespace DFSNetworking
 	void NetworkDaemon::NetworkLoop(void)
 	{
 		std::cout << " -=Network Loop activated: Listening on port " << listenPort << "..." << std::endl;
-
-		std::vector<NetworkHandler> NetworkHandlers;
 
 		while (1)
 		{
@@ -652,9 +650,9 @@ namespace DFSNetworking
 
 		PollStruct.push_back(PollFDTemp); // Add the master socket to the poll structure.
 
-		if (MessangerServer)
+		if (MessengerServer)
 		{
-			NetworkMessanger = MessangerServer->ReceiveActiveMessenger();
+			NetworkMessanger = MessengerServer->ReceiveActiveMessenger();
 			NetworkMessanger->Name = "Network";
 		}
 		else

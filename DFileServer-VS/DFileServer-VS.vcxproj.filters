@@ -45,6 +45,9 @@
     <ClCompile Include="..\src\HTMLEncoding.cxx">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\NetworkThread.cxx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\ClientConnection.hxx">
@@ -78,6 +81,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\src\HTMLEncoding.hxx">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\NetworkThread.hxx">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

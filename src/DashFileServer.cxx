@@ -61,7 +61,7 @@
 #include "Networking.hxx"
 #include "Version.hxx"
 
-DFSMessaging::MessengerServer* MessangerServer = nullptr;
+DFSMessaging::MessengerServer* MessengerServer = nullptr;
 
 namespace Version
 {
@@ -80,11 +80,11 @@ int ActiveConnections = 0;
 
 void InitateServerShutdown ( int ArgSignal )
 {
-	if (MessangerServer)
+	if (MessengerServer)
 	{
 		DFSMessaging::Messenger* ServerShutdownMessanger;
 
-		ServerShutdownMessanger = MessangerServer->ReceiveActiveMessenger();
+		ServerShutdownMessanger = MessengerServer->ReceiveActiveMessenger();
 	
 	}
 
@@ -311,16 +311,16 @@ int main( int argc, char *argv[] )
 #endif
    }
 
-   MessangerServer = new DFSMessaging::MessengerServer();
+   MessengerServer = new DFSMessaging::MessengerServer();
    NetworkDaemon = new DFSNetworking::NetworkDaemon();
    
-   ConsoleMessanger = MessangerServer->ReceiveActiveMessenger();
+   ConsoleMessanger = MessengerServer->ReceiveActiveMessenger();
    ConsoleMessanger->Name = "Console";
    ConsoleMessanger->RegisterOnChannel(MSG_TARGET_CONSOLE);
 
    std::cout << " -=Initalize Network..." << std::endl;
 
-   if (NetworkDaemon->initalizeNetwork(Configuration.Port, Configuration.BackLog) == false)
+   if (NetworkDaemon->initializeNetwork(Configuration.Port, Configuration.BackLog) == false)
    {
 	   std::cout << "CRITICAL ERROR: Couldn't initalize listening socket on port " << Configuration.Port << std::endl;
 	   exit(-1); // TODO: Replace with an exit function that cleans up after itself.

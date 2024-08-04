@@ -18,24 +18,10 @@
 #include "ClientConnection.hxx"
 #include "InterProcessMessaging.hxx"
 
-extern DFSMessaging::MessengerServer* MessangerServer;
+extern DFSMessaging::MessengerServer* MessengerServer;
 
 namespace DFSNetworking
 {
-	class NetworkHandler
-	{
-	private:
-		std::vector<struct pollfd> PollStruct;
-		std::vector<ClientConnection*> ConnectionList;
-		DFSMessaging::Messenger* NetworkHandlerMessanger;
-
-	public:
-		void NetworkHandlerLoop(void);
-
-		NetworkHandler();
-		~NetworkHandler();
-	};
-
 	class NetworkDaemon
 	{
 	private:
@@ -56,7 +42,7 @@ namespace DFSNetworking
 		void Buffer401(ClientConnection* ArgClient);
 		void ParseURLEncoding(char* ArgBuffer);
 	public:
-		bool initalizeNetwork(unsigned int aPort, unsigned int aBackLog);
+		bool initializeNetwork(unsigned int aPort, unsigned int aBackLog);
 
 		void NetworkLoop();
 
