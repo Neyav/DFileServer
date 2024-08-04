@@ -22,20 +22,6 @@ extern DFSMessaging::MessangerServer* MessangerServer;
 
 namespace DFSNetworking
 {
-	class NetworkHandler
-	{
-	private:
-		std::vector<struct pollfd> PollStruct;
-		std::vector<ClientConnection*> ConnectionList;
-		DFSMessaging::Messanger* NetworkHandlerMessanger;
-
-	public:
-		void NetworkHandlerLoop(void);
-
-		NetworkHandler();
-		~NetworkHandler();
-	};
-
 	class NetworkDaemon
 	{
 	private:
