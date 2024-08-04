@@ -78,6 +78,33 @@ bool ServerShutdown = false;
 
 int ActiveConnections = 0;
 
+#ifdef _WINDOWS
+BOOL WINAPI InitateServerShutdown(DWORD ArgSignal)
+{
+	if (signal != CTRL_C_EVENT)
+		return FALSE;
+
+	if (MessengerServer)
+	{
+		DFSMessaging::Messenger* ServerShutdownMessenger;
+
+		ServerShutdownMessenger = MessengerServer->ReceiveActiveMessenger();
+
+		ServerShutdownMessenger->SendMessage(MSG_TARGET_NETWORK, "SHUTDOWN");
+
+		while (!ServerShutdownMessenger->HasMessages())
+		{ // Wait for the response.
+			Sleep(100);
+		}
+	}
+	else
+	{
+		ServerShutdown = true;	
+	}
+
+	return TRUE;
+}
+#else
 void InitateServerShutdown ( int ArgSignal )
 {
 	if (MessengerServer)
@@ -102,6 +129,7 @@ void InitateServerShutdown ( int ArgSignal )
 		printf( "Initating Server Lockdown, waiting on %i Client(s).\n", ActiveConnections );
 	}*/
 }
+#endif
 
 // This function contributed by Markus Thiele
 std::string i2hex( unsigned int n, unsigned int minWidth, bool upperCase ) 
@@ -190,9 +218,15 @@ int main( int argc, char *argv[] )
 #ifndef _WINDOWS
    // Catch SIGPIPE and ignore it.
    signal( SIGPIPE, SIG_IGN );
+   signal(SIGTERM, InitateServerShutdown);
+   signal(SIGINT, InitateServerShutdown);
+   signal(SIGQUIT, InitateServerShutdown);
+#else
+   if (!SetConsoleCtrlHandler(InitateServerShutdown, TRUE)) {
+	   std::cout << " -=Control Handler capture failed." << std::endl;
+	   return 1;
+   }
 #endif
-   signal( SIGTERM, InitateServerShutdown );
-   signal( SIGINT, InitateServerShutdown );
 
    // FileServer Name/Version Banner
    {
