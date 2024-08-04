@@ -84,6 +84,8 @@ BOOL WINAPI InitiateServerShutdown(DWORD ArgSignal)
 	if (signal != CTRL_C_EVENT)
 		return FALSE;
 
+	std::cout << " -=Caught Ctrl-C, Initiating Server Shutdown..." << std::endl;	
+
 	if (MessengerServer)
 	{
 		DFSMessaging::Messenger* ServerShutdownMessenger;
