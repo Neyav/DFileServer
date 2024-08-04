@@ -220,7 +220,7 @@ int main( int argc, char *argv[] )
    }
 
    std::cout << "In memorial for all the code that was lost that one day when Sylvia wrote her last bit." << std::endl;
-   std::cout << "Initalizing..." << std::endl;
+   std::cout << "Initializing..." << std::endl;
    std::cout << " -=Parameters..." << std::endl;
    // Parse for command line parameters.
    for (int x = 1; x < argc; x++)
