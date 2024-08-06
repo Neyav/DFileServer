@@ -1,3 +1,4 @@
+#pragma once
 #ifndef _WINDOWS
 #include <netinet/in.h>
 #define SOCKET int

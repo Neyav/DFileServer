@@ -33,6 +33,13 @@ namespace DFSNetworking
 		std::vector<struct pollfd> PollStruct;
 		std::vector<ClientConnection*> ConnectionList;
 		DFSMessaging::Messenger* NetworkHandlerMessenger;
+
+		void TerminateConnection(int aConnectionIndex);
+
+		char LocateResource(std::string Resource, ClientConnection* ArgClient, char* DstResource, char* DstResourceType);
+		void Buffer404(ClientConnection* ArgClient);
+		void Buffer401(ClientConnection* ArgClient);
+		void ParseURLEncoding(char* ArgBuffer);
 	public:
 
 		NetworkThread();
