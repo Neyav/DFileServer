@@ -58,6 +58,9 @@ namespace DFSNetworking
 
 		ActiveConnections++;
 
+		NetworkMessanger->SendPointer(MSG_TARGET_NETWORK, (void *)IncomingClient);
+		// [TODO: MOVE THE NETWORK THREAD]
+		Sleep(5000); // Give the network thread time to process the new connection.
 		// Create a pollfd struct for the new client.
 		struct pollfd PollFDTemp;
 		memset (&PollFDTemp, 0, sizeof(struct pollfd));

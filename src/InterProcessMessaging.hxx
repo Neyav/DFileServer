@@ -67,6 +67,7 @@ namespace DFSMessaging
 
 		void AlertMessageID(unsigned int aMessageID);
 		void SendMessage(unsigned int aChannel, std::string aMessage);
+		void SendPointer(unsigned int aChannel, void* aPointer);
 		bool HasMessages(void);
 		Message AcceptMessage(void);
 

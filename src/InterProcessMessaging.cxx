@@ -136,6 +136,16 @@ namespace DFSMessaging
 
 		parentServer->DistributeMessage(newMessage);
 	}
+
+	void Messenger::SendPointer(unsigned int aChannel, void* aPointer)
+	{
+		Message newMessage(true, false, this, securityKey);
+
+		newMessage.Pointer = aPointer;
+		newMessage.channel = aChannel;
+
+		parentServer->DistributeMessage(newMessage);
+	}
 	
 	Message Messenger::AcceptMessage(void)
 	{

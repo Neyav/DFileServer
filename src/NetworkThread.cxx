@@ -219,7 +219,31 @@ namespace DFSNetworking
 	void NetworkThread::NetworkThreadLoop()
 	{
 		while (1)
+		{
+			// Check for messages.
+			if (NetworkThreadMessenger && NetworkThreadMessenger->HasMessages())
+			{
+				DFSMessaging::Message NewMessage = NetworkThreadMessenger->AcceptMessage();
+
+				if (NewMessage.Pointer && NewMessage.acceptTask())
+				{
+					ClientConnection* NewConnection = (ClientConnection*)NewMessage.Pointer;
+
+					// Add the new connection to the poll structure.
+					struct pollfd NewPollStruct;
+					NewPollStruct.fd = NewConnection->GetSocket();
+					NewPollStruct.events = POLLIN;
+					PollStruct.push_back(NewPollStruct);
+
+					// Add the new connection to the linked list.
+					ConnectionList.push_back(NewConnection);
+
+					// Send a message to the console.
+					NetworkThreadMessenger->SendMessage(MSG_TARGET_CONSOLE, "New connection accepted from " + std::string(NewConnection->GetIP()));
+				}				
+			}
 			Sleep(1000);
+		}
 	}
 
 	NetworkThread::NetworkThread()
