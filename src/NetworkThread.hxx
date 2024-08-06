@@ -32,7 +32,7 @@ namespace DFSNetworking
 
 		std::vector<struct pollfd> PollStruct;
 		std::vector<ClientConnection*> ConnectionList;
-		DFSMessaging::Messenger* NetworkHandlerMessenger;
+		DFSMessaging::Messenger* NetworkThreadMessenger;
 
 		void TerminateConnection(int aConnectionIndex);
 
@@ -41,6 +41,8 @@ namespace DFSNetworking
 		void Buffer401(ClientConnection* ArgClient);
 		void ParseURLEncoding(char* ArgBuffer);
 	public:
+
+		void NetworkThreadLoop();
 
 		NetworkThread();
 		NetworkThread(bool aprimeThread);

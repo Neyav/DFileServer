@@ -1,6 +1,7 @@
 #include <iostream>
 
 #include "Networking.hxx"
+#include "NetworkThread.hxx"
 #include "Version.hxx"
 #include "DirectoryIndexing.hxx"
 #include "CPathResolver.hxx"
@@ -338,6 +339,9 @@ namespace DFSNetworking
 	void NetworkDaemon::NetworkLoop(void)
 	{
 		std::cout << " -=Network Loop activated: Listening on port " << listenPort << "..." << std::endl;
+
+		// Start our prime Network Thread.
+		NetworkThread* PrimeNetworkThread = new NetworkThread(true);
 
 		while (1)
 		{

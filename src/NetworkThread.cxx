@@ -4,6 +4,8 @@
 #include "Version.hxx"
 #include "ClientConnection.hxx"
 
+#include <thread>
+
 namespace DFSNetworking
 {
 	void NetworkThread::TerminateConnection(int aConnectionIndex)
@@ -213,16 +215,49 @@ namespace DFSNetworking
 
 	}
 
+	// Placeholder for now.
+	void NetworkThread::NetworkThreadLoop()
+	{
+		while (1)
+			Sleep(1000);
+	}
+
 	NetworkThread::NetworkThread()
 	{
 		NetworkThreadID = (size_t)this;
 		primeThread = false;
+
+		if (MessengerServer)
+		{
+			NetworkThreadMessenger = MessengerServer->ReceiveActiveMessenger();
+			NetworkThreadMessenger->Name = "Network Thread[" + std::to_string(NetworkThreadID) + "]";
+		}
+		else
+			NetworkThreadMessenger = nullptr;
+
+		// Start Network Thread
+		std::thread NThread(&NetworkThread::NetworkThreadLoop, this);
+		NThread.detach();
 	}
 
 	NetworkThread::NetworkThread(bool aprimeThread)
 	{
 		NetworkThreadID = (size_t)this;
 		primeThread = aprimeThread;
+
+		if (MessengerServer)
+		{
+			NetworkThreadMessenger = MessengerServer->ReceiveActiveMessenger();
+			NetworkThreadMessenger->Name = "Network Thread[" + std::to_string(NetworkThreadID) + "]";
+			NetworkThreadMessenger->RegisterOnChannel(MSG_TARGET_NETWORK);
+			NetworkThreadMessenger->SendMessage(MSG_TARGET_CONSOLE, "Network Thread initialized.");
+		}
+		else
+			NetworkThreadMessenger = nullptr;
+
+		// Start Network Thread
+		std::thread NThread(&NetworkThread::NetworkThreadLoop, this);
+		NThread.detach();
 	}
 
 	NetworkThread::~NetworkThread()
