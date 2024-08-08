@@ -57,6 +57,7 @@ namespace DFSMessaging
 	private:
 		MessengerServer* parentServer;
 		unsigned int securityKey;
+		std::condition_variable messengerCondition;
 
 		std::vector<unsigned int> waitingMessageIDs;
 		std::vector<unsigned int> RegisteredChannels;
@@ -66,6 +67,7 @@ namespace DFSMessaging
 		std::string Name;
 
 		void AlertMessageID(unsigned int aMessageID);
+		void pauseForMessage(unsigned int aTimeout = 0);
 		void SendMessage(unsigned int aChannel, std::string aMessage);
 		void SendPointer(unsigned int aChannel, void* aPointer);
 		bool HasMessages(void);

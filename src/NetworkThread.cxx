@@ -3,6 +3,9 @@
 #include "CPathResolver.hxx"
 #include "Version.hxx"
 #include "ClientConnection.hxx"
+#include "DirectoryIndexing.hxx"
+#include "MimeTypes.hxx"
+#include "contrib/Base64.h"
 
 #include <thread>
 
@@ -13,16 +16,7 @@ namespace DFSNetworking
 		int NewHighestPollIterator = 0;
 		ClientConnection* deleteClient = ConnectionList[aConnectionIndex]; // TODO: This may not be necessary now...
 
-		/*ActiveConnections--;
-
-		// If serverlockdown was established and this is the last connection, do a complete shutdown.
-		if (ServerLockdown)
-		{
-			if (ActiveConnections == 0)
-				ServerShutdown = true;
-			else
-				printf("Client Disconnected; %i remaining...\n", ActiveConnections);
-		}*/
+		localConnections--;
 
 		// Iterate through the poll structure to find one that matches our clients socket, and remove it.
 		for (int PollStructIterator = 0; PollStructIterator < PollStruct.size(); PollStructIterator++)
@@ -215,11 +209,29 @@ namespace DFSNetworking
 
 	}
 
-	// Placeholder for now.
 	void NetworkThread::NetworkThreadLoop()
 	{
 		while (1)
 		{
+			// We have no connections, if we're a prime thread, wait forever, otherwise wait for 2 minutes, after 2 minutes with no messages, self destruct.
+			if (ConnectionList.size() == 0)
+			{ 				
+				if (primeThread)
+				{
+					NetworkThreadMessenger->pauseForMessage();
+				}
+				else
+				{
+					NetworkThreadMessenger->pauseForMessage(120000);
+					if (!NetworkThreadMessenger->HasMessages())
+					{
+						NetworkThreadMessenger->SendMessage(MSG_TARGET_CONSOLE, "Network Thread[" + std::to_string(NetworkThreadID) + "] has been idle for 2 minutes and is self destructing.");
+						delete this;
+						return;
+					}
+				}
+			}
+
 			// Check for messages.
 			if (NetworkThreadMessenger && NetworkThreadMessenger->HasMessages())
 			{
@@ -232,17 +244,279 @@ namespace DFSNetworking
 					// Add the new connection to the poll structure.
 					struct pollfd NewPollStruct;
 					NewPollStruct.fd = NewConnection->GetSocket();
-					NewPollStruct.events = POLLIN;
+					NewPollStruct.events = (POLLIN | POLLOUT);
 					PollStruct.push_back(NewPollStruct);
 
 					// Add the new connection to the linked list.
 					ConnectionList.push_back(NewConnection);
 
+					localConnections++;
+
 					// Send a message to the console.
 					NetworkThreadMessenger->SendMessage(MSG_TARGET_CONSOLE, "New connection accepted from " + std::string(NewConnection->GetIP()));
 				}				
 			}
-			Sleep(1000);
+			
+			// Go through the list looking for connections that have incoming data.
+			for (int ConnectionListIterator = 0; ConnectionListIterator < ConnectionList.size(); ConnectionListIterator++)
+			{
+				// This socket has incoming data. Here I'm counting on PollStruct and ConnectionList being in the same
+				// order as each other, as they only EVER get deleted together, and added together. 
+				if (PollStruct[ConnectionListIterator + 1].revents & POLLIN)
+				{
+					char DataBuffer[500]; // 500 should be big enough.
+					size_t DataRecved;
+
+					if ((DataRecved = ConnectionList[ConnectionListIterator]->RecvData(DataBuffer, sizeof(DataBuffer))) < 1)
+					{ // Disconnection or error. Terminate client.
+
+						NetworkThreadMessenger->SendMessage(MSG_TARGET_CONSOLE, std::string(ConnectionList[ConnectionListIterator]->GetIP()) + " - Disconnected w/o complete data.");
+
+						TerminateConnection(ConnectionListIterator);
+						ConnectionListIterator--;
+						if (ConnectionListIterator < 0)
+							ConnectionListIterator = 0;
+						continue;
+					}
+					else
+					{ // Incoming data.
+						ConnectionList[ConnectionListIterator]->BrowserRequest.ImportHeader(std::string(DataBuffer));
+
+						// Find what resource this person is after.
+						ConnectionList[ConnectionListIterator]->Resource = ConnectionList[ConnectionListIterator]->BrowserRequest.AccessPath;
+					}
+
+				} // [/END] Incoming Data on socket.
+
+				if (ConnectionListIterator < ConnectionList.size() && !ConnectionList[ConnectionListIterator]->Resource.empty() &&
+					PollStruct[ConnectionListIterator + 1].revents & POLLOUT)
+				{
+
+					if (!ConnectionList[ConnectionListIterator]->FileStream
+						&& ConnectionList[ConnectionListIterator]->SendBuffer.empty())
+					{
+						char Resource[151];
+						char ResourceType[151];
+						size_t ResourceSize = 0;
+
+						// We need to locate this resource.
+						if (LocateResource(ConnectionList[ConnectionListIterator]->Resource, ConnectionList[ConnectionListIterator], Resource, ResourceType) == -1)
+						{ // Resource wasn't found.
+							Buffer404(ConnectionList[ConnectionListIterator]);
+							ResourceSize = ConnectionList[ConnectionListIterator]->BytesRemaining = ConnectionList[ConnectionListIterator]->SendBuffer.size();
+							strcpy(Resource, "--404--");
+							strcpy(ResourceType, "text/html");
+
+							continue;
+						}
+
+						ParseURLEncoding(Resource);
+
+						// Is it a redirect?
+						if (strcmp(ResourceType, "redirect") == 0)
+						{
+							char direrror;
+
+							direrror = GenerateFolderIndex(ConnectionList[ConnectionListIterator]->Resource, Resource, ConnectionList[ConnectionListIterator]->SendBuffer);
+
+							if (direrror == -1)
+							{ // File/Folder doesn't exist
+								Buffer404(ConnectionList[ConnectionListIterator]);
+								ResourceSize = ConnectionList[ConnectionListIterator]->BytesRemaining = ConnectionList[ConnectionListIterator]->SendBuffer.size();
+								strcpy(Resource, "--404--");
+								strcpy(ResourceType, "text/html");
+							}
+							else if (direrror)
+							{ // It generated an index for us.
+
+								ConnectionList[ConnectionListIterator]->SendBufferIterator = 0;
+
+								ResourceSize = ConnectionList[ConnectionListIterator]->BytesRemaining = ConnectionList[ConnectionListIterator]->SendBuffer.size();
+
+								strcpy(ResourceType, "text/html");
+							}
+							else
+							{ // The location points to a file, not a folder.
+								// Determine the mimetype by the filename's extention
+								strcpy(ResourceType, ReturnMimeType(Resource));
+							}
+						}
+						else if (strcmp(ResourceType, "-") == 0)
+						{ // User didn't specify a mimetype. Determine by extension.
+							strcpy(ResourceType, ReturnMimeType(Resource));
+						}
+
+						NetworkThreadMessenger->SendMessage(MSG_TARGET_CONSOLE, std::string(ConnectionList[ConnectionListIterator]->GetIP()) + " - [" + ConnectionList[ConnectionListIterator]->Resource + "]");
+						NetworkThreadMessenger->SendMessage(MSG_TARGET_CONSOLE, "Resolved resource to: -> " + std::string(Resource));
+
+						// If there is no sendbuffer, try to open the file, and if you can't, terminate the connection.
+						if (ConnectionList[ConnectionListIterator]->SendBuffer.empty() &&
+							((ResourceSize = ConnectionList[ConnectionListIterator]->OpenFile(Resource)) == -1))
+						{ // File couldn't be opened.
+							TerminateConnection(ConnectionListIterator);
+							ConnectionListIterator--;
+							if (ConnectionListIterator < 0)
+								ConnectionListIterator = 0;
+							continue;
+						}
+						else
+						{
+							// Send the HTTP header.
+							char Buffer[500];
+
+							ConnectionList[ConnectionListIterator]->ServerResponse.AccessType = "HTTP/1.1";
+							ConnectionList[ConnectionListIterator]->ServerResponse.AccessPath = "200";
+							ConnectionList[ConnectionListIterator]->ServerResponse.AccessProtocol = "OK";
+
+							if (!Configuration.BasicCredentials.empty()) // Authentication Required
+							{
+								if (ConnectionList[ConnectionListIterator]->BrowserRequest.GetValue("Authorization").empty())
+								{ // Authentication wasn't attempted, send the request.
+									ConnectionList[ConnectionListIterator]->ServerResponse.SetValue("WWW-Authenticate",
+										"Basic realm=\"DFileServer\"");
+									ConnectionList[ConnectionListIterator]->ServerResponse.AccessPath = "401"; // Authorization Required
+								}
+								else
+								{ // Try to verify the authentication.
+									Base64 Base64Encoding;
+									std::string Base64Authorization;
+
+									Base64Authorization = ConnectionList[ConnectionListIterator]->BrowserRequest.GetValue("Authorization");
+
+									Base64Authorization.erase(0, 6); // Remove the beginning "Basic "
+									Base64Authorization.erase(Base64Authorization.length() - 1, 1); // Remove the ending
+
+									if (Base64Encoding.decode(Base64Authorization) != Configuration.BasicCredentials)
+									{
+										if (Base64Authorization == "")
+											NetworkThreadMessenger->SendMessage(MSG_TARGET_CONSOLE, std::string(ConnectionList[ConnectionListIterator]->GetIP()) + " - Protected Resource Requested; Authentication Requested.");
+										else
+											NetworkThreadMessenger->SendMessage(MSG_TARGET_CONSOLE, std::string(ConnectionList[ConnectionListIterator]->GetIP()) + " - Protected Resource Requested; Failed Authentication.");
+
+										ConnectionList[ConnectionListIterator]->ServerResponse.AccessPath = "401"; // Authorization Required
+
+										ConnectionList[ConnectionListIterator]->CloseFile(); // Make sure we close the resource.
+
+										// Prepare the 401...
+										Buffer401(ConnectionList[ConnectionListIterator]);
+										ResourceSize = ConnectionList[ConnectionListIterator]->BytesRemaining = ConnectionList[ConnectionListIterator]->SendBuffer.size();
+										strcpy(Resource, "--401--");
+										strcpy(ResourceType, "text/html");
+									}
+
+								}
+							}
+
+							sprintf(Buffer, "DFileServer/%i.%i.%i", Version::MAJORVERSION, Version::MINORVERSION, Version::PATCHVERSION);
+
+							ConnectionList[ConnectionListIterator]->ServerResponse.SetValue("Server", std::string(Buffer));
+							ConnectionList[ConnectionListIterator]->ServerResponse.SetValue("Connection", "close");
+
+							sprintf(Buffer, "%i", (int)ResourceSize);
+
+							ConnectionList[ConnectionListIterator]->ServerResponse.SetValue("Content-Length", std::string(Buffer));
+							ConnectionList[ConnectionListIterator]->ServerResponse.SetValue("Content-Type", std::string(ResourceType));
+
+							ConnectionList[ConnectionListIterator]->SendData(
+								(char*)ConnectionList[ConnectionListIterator]->ServerResponse.ExportHeader().c_str(), 0);
+						}
+					}
+					else
+					{ // Send 4096 bytes of the file the way of the client.
+						char Buffer[4096];
+						int BytesToRead, BytesRead;
+
+						// Clear the buffer.
+						memset(Buffer, '\0', sizeof(Buffer));
+
+						BytesToRead = sizeof(Buffer) - 1;
+
+						if (Configuration.MaxBandwidth)
+						{
+							// -- Bandwidth Control --
+							if (ConnectionList[ConnectionListIterator]->LastBandReset != time(NULL))
+							{
+								ConnectionList[ConnectionListIterator]->BandwidthLeft = Configuration.MaxBandwidth / localConnections;
+
+								ConnectionList[ConnectionListIterator]->LastBandReset = time(NULL);
+							}
+
+							if (BytesToRead > ConnectionList[ConnectionListIterator]->BandwidthLeft)
+								BytesToRead = ConnectionList[ConnectionListIterator]->BandwidthLeft;
+
+							ConnectionList[ConnectionListIterator]->BandwidthLeft -= BytesToRead;
+							// / -- Bandwidth Control --
+						}
+
+						if (BytesToRead > ConnectionList[ConnectionListIterator]->BytesRemaining)
+							BytesToRead = ConnectionList[ConnectionListIterator]->BytesRemaining;
+
+						if (ConnectionList[ConnectionListIterator]->FileStream)
+						{ // Read from a file
+							ConnectionList[ConnectionListIterator]->FileStream->read(Buffer, BytesToRead);
+						}
+						else
+						{ // Send from the buffer
+
+							strcpy(Buffer, ConnectionList[ConnectionListIterator]->SendBuffer.substr(
+								ConnectionList[ConnectionListIterator]->SendBufferIterator, BytesToRead).c_str());
+
+							// Increment Iterator
+							ConnectionList[ConnectionListIterator]->SendBufferIterator += BytesToRead;
+						}
+
+						BytesRead = ConnectionList[ConnectionListIterator]->SendData(Buffer, BytesToRead);
+
+						ConnectionList[ConnectionListIterator]->BytesRemaining -= BytesRead;
+
+						// It hasn't sent all the bytes we've read.
+						if (BytesRead != BytesToRead)
+						{
+							if (ConnectionList[ConnectionListIterator]->FileStream)
+							{
+								// Relocate the file pointer to match where we are.
+
+								int LocationOffset = BytesToRead - BytesRead;
+								std::ifstream::pos_type CurrentPosition = ConnectionList[ConnectionListIterator]->FileStream->tellg();
+
+								ConnectionList[ConnectionListIterator]->FileStream->seekg((CurrentPosition - (std::ifstream::pos_type)LocationOffset));
+							}
+							else
+							{
+								// Relocate the iterator to match where we are.
+
+								int LocationOffset = BytesToRead - BytesRead;
+
+								ConnectionList[ConnectionListIterator]->SendBufferIterator -= LocationOffset;
+							}
+						}
+
+						// End of the file?
+						if (ConnectionList[ConnectionListIterator]->BytesRemaining == 0)
+						{
+							TerminateConnection(ConnectionListIterator);
+							ConnectionListIterator--;
+							if (ConnectionListIterator < 0)
+								ConnectionListIterator = 0;
+							continue;
+						}
+					}
+
+
+				} // [/END] Socket can accept data.
+
+				// Connection was idle for too long, remove the jerk.
+				if (ConnectionList[ConnectionListIterator]->SecondsIdle() > 15)
+				{
+					TerminateConnection(ConnectionListIterator);
+					ConnectionListIterator--;
+					if (ConnectionListIterator < 0)
+						ConnectionListIterator = 0;
+					continue;
+				}
+
+			} // The linked list for loop.
+
 		}
 	}
 
@@ -250,6 +524,7 @@ namespace DFSNetworking
 	{
 		NetworkThreadID = (size_t)this;
 		primeThread = false;
+		localConnections = 0;
 
 		if (MessengerServer)
 		{
@@ -268,6 +543,7 @@ namespace DFSNetworking
 	{
 		NetworkThreadID = (size_t)this;
 		primeThread = aprimeThread;
+		localConnections = 0;
 
 		if (MessengerServer)
 		{
@@ -286,6 +562,7 @@ namespace DFSNetworking
 
 	NetworkThread::~NetworkThread()
 	{
-
+		if (NetworkThreadMessenger)
+			delete NetworkThreadMessenger;
 	}
 }

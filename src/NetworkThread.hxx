@@ -29,6 +29,7 @@ namespace DFSNetworking
 	private:
 		size_t NetworkThreadID;
 		bool primeThread;
+		int localConnections;
 
 		std::vector<struct pollfd> PollStruct;
 		std::vector<ClientConnection*> ConnectionList;

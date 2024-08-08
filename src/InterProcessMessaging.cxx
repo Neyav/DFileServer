@@ -15,6 +15,11 @@ namespace DFSMessaging
 	std::mutex MessageServerQueueMutex;
 	std::mutex MessageServerMutex;
 
+	// The Message class contains the message data, and is used to accept tasks and receieve messages.
+	// ==============================================================================
+	// = DFS:Messaging:Message														=
+	// ==============================================================================
+
 	Messenger* Message::identifyOrigin(void)
 	{
 		return Origin;
@@ -78,6 +83,11 @@ namespace DFSMessaging
 
 	}
 
+	// The Messenger class is used as a method to send and recieve messages between other messengers.
+	// ==============================================================================
+	// = DFS:Messaging:Messenger													=
+	// ==============================================================================
+
 	void Messenger::RegisterOnChannel(unsigned int aChannel)
 	{
 		// Check if we are registered on this channel.
@@ -124,7 +134,32 @@ namespace DFSMessaging
 	{
 		MessengerQueueMutex.lock();
 		waitingMessageIDs.push_back(aMessageID);
+		// If we're waiting for a message, notify us.
+		messengerCondition.notify_all();
 		MessengerQueueMutex.unlock();
+	}
+
+	void Messenger::pauseForMessage(unsigned int aTimeout)
+	{
+		// If we have no messages, wait for one on our condition variable for aTimeout milliseconds, or indefinitely if aTimeout is 0.
+		if (waitingMessageIDs.size() == 0)
+		{
+			std::mutex MessengerMutex;
+			std::unique_lock<std::mutex> lock(MessengerMutex);
+			if (aTimeout == 0)
+			{
+				messengerCondition.wait(lock);
+			}
+			else
+			{
+				messengerCondition.wait_for(lock, std::chrono::milliseconds(aTimeout));
+			}
+		}
+		else
+		{
+			// If we have messages, we don't need to wait.
+			return;
+		}
 	}
 
     void Messenger::SendMessage(unsigned int aChannel, std::string aMessage)
