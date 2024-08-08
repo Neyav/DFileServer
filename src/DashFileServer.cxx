@@ -385,7 +385,28 @@ int main( int argc, char *argv[] )
 #else
 	   sleep(1);
 #endif
+
+	   // Check to see if the Q key has been pushed, if so send a killall signal to the threads and shutdown.
+
+	   // Has Q been pushed
+	   if (getchar() == 'q')
+	   {
+		   std::cout << "Initiating Server Shutdown..." << std::endl;	
+		   // Send a shutdown signal to the network thread.
+		   ConsoleMessanger->SendMessage(MSG_TARGET_ALL, "SHUTDOWN");
+		   // Sleep for 5 seconds while shutdown occurs.
+#ifdef _WINDOWS
+		   Sleep(5000);
+#else
+		   sleep(5);
+#endif
+		   break;
+	   }
+
    }
+
+   delete NetworkDaemon;
+   delete MessangerServer;
 
    return 0;
 }

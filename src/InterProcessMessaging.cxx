@@ -231,7 +231,17 @@ namespace DFSMessaging
 				MessageServerQueueMutex.lock();
 			}
 			MessageServerQueueMutex.unlock();
-			
+
+			// Check for a shutdown message and break if we have one.
+			if (ServerMessanger->HasMessages())
+			{
+				MessagePacket newMessage = ServerMessanger->AcceptMessage();
+				if (newMessage.message == "SHUTDOWN")
+				{
+					std::cout << "Messenger Service received shutdown code..." << std::endl;
+					break;
+				}
+			}
 		}
 	}
 
@@ -279,6 +289,7 @@ namespace DFSMessaging
 	
 		std::cout << " -=Messanger Service Security Key generated. [" << securityKey << "]" << std::endl;
 
+		ServerMessanger = ReceiveActiveMessanger();
 		// Start Messanger Server Runtime
 		std::thread MessangerServerThread(&MessangerServer::MessangerServerRuntime, this);
 		MessangerServerThread.detach();

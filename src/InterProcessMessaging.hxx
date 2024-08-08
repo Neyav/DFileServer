@@ -67,6 +67,7 @@ namespace DFSMessaging
 		std::vector<Messanger*> Messangers;
 		std::condition_variable queueCondition;
 		std::queue<MessagePacket> MessageQueue;
+		Messanger* ServerMessanger;
 
 		void MessangerServerRuntime(void);
 	public:

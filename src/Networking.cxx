@@ -322,7 +322,20 @@ namespace DFSNetworking
 		{
 			// As of C++11, vectors are guaranteed to be contiguous in memory. So this new hackery works.
 			struct pollfd *CPollStruct = &PollStruct[0];
-			poll(CPollStruct, PollStruct.size(), INFTIM);
+			poll(CPollStruct, PollStruct.size(), 1000);
+
+			// Check for a shutdown message.
+			if (NetworkMessanger->HasMessages())
+			{
+				DFSMessaging::MessagePacket Message = NetworkMessanger->AcceptMessage();
+
+				if (Message.message == "SHUTDOWN")
+				{
+					ServerShutdown = true;
+					std::cout << "Network Daemon received shutdown message." << std::endl;
+					break;
+				}
+			}			
 
 			// Do we have an incoming connection?
 			if ((PollStruct[0].revents & POLLIN) && (ActiveConnections != Configuration.MaxConnections || !Configuration.MaxConnections))
