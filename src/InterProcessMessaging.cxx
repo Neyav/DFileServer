@@ -15,7 +15,7 @@ namespace DFSMessaging
 	std::mutex MessageServerQueueMutex;
 	std::mutex MessageServerMutex;
 
-	// The Message class contains the message data, and is used to accept tasks and receieve messages.
+	// The Message class contains the message data, and is used to accept tasks and receive messages.
 	// ==============================================================================
 	// = DFS:Messaging:Message														=
 	// ==============================================================================
@@ -115,7 +115,7 @@ namespace DFSMessaging
 
 	}
 
-	// The Messenger class is used as a method to send and recieve messages between other messengers.
+	// The Messenger class is used as a method to send and receive messages between other messengers.
 	// ==============================================================================
 	// = DFS:Messaging:Messenger													=
 	// ==============================================================================
