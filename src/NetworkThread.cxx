@@ -9,6 +9,7 @@
 #include "contrib/Base64.h"
 
 #include <thread>
+#include <iostream>
 
 namespace DFSNetworking
 {
@@ -18,6 +19,8 @@ namespace DFSNetworking
 		ClientConnection* deleteClient = ConnectionList[aConnectionIndex]; // TODO: This may not be necessary now...
 
 		localConnections--;
+
+		std::cout << "Network THREAD [" << NetworkThreadID << "] is terminating connection." << std::endl;
 
 		// Iterate through the poll structure to find one that matches our clients socket, and remove it.
 		for (int PollStructIterator = 0; PollStructIterator < PollStruct.size(); PollStructIterator++)
@@ -216,7 +219,8 @@ namespace DFSNetworking
 		{
 			// We have no connections, if we're a prime thread, wait forever, otherwise wait for 2 minutes, after 2 minutes with no messages, self destruct.
 			if (ConnectionList.size() == 0)
-			{ 				
+			{ 	
+				std::cout << "DEBUG: Network THREAD [" << NetworkThreadID << "] is idle." << std::endl;
 				if (primeThread)
 				{
 					NetworkThreadMessenger->pauseForMessage();
@@ -231,16 +235,19 @@ namespace DFSNetworking
 						return;
 					}
 				}
+				std::cout << "DEBUG: Network THREAD [" << NetworkThreadID << "] is no longer idle." << std::endl;
 			}
 
 			// Check for messages.
-			if (NetworkThreadMessenger && NetworkThreadMessenger->HasMessages())
+			while (NetworkThreadMessenger && NetworkThreadMessenger->HasMessages())
 			{
 				DFSMessaging::Message NewMessage = NetworkThreadMessenger->AcceptMessage();
 
 				if (NewMessage.Pointer && NewMessage.acceptTask())
 				{
 					ClientConnection* NewConnection = (ClientConnection*)NewMessage.Pointer;
+
+					std::cout << "Network THREAD [" << NetworkThreadID << "] is accepting new connection." << std::endl;
 
 					// Add the new connection to the poll structure.
 					struct pollfd NewPollStruct;
@@ -258,8 +265,12 @@ namespace DFSNetworking
 				}				
 			}
 
+			std::cout << "Network THREAD [" << NetworkThreadID << "] is processing connections." << std::endl;
+
 			struct pollfd* CPollStruct = &PollStruct[0];
 			poll(CPollStruct, PollStruct.size(), 0);
+
+			std::cout << "Network THREAD [" << NetworkThreadID << "] has finished polling." << std::endl;
 			
 			// Go through the list looking for connections that have incoming data.
 			for (int ConnectionListIterator = 0; ConnectionListIterator < ConnectionList.size(); ConnectionListIterator++)
@@ -270,6 +281,8 @@ namespace DFSNetworking
 				{
 					char DataBuffer[500]; // 500 should be big enough.
 					size_t DataRecved;
+					std::cout << "Network THREAD [" << NetworkThreadID << "] has incoming data on socket." << std::endl;
+
 
 					if ((DataRecved = ConnectionList[ConnectionListIterator]->RecvData(DataBuffer, sizeof(DataBuffer))) < 1)
 					{ // Disconnection or error. Terminate client.
@@ -295,13 +308,15 @@ namespace DFSNetworking
 				if (ConnectionListIterator < ConnectionList.size() && !ConnectionList[ConnectionListIterator]->Resource.empty() &&
 					PollStruct[ConnectionListIterator].revents & POLLOUT)
 				{
-
+					std::cout << "Network THREAD [" << NetworkThreadID << "] is sending data on socket." << std::endl;
 					if (!ConnectionList[ConnectionListIterator]->FileStream
 						&& ConnectionList[ConnectionListIterator]->SendBuffer.empty())
 					{
 						char Resource[151];
 						char ResourceType[151];
 						size_t ResourceSize = 0;
+
+						std::cout << "Network THREAD [" << NetworkThreadID << "] is resolving resource." << std::endl;
 
 						// We need to locate this resource.
 						if (LocateResource(ConnectionList[ConnectionListIterator]->Resource, ConnectionList[ConnectionListIterator], Resource, ResourceType) == -1)
@@ -314,12 +329,16 @@ namespace DFSNetworking
 							continue;
 						}
 
+						std::cout << "Network THREAD [" << NetworkThreadID << "] is resolving resource to: " << Resource << std::endl;
+
 						ParseURLEncoding(Resource);
 
 						// Is it a redirect?
 						if (strcmp(ResourceType, "redirect") == 0)
 						{
 							char direrror;
+
+							std::cout << "Network THREAD [" << NetworkThreadID << "] is redirecting resource." << std::endl;
 
 							direrror = GenerateFolderIndex(ConnectionList[ConnectionListIterator]->Resource, Resource, ConnectionList[ConnectionListIterator]->SendBuffer);
 
@@ -366,7 +385,9 @@ namespace DFSNetworking
 						else
 						{
 							// Send the HTTP header.
-							char Buffer[500];
+							char Buffer[5000];
+
+							std::cout << "Network THREAD [" << NetworkThreadID << "] is sending HTTP header." << std::endl;
 
 							ConnectionList[ConnectionListIterator]->ServerResponse.AccessType = "HTTP/1.1";
 							ConnectionList[ConnectionListIterator]->ServerResponse.AccessPath = "200";
@@ -423,12 +444,16 @@ namespace DFSNetworking
 
 							ConnectionList[ConnectionListIterator]->SendData(
 								(char*)ConnectionList[ConnectionListIterator]->ServerResponse.ExportHeader().c_str(), 0);
+
+							std::cout << "Network THREAD [" << NetworkThreadID << "] has sent HTTP header." << std::endl;
 						}
 					}
 					else
 					{ // Send 4096 bytes of the file the way of the client.
 						char Buffer[4096];
 						int BytesToRead, BytesRead;
+
+						std::cout << "Network THREAD [" << NetworkThreadID << "] is sending data on socket." << std::endl;
 
 						// Clear the buffer.
 						memset(Buffer, '\0', sizeof(Buffer));

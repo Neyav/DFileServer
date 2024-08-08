@@ -97,6 +97,7 @@ namespace DFSMessaging
 		Origin = aOrigin;
 		OriginName = aOrigin->Name;
 		securityKey = asecurityKey;
+		Pointer = nullptr;
 		Pending = 0;
 		messageID = 0;
 	}
@@ -106,6 +107,7 @@ namespace DFSMessaging
 		isPointer = false;
 		isTask = false;
 		Origin = nullptr;
+		Pointer = nullptr;
 		securityKey = 0;
 		messageID = 0;
 	}
