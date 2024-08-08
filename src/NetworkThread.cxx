@@ -257,6 +257,9 @@ namespace DFSNetworking
 					NetworkThreadMessenger->SendMessage(MSG_TARGET_CONSOLE, "New connection accepted from " + std::string(NewConnection->GetIP()));
 				}				
 			}
+
+			struct pollfd* CPollStruct = &PollStruct[0];
+			poll(CPollStruct, PollStruct.size(), 0);
 			
 			// Go through the list looking for connections that have incoming data.
 			for (int ConnectionListIterator = 0; ConnectionListIterator < ConnectionList.size(); ConnectionListIterator++)
