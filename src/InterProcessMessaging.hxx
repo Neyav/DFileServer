@@ -45,6 +45,7 @@ namespace DFSMessaging
 
 		Messenger *identifyOrigin(void);
 		bool acceptTask(void);
+		void refuseTask(void);
 
 		Message(bool aisPointer, bool aisTask, Messenger *aOrigin, unsigned int asecurityKey);
 		Message();

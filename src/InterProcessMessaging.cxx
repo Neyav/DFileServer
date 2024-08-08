@@ -53,9 +53,41 @@ namespace DFSMessaging
 			MessageServerMutex.unlock();
 			return true;
 		}
-		MessageServerMutex.unlock();
+		MessageServerMutex.unlock();		
 
 		return false;
+	}
+
+	void Message::refuseTask(void)
+	{
+		// Check if the message is still valid, if it is, decrease the pending count.
+		if (Origin == nullptr)
+		{
+			return;
+		}
+
+		if (Origin->securityKey != securityKey)
+		{
+			return;
+		}
+
+		if (!isTask)
+		{
+			return;
+		}
+
+		MessengerServer* parentServer = Origin->parentServer;
+
+		MessageServerMutex.lock();
+		// Check if the message is in the map, if so, decrease the pending count.
+		if (parentServer->sentMessages.find(messageID) != parentServer->sentMessages.end())
+		{
+			if (parentServer->sentMessages[messageID].Pending-- == 0)
+			{	// This message has been rejected by everyone that looked at it. Erase it from the map.
+				parentServer->sentMessages.erase(messageID);
+			}
+		}
+		MessageServerMutex.unlock();
 	}
 
 	Message::Message(bool aisPointer, bool aisTask, Messenger* aOrigin, unsigned int asecurityKey)
@@ -254,7 +286,7 @@ namespace DFSMessaging
 		{
 			newMessage = sentMessages[aMessageID];
 			if (!sentMessages[aMessageID].isTask)
-			{  // If it's not a task messages are accepted as recieved.
+			{  // If it's not a task messages are accepted as received.
 				if (sentMessages[aMessageID].Pending-- == 0)
 				{
 					sentMessages.erase(aMessageID);
@@ -299,6 +331,7 @@ namespace DFSMessaging
 
 			// Distribute any messages in the queue.
 			MessageServerQueueMutex.lock();
+			MessageServerMutex.lock();
 			while (MessageQueue.size() > 0)
 			{
 				Message newMessage = MessageQueue.front();
@@ -343,6 +376,7 @@ namespace DFSMessaging
 				this->PruneOldMessages(60);
 
 			}
+			MessageServerMutex.unlock();
 			MessageServerQueueMutex.unlock();
 			
 		}
