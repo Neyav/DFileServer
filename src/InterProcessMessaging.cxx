@@ -38,7 +38,7 @@ namespace DFSMessaging
 			return false;
 		}
 	
-		if (deleteOnReceive)
+		if (!isTask)
 		{
 			return false;
 		}
@@ -58,21 +58,21 @@ namespace DFSMessaging
 		return false;
 	}
 
-	Message::Message(bool aisPointer, bool adeleteOnRecieve, Messenger* aOrigin, unsigned int asecurityKey)
+	Message::Message(bool aisPointer, bool aisTask, Messenger* aOrigin, unsigned int asecurityKey)
 	{
 		isPointer = aisPointer;
-		deleteOnReceive = adeleteOnRecieve;
+		isTask = aisTask;
 		Origin = aOrigin;
 		OriginName = aOrigin->Name;
 		securityKey = asecurityKey;
-		Outgoing = 0;
+		Pending = 0;
 		messageID = 0;
 	}
 
 	Message::Message()
 	{
 		isPointer = false;
-		deleteOnReceive = true;
+		isTask = false;
 		Origin = nullptr;
 		securityKey = 0;
 		messageID = 0;
@@ -164,7 +164,7 @@ namespace DFSMessaging
 
     void Messenger::SendMessage(unsigned int aChannel, std::string aMessage)
 	{
-		Message newMessage(false, true, this, securityKey);
+		Message newMessage(false, false, this, securityKey);
 
 		newMessage.message = aMessage;
 		newMessage.channel = aChannel;
@@ -174,7 +174,7 @@ namespace DFSMessaging
 
 	void Messenger::SendPointer(unsigned int aChannel, void* aPointer)
 	{
-		Message newMessage(true, false, this, securityKey);
+		Message newMessage(true, true, this, securityKey);
 
 		newMessage.Pointer = aPointer;
 		newMessage.channel = aChannel;
@@ -253,11 +253,13 @@ namespace DFSMessaging
 		if (sentMessages.find(aMessageID) != sentMessages.end())
 		{
 			newMessage = sentMessages[aMessageID];
-			if (sentMessages[aMessageID].Outgoing-- == 0)
-			{	// The last reciepient has recieved the message.
-				if (sentMessages[aMessageID].deleteOnReceive)
+			if (!sentMessages[aMessageID].isTask)
+			{  // If it's not a task messages are accepted as recieved.
+				if (sentMessages[aMessageID].Pending-- == 0)
+				{
 					sentMessages.erase(aMessageID);
-			} 
+				}
+			}
 			
 		}
 		MessageServerQueueMutex.unlock();
@@ -312,7 +314,7 @@ namespace DFSMessaging
 						}
 
 						messenger->AlertMessageID(nextMessageID);
-						newMessage.Outgoing++;
+						newMessage.Pending++;
 					}				
 				}
 				else
@@ -326,7 +328,7 @@ namespace DFSMessaging
 						if (messenger->isRegisteredOnChannel(newMessage.channel))
 						{
 							messenger->AlertMessageID(nextMessageID);
-							newMessage.Outgoing++;
+							newMessage.Pending++;
 						}
 					}
 				}

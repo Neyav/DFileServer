@@ -28,11 +28,11 @@ namespace DFSMessaging
 	{
 	private:		
 		bool isPointer;
-		bool deleteOnReceive;
+		bool isTask;
 		unsigned int securityKey;
 		unsigned int messageID;
 		Messenger* Origin;
-		unsigned int Outgoing; // This is how many copies of this message are out there.
+		unsigned int Pending; // This is how many copies of this message are out there waiting to be processed.
 		
 		friend class MessengerServer;
 	public:
@@ -46,7 +46,7 @@ namespace DFSMessaging
 		Messenger *identifyOrigin(void);
 		bool acceptTask(void);
 
-		Message(bool aisPointer, bool adeleteOnRecieve, Messenger *aOrigin, unsigned int asecurityKey);
+		Message(bool aisPointer, bool aisTask, Messenger *aOrigin, unsigned int asecurityKey);
 		Message();
 		~Message();
 		
