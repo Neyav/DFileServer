@@ -135,6 +135,7 @@ namespace DFSNetworking
 			if ((PollStruct[0].revents & POLLIN) && (ActiveConnections != Configuration.MaxConnections || !Configuration.MaxConnections))
 			{
 				// Handle the incoming connection.
+				NetworkMessanger->SendMessage(MSG_TARGET_CONSOLE, "Accepting incoming connection; distributing to NetworkThreads");
 				IncomingConnection();
 			}
 
