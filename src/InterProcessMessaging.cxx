@@ -174,7 +174,13 @@ namespace DFSMessaging
 	void Messenger::pauseForMessage(unsigned int aTimeout)
 	{
 		// If we have no messages, wait for one on our condition variable for aTimeout milliseconds, or indefinitely if aTimeout is 0.
-		if (waitingMessageIDs.size() == 0)
+		int waitingMessages = 0;
+
+		MessengerQueueMutex.lock();
+		waitingMessages = waitingMessageIDs.size();
+		MessengerQueueMutex.unlock();
+
+		if (waitingMessages == 0)
 		{
 			std::mutex MessengerMutex;
 			std::unique_lock<std::mutex> lock(MessengerMutex);
