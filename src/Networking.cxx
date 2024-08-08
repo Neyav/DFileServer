@@ -124,7 +124,7 @@ namespace DFSNetworking
 
 		// Start our prime Network Thread.
 		NetworkThread* PrimeNetworkThread = new NetworkThread(true);
-
+		
 		while (1)
 		{
 			// As of C++11, vectors are guaranteed to be contiguous in memory. So this new hackery works.
