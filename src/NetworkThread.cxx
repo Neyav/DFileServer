@@ -4,6 +4,7 @@
 #include "Version.hxx"
 #include "ClientConnection.hxx"
 #include "DirectoryIndexing.hxx"
+#include "InterProcessMessaging.hxx"
 #include "MimeTypes.hxx"
 #include "contrib/Base64.h"
 
@@ -262,7 +263,7 @@ namespace DFSNetworking
 			{
 				// This socket has incoming data. Here I'm counting on PollStruct and ConnectionList being in the same
 				// order as each other, as they only EVER get deleted together, and added together. 
-				if (PollStruct[ConnectionListIterator + 1].revents & POLLIN)
+				if (PollStruct[ConnectionListIterator].revents & POLLIN)
 				{
 					char DataBuffer[500]; // 500 should be big enough.
 					size_t DataRecved;
@@ -289,7 +290,7 @@ namespace DFSNetworking
 				} // [/END] Incoming Data on socket.
 
 				if (ConnectionListIterator < ConnectionList.size() && !ConnectionList[ConnectionListIterator]->Resource.empty() &&
-					PollStruct[ConnectionListIterator + 1].revents & POLLOUT)
+					PollStruct[ConnectionListIterator].revents & POLLOUT)
 				{
 
 					if (!ConnectionList[ConnectionListIterator]->FileStream
