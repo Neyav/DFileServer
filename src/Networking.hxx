@@ -35,12 +35,6 @@ namespace DFSNetworking
 		SOCKET NetworkSocket;
 
 		void IncomingConnection(void);
-		void TerminateConnection(int aConnectionIndex);
-
-		char LocateResource(std::string Resource, ClientConnection* ArgClient, char* DstResource, char* DstResourceType);
-		void Buffer404(ClientConnection* ArgClient);
-		void Buffer401(ClientConnection* ArgClient);
-		void ParseURLEncoding(char* ArgBuffer);
 	public:
 		bool initializeNetwork(unsigned int aPort, unsigned int aBackLog);
 
