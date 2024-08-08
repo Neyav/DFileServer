@@ -143,13 +143,6 @@ namespace DFSNetworking
 			{
 				printf("Initating self destruct sequence...\n");
 
-				printf("Terminating %i Client(s)\n", ActiveConnections);
-				// Remove all Client Connections gracefully.
-				while (ConnectionList.begin() != ConnectionList.end())
-				{
-					TerminateConnection(0);
-				}
-
 				// Close the main server socket.
 #ifdef _WINDOWS
 				closesocket(NetworkSocket);
