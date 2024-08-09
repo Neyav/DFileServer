@@ -22,6 +22,7 @@ namespace DFSNetworking
 
 		std::cout << "Network THREAD [" << NetworkThreadID << "] is terminating connection." << std::endl;
 
+		std::cout << "--[Removing pollstruct" << std::endl;
 		// Iterate through the poll structure to find one that matches our clients socket, and remove it.
 		for (int PollStructIterator = 0; PollStructIterator < PollStruct.size(); PollStructIterator++)
 		{
@@ -31,13 +32,16 @@ namespace DFSNetworking
 				break;
 			}
 		}
-
+		std::cout << "  [Removing Client." << std::endl;
 		// Remove the client from the linked list.
 		ConnectionList.erase(ConnectionList.begin() + aConnectionIndex);
 
+		std::cout << "  [Deleting Client." << std::endl;	
 		delete deleteClient; // Had to reference it seperately to avoid chicken/egg problem with remove from list versus
 		// delete or delete then remove from list.
 
+	
+		std::cout << "--[Connection Terminated.." << std::endl;	
 		return;
 	}
 

@@ -76,7 +76,7 @@ ClientConnection::~ClientConnection()
 	this->DisconnectClient();
 
 	if (Messanger)
-		MessengerServer->DeactivateActiveMessenger(Messanger);
+		delete Messanger;
 }
 
 SOCKET ClientConnection::GetSocket ( void )
