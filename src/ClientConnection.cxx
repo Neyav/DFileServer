@@ -66,8 +66,8 @@ ClientConnection::ClientConnection ()
 
 	LastAction = time (NULL);
 
-	Messanger = MessengerServer->ReceiveActiveMessenger();
-	Messanger->Name = "Inactive Client Connection";
+	Messenger = MessengerServer->ReceiveActiveMessenger();
+	Messenger->Name = "Inactive Client Connection";
 }
 
 ClientConnection::~ClientConnection()
@@ -75,8 +75,8 @@ ClientConnection::~ClientConnection()
 	this->CloseFile();
 	this->DisconnectClient();
 
-	if (Messanger)
-		delete Messanger;
+	if (Messenger)
+		delete Messenger;
 }
 
 SOCKET ClientConnection::GetSocket ( void )
@@ -142,12 +142,12 @@ char ClientConnection::AcceptConnection ( int ArgSocket )
 	if ( ( NetworkSocket = accept(ArgSocket, (struct sockaddr *)&SocketStruct,
 			&sin_size)) == -1 )
 	{
-		Messanger->SendMessage(MSG_TARGET_CONSOLE, "ClientConnection::AcceptConnection -- accept() failed.");
+		Messenger->SendMessage(MSG_TARGET_CONSOLE, "ClientConnection::AcceptConnection -- accept() failed.");
 	
 		return -1;
 	}
 
-	Messanger->Name = "Client: " + std::string(inet_ntoa(SocketStruct.sin_addr));
+	Messenger->Name = "Client: " + std::string(inet_ntoa(SocketStruct.sin_addr));
 
 	return 0;
 }
@@ -161,7 +161,7 @@ void ClientConnection::DisconnectClient ( void )
 	if ( close (NetworkSocket) == -1 )
 #endif
 	{
-		Messanger->SendMessage(MSG_TARGET_CONSOLE, "ClientConnection::DisconnectClient -- close() failed.");
+		Messenger->SendMessage(MSG_TARGET_CONSOLE, "ClientConnection::DisconnectClient -- close() failed.");
 	}
 
 	NetworkSocket = -1;
@@ -179,7 +179,7 @@ int ClientConnection::SendData ( char *Argstring, int ArgSize )
 
 	if ( (DataSent = send( NetworkSocket, Argstring, DataSize, 0 )) == -1)
 	{
-		Messanger->SendMessage(MSG_TARGET_CONSOLE, "ClientConnection::SendData -- send() failed.");
+		Messenger->SendMessage(MSG_TARGET_CONSOLE, "ClientConnection::SendData -- send() failed.");
 		return 0;
 	}
 
@@ -197,7 +197,7 @@ size_t ClientConnection::RecvData ( char *Argstring, size_t ArgDataSize )
 
 	if ( (DataRecv = recv( NetworkSocket, Argstring, ArgDataSize-1, 0 )) == -1)
 	{
-		Messanger->SendMessage(MSG_TARGET_CONSOLE, "ClientConnection::RecvData -- recv() failed.");
+		Messenger->SendMessage(MSG_TARGET_CONSOLE, "ClientConnection::RecvData -- recv() failed.");
 		return -1;
 	}
 

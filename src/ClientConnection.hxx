@@ -19,7 +19,7 @@ class ClientConnection
 		SOCKET				NetworkSocket;
 		struct sockaddr_in	SocketStruct;
 		time_t				LastAction;
-		DFSMessaging::Messenger* Messanger;
+		DFSMessaging::Messenger* Messenger;
 	public:	
 
 		std::ifstream		*FileStream;
