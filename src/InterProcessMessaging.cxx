@@ -338,7 +338,7 @@ namespace DFSMessaging
 			queueCondition.wait(queueLock);
 
 			// Distribute any messages in the queue.
-			MessageServerMutex.lock();
+			MessageServerAddRemoveMutex.lock();
 			while (MessageQueue.size() > 0)
 			{
 				Message newMessage = MessageQueue.front();
@@ -383,7 +383,7 @@ namespace DFSMessaging
 				this->PruneOldMessages(60);
 
 			}
-			MessageServerMutex.unlock();			
+			MessageServerAddRemoveMutex.unlock();			
 		}
 	}
 
