@@ -217,6 +217,8 @@ namespace DFSNetworking
 	{
 		while (1)
 		{
+			std::cout << "DEBUG: Main loop of Network THREAD [" << NetworkThreadID << "] has started." << std::endl;
+
 			// We have no connections, if we're a prime thread, wait forever, otherwise wait for 2 minutes, after 2 minutes with no messages, self destruct.
 			if (ConnectionList.size() == 0)
 			{ 	
@@ -239,9 +241,13 @@ namespace DFSNetworking
 			}
 
 			// Check for messages.
+			std::cout << "Check for messages." << std::endl;
 			while (NetworkThreadMessenger && NetworkThreadMessenger->HasMessages())
 			{
+				std::cout << "Network THREAD [" << NetworkThreadID << "] is checking messages." << std::endl;
 				DFSMessaging::Message NewMessage = NetworkThreadMessenger->AcceptMessage();
+
+				std::cout << "Network THREAD [" << NetworkThreadID << "] is processing messages." << std::endl;
 
 				if (NewMessage.Pointer && NewMessage.acceptTask())
 				{
@@ -267,6 +273,12 @@ namespace DFSNetworking
 
 			std::cout << "Network THREAD [" << NetworkThreadID << "] is processing connections." << std::endl;
 
+			if (PollStruct.size() == 0)
+			{
+				std::cout << "Network THREAD [" << NetworkThreadID << "] has no connections to process." << std::endl;
+				continue;
+			}
+
 			struct pollfd* CPollStruct = &PollStruct[0];
 			poll(CPollStruct, PollStruct.size(), 0);
 
@@ -275,6 +287,7 @@ namespace DFSNetworking
 			// Go through the list looking for connections that have incoming data.
 			for (int ConnectionListIterator = 0; ConnectionListIterator < ConnectionList.size(); ConnectionListIterator++)
 			{
+				std::cout << "DEBUG: Network THREAD [" << NetworkThreadID << "] is processing [" << ConnectionListIterator << "]." << std::endl;
 				// This socket has incoming data. Here I'm counting on PollStruct and ConnectionList being in the same
 				// order as each other, as they only EVER get deleted together, and added together. 
 				if (PollStruct[ConnectionListIterator].revents & POLLIN)
@@ -534,16 +547,20 @@ namespace DFSNetworking
 
 				} // [/END] Socket can accept data.
 
+				std::cout << "Checking for idle connection." << std::endl;	
 				// Connection was idle for too long, remove the jerk.
 				if (ConnectionList[ConnectionListIterator]->SecondsIdle() > 15)
 				{
+					std::cout << "Connection was idle for too long, removing." << std::endl;
 					TerminateConnection(ConnectionListIterator);
 					ConnectionListIterator--;
 					if (ConnectionListIterator < 0)
 						ConnectionListIterator = 0;
 					continue;
 				}
+				std::cout << "Done checking for idle connection." << std::endl;
 
+				std::cout << "Network THREAD [" << NetworkThreadID << "] LOOP: ConnectionListIterator: " << ConnectionListIterator << " ConnectionList size: " << ConnectionList.size() << std::endl;
 			} // The linked list for loop.
 
 		}
