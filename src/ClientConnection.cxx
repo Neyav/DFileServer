@@ -34,6 +34,7 @@
 #include <string.h>
 #include <errno.h>
 #include <memory>
+#include <iostream>
 #ifdef _WINDOWS
 #include <winsock.h>
 #include <io.h>
@@ -72,9 +73,12 @@ ClientConnection::ClientConnection ()
 
 ClientConnection::~ClientConnection()
 {
+	std::cout << "ClientConnection::~ClientConnection() -= CloseFile" << std::endl;
 	this->CloseFile();
+	std::cout << "ClientConnection::~ClientConnection() -= DisconnectClient" << std::endl;
 	this->DisconnectClient();
 
+	std::cout << "ClientConnection::~ClientConnection() -= Delete Messenger" << std::endl;
 	if (Messenger)
 		delete Messenger;
 }

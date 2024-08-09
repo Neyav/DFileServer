@@ -37,7 +37,7 @@ namespace DFSNetworking
 		ConnectionList.erase(ConnectionList.begin() + aConnectionIndex);
 
 		std::cout << "  [Deleting Client." << std::endl;	
-		delete deleteClient; // Had to reference it seperately to avoid chicken/egg problem with remove from list versus
+		delete deleteClient; // Had to reference it separately to avoid chicken/egg problem with remove from list versus
 		// delete or delete then remove from list.
 
 	

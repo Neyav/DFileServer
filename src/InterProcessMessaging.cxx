@@ -12,6 +12,7 @@ namespace DFSMessaging
 {
 	std::mutex MessengerMutex;
 	std::mutex MessageServerMutex;
+	std::mutex MessageServerAddRemoveMutex;
 
 	// The Message class contains the message data, and is used to accept tasks and receive messages.
 	// ==============================================================================
@@ -237,9 +238,9 @@ namespace DFSMessaging
 	{
 		int MessageCount = 0;
 
-		MessengerMutex.lock();
+		//MessengerMutex.lock();
 		MessageCount = this->waitingMessageIDs.size();
-		MessengerMutex.unlock();
+		//MessengerMutex.unlock();
 
 		return (MessageCount > 0);
 	}
@@ -253,6 +254,7 @@ namespace DFSMessaging
 	{
 		if (parentServer != nullptr)
 		{
+			std::cout << " -=Messenger [" << Name << "] shutting down." << std::endl;
 			parentServer->DeactivateActiveMessenger(this);
 		}
 	}
@@ -391,16 +393,18 @@ namespace DFSMessaging
 		
 		newMessenger = new Messenger(securityKey, this);
 
-		MessageServerMutex.lock();
+		MessageServerAddRemoveMutex.lock();
 		Messengers.push_back(newMessenger);
-		MessageServerMutex.unlock();
+		MessageServerAddRemoveMutex.unlock();
 
 		return Messengers.back();
 	}
 
 	void MessengerServer::DeactivateActiveMessenger(Messenger* aMessenger)
 	{
-		MessageServerMutex.lock();
+		std::cout << " -==Message Server locking..." << std::endl;
+		MessageServerAddRemoveMutex.lock();
+		std::cout << " -==Message Server locked." << std::endl;
 		for (int i = 0; i < Messengers.size(); i++)
 		{
 			if (Messengers[i] == aMessenger)
@@ -411,7 +415,9 @@ namespace DFSMessaging
 				break;
 			}
 		}
-		MessageServerMutex.unlock();
+		std::cout << " -==Message Server unlocking..." << std::endl;
+		MessageServerAddRemoveMutex.unlock();
+		std::cout << " -==Message Server unlocked." << std::endl;
 	}
 
 	MessengerServer::MessengerServer()
