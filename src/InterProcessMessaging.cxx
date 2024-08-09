@@ -238,9 +238,9 @@ namespace DFSMessaging
 	{
 		int MessageCount = 0;
 
-		//MessengerMutex.lock();
+		MessengerMutex.lock();
 		MessageCount = this->waitingMessageIDs.size();
-		//MessengerMutex.unlock();
+		MessengerMutex.unlock();
 
 		return (MessageCount > 0);
 	}
@@ -402,9 +402,7 @@ namespace DFSMessaging
 
 	void MessengerServer::DeactivateActiveMessenger(Messenger* aMessenger)
 	{
-		std::cout << " -==Message Server locking..." << std::endl;
 		MessageServerAddRemoveMutex.lock();
-		std::cout << " -==Message Server locked." << std::endl;
 		for (int i = 0; i < Messengers.size(); i++)
 		{
 			if (Messengers[i] == aMessenger)
@@ -415,9 +413,7 @@ namespace DFSMessaging
 				break;
 			}
 		}
-		std::cout << " -==Message Server unlocking..." << std::endl;
 		MessageServerAddRemoveMutex.unlock();
-		std::cout << " -==Message Server unlocked." << std::endl;
 	}
 
 	MessengerServer::MessengerServer()
