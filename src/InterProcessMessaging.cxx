@@ -254,7 +254,6 @@ namespace DFSMessaging
 	{
 		if (parentServer != nullptr)
 		{
-			std::cout << " -=Messenger [" << Name << "] shutting down." << std::endl;
 			parentServer->DeactivateActiveMessenger(this);
 		}
 	}
