@@ -122,8 +122,9 @@ namespace DFSNetworking
 	{
 		std::cout << " -=Network Loop activated: Listening on port " << listenPort << "..." << std::endl;
 
-		// Start our prime Network Thread.
-		NetworkThread* PrimeNetworkThread = new NetworkThread(true);
+		// Start the specified number of prime threads.
+		for (int i = 0; i < Configuration.primeThreads; i++)
+			NetworkThread* PrimeNetworkThread = new NetworkThread(true);
 		
 		while (1)
 		{

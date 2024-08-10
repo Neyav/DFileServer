@@ -71,6 +71,7 @@ public:
 struct Configuration_t
 {
 	int Port;
+	int primeThreads;
 	int BackLog;
 	int MaxConnections;
 	int MaxBandwidth;
@@ -82,6 +83,7 @@ struct Configuration_t
 Configuration_t() // Just some default values.
 	{
 		Port = 2000;
+		primeThreads = 4;
 		BackLog = 100;
 		MaxConnections = 0;
 		MaxBandwidth = 0;
