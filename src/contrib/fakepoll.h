@@ -110,7 +110,7 @@ inline int poll(struct pollfd *pollSet, int pollCount, int pollTimeout)
     }
     
     
-    selected = select(maxFD+1, readp, writep, exceptp, tvp);
+    selected = select((int)maxFD+1, readp, writep, exceptp, tvp);
 
 
     if (selected < 0) {

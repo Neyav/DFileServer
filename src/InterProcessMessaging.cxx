@@ -178,7 +178,7 @@ namespace DFSMessaging
 		int waitingMessages = 0;
 
 		MessengerMutex.lock();
-		waitingMessages = waitingMessageIDs.size();
+		waitingMessages = (int)waitingMessageIDs.size();
 		MessengerMutex.unlock();
 
 		if (waitingMessages == 0)
@@ -239,7 +239,7 @@ namespace DFSMessaging
 		int MessageCount = 0;
 
 		MessengerMutex.lock();
-		MessageCount = this->waitingMessageIDs.size();
+		MessageCount = (int)this->waitingMessageIDs.size();
 		MessengerMutex.unlock();
 
 		return (MessageCount > 0);
@@ -373,7 +373,7 @@ namespace DFSMessaging
 				}
 
 				// Add the message to the map.
-				newMessage.sendTime = std::time(nullptr);
+				newMessage.sendTime = (unsigned int) std::time(nullptr);
 				newMessage.messageID = nextMessageID;
 				sentMessages[nextMessageID] = newMessage;
 				nextMessageID++;

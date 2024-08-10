@@ -264,7 +264,7 @@ namespace DFSNetworking
 			}
 
 			struct pollfd* CPollStruct = &PollStruct[0];
-			poll(CPollStruct, PollStruct.size(), 0);
+			poll(CPollStruct, (int)PollStruct.size(), 0);
 			
 			// Go through the list looking for connections that have incoming data.
 			for (int ConnectionListIterator = 0; ConnectionListIterator < ConnectionList.size(); ConnectionListIterator++)
@@ -457,7 +457,7 @@ namespace DFSNetworking
 						}
 
 						if (BytesToRead > ConnectionList[ConnectionListIterator]->BytesRemaining)
-							BytesToRead = ConnectionList[ConnectionListIterator]->BytesRemaining;
+							BytesToRead = (int)ConnectionList[ConnectionListIterator]->BytesRemaining;
 
 						if (ConnectionList[ConnectionListIterator]->FileStream)
 						{ // Read from a file

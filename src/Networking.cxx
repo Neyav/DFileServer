@@ -129,7 +129,7 @@ namespace DFSNetworking
 		{
 			// As of C++11, vectors are guaranteed to be contiguous in memory. So this new hackery works.
 			struct pollfd *CPollStruct = &PollStruct[0];
-			poll(CPollStruct, PollStruct.size(), 100);
+			poll(CPollStruct, (int)PollStruct.size(), 100);
 
 			// Do we have an incoming connection?
 			if ((PollStruct[0].revents & POLLIN) && (ActiveConnections != Configuration.MaxConnections || !Configuration.MaxConnections))

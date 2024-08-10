@@ -41,9 +41,9 @@ class ClientConnection
 		char *GetIP ( void );
 		size_t OpenFile ( char * );
 		void CloseFile ( void );
-		char AcceptConnection ( int );
+		char AcceptConnection ( SOCKET );
 		void DisconnectClient ( void );
 		int SendData ( char *, int );
-		size_t RecvData ( char *, size_t );
+		size_t RecvData ( char *, int );
 		time_t SecondsIdle ( void );
 };

@@ -201,7 +201,7 @@ char *TimeAndDate ( void )
 
 inline void DisplayBannerString(std::string ArgBannerString)
 {
-	int ConsoleBlankSpace = Configuration.Console.Width() - ArgBannerString.size() - 4;
+	int ConsoleBlankSpace = Configuration.Console.Width() - (int)ArgBannerString.size() - 4;
 	std::cout << ArgBannerString << std::string(ConsoleBlankSpace, ' ');
 }
 

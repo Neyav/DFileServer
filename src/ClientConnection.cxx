@@ -133,7 +133,7 @@ void ClientConnection::CloseFile ( void )
 
 }
 
-char ClientConnection::AcceptConnection ( int ArgSocket )
+char ClientConnection::AcceptConnection ( SOCKET ArgSocket )
 {
 	socklen_t sin_size = sizeof(struct sockaddr_in);
 
@@ -169,11 +169,11 @@ void ClientConnection::DisconnectClient ( void )
 
 int ClientConnection::SendData ( char *Argstring, int ArgSize )
 {
-	size_t DataSize;
+	int DataSize;
 	size_t DataSent;
 
 	if (ArgSize == 0)
-		DataSize = strlen( Argstring );
+		DataSize = (int) strlen( Argstring );
 	else
 		DataSize = ArgSize;
 
@@ -189,7 +189,7 @@ int ClientConnection::SendData ( char *Argstring, int ArgSize )
 	return (int) DataSent;
 }
 
-size_t ClientConnection::RecvData ( char *Argstring, size_t ArgDataSize )
+size_t ClientConnection::RecvData ( char *Argstring, int ArgDataSize )
 {
 	size_t DataRecv;
 
