@@ -28,14 +28,10 @@
 ** THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include <stdio.h>
-#include <stdlib.h>
 #include <iostream>
 #include <sstream>
 
 #include "HTTPHeader.hxx"
-
-using namespace std;
 
 void HTTPHeader::ImportHeader ( std::string ArgHTTPHeader )
 {
@@ -45,17 +41,10 @@ void HTTPHeader::ImportHeader ( std::string ArgHTTPHeader )
 	// Grab the basics first.
 	stringStream >> AccessType >> AccessPath >> AccessProtocol;	
 
-	while ( 1 )
+	// Grab the header fields. Break when we hit the end of the header.
+	while (stringStream.good())
 	{
-
-		Field = "[FunkyTurkeyMonday]";
-
 		stringStream >> Field;
-
-		if ( Field == "[FunkyTurkeyMonday]" )
-		{ // Last legitimate Value has been passed, break
-			break;
-		}
 
 		getline ( stringStream, Value );
 
@@ -73,7 +62,7 @@ std::string HTTPHeader::ExportHeader ( void )
 {
 	std::string Buffer;
 	std::string Linefeed = "\r\n";
-	map<std::string, std::string>::iterator HTTPMap;
+	std::map<std::string, std::string>::iterator HTTPMap;
 
 	// Put the Access information at the top.
 	Buffer = AccessType + " " + AccessPath + " " + AccessProtocol + Linefeed;
@@ -94,7 +83,7 @@ std::string HTTPHeader::ExportHeader ( void )
 std::string HTTPHeader::GetValue ( std::string ArgField )
 {
 	std::string Value = "";
-	map<std::string, std::string>::iterator Result;
+	std::map<std::string, std::string>::iterator Result;
 
 	// Find the field in the map
 	Result = HeaderFields.find( ArgField );
