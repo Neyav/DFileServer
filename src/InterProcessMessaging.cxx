@@ -107,6 +107,8 @@ namespace DFSMessaging
 		isTask = false;
 		Origin = nullptr;
 		Pointer = nullptr;
+		Pending = 0;
+		OriginName = "Unknown";
 		securityKey = 0;
 		messageID = 0;
 	}
