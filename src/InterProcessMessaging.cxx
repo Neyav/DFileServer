@@ -10,9 +10,11 @@
 
 namespace DFSMessaging
 {
-	std::mutex MessengerMutex;
-	std::mutex MessageServerMutex;
-	std::mutex MessageServerAddRemoveMutex;
+	std::mutex MessengerwaitingMessageIDsMutex;
+	std::mutex MessengerRegisteredChannelsMutex;
+	std::mutex MessengerServerMessengersMutex;
+	std::mutex MessengerServerMessageQueueMutex;
+	std::mutex MessengerServerSentMessagesMutex;
 
 	// The Message class contains the message data, and is used to accept tasks and receive messages.
 	// ==============================================================================
@@ -44,15 +46,16 @@ namespace DFSMessaging
 
 		MessengerServer *parentServer = Origin->parentServer;
 
-		MessageServerMutex.lock();
+		MessengerServerSentMessagesMutex.lock();
 		// Check if the message is in the map, if so, delete it and return true.
 		if (parentServer->sentMessages.find(messageID) != parentServer->sentMessages.end())
 		{
 			parentServer->sentMessages.erase(messageID);
-			MessageServerMutex.unlock();
+			MessengerServerSentMessagesMutex.unlock();
 			return true;
 		}
-		MessageServerMutex.unlock();		
+		MessengerServerSentMessagesMutex.unlock();
+				
 
 		return false;
 	}
@@ -77,7 +80,7 @@ namespace DFSMessaging
 
 		MessengerServer* parentServer = Origin->parentServer;
 
-		MessageServerMutex.lock();
+		MessengerServerSentMessagesMutex.lock();
 		// Check if the message is in the map, if so, decrease the pending count.
 		if (parentServer->sentMessages.find(messageID) != parentServer->sentMessages.end())
 		{
@@ -86,7 +89,7 @@ namespace DFSMessaging
 				parentServer->sentMessages.erase(messageID);
 			}
 		}
-		MessageServerMutex.unlock();
+		MessengerServerSentMessagesMutex.unlock();
 	}
 
 	Message::Message(bool aisPointer, bool aisTask, Messenger* aOrigin, unsigned int asecurityKey)
@@ -108,7 +111,7 @@ namespace DFSMessaging
 		Origin = nullptr;
 		Pointer = nullptr;
 		Pending = 0;
-		OriginName = "Unknown";
+		OriginName = "Invalid Message";
 		securityKey = 0;
 		messageID = 0;
 	}
@@ -126,52 +129,52 @@ namespace DFSMessaging
 	void Messenger::RegisterOnChannel(unsigned int aChannel)
 	{
 		// Check if we are registered on this channel.
-		MessengerMutex.lock();
+		MessengerRegisteredChannelsMutex.lock();
 		for (auto& channel : RegisteredChannels)
 		{
 			if (channel == aChannel)
 			{
-				MessengerMutex.unlock();
+				MessengerRegisteredChannelsMutex.unlock();
 				return;
 			}
 		}
 
 		// If we are not, register on it.
 		RegisteredChannels.push_back(aChannel);
-		MessengerMutex.unlock();
+		MessengerRegisteredChannelsMutex.unlock();
 	}
 
 	bool Messenger::isRegisteredOnChannel(unsigned int aChannel)
 	{
 		// Check if we are registered on this channel.
-		MessengerMutex.lock();
+		MessengerRegisteredChannelsMutex.lock();
 		for (auto& channel : RegisteredChannels)
 		{
 			if (channel == aChannel)
 			{
-				MessengerMutex.unlock();
+				MessengerRegisteredChannelsMutex.unlock();
 				return true;
 			}
 		}
-		MessengerMutex.unlock();
+		MessengerRegisteredChannelsMutex.unlock();
 
 		return false;
 	}
 
 	void Messenger::unRegisterAllChannels(void)
 	{
-		MessengerMutex.lock();
+		MessengerRegisteredChannelsMutex.lock();
 		RegisteredChannels.clear();
-		MessengerMutex.unlock();
+		MessengerRegisteredChannelsMutex.unlock();
 	}
 
 	void Messenger::AlertMessageID(unsigned int aMessageID)
 	{
-		MessengerMutex.lock();
+		MessengerwaitingMessageIDsMutex.lock();
 		waitingMessageIDs.push_back(aMessageID);
 		// If we're waiting for a message, notify us.
 		messengerCondition.notify_all();
-		MessengerMutex.unlock();
+		MessengerwaitingMessageIDsMutex.unlock();
 	}
 
 	void Messenger::pauseForMessage(unsigned int aTimeout)
@@ -179,9 +182,9 @@ namespace DFSMessaging
 		// If we have no messages, wait for one on our condition variable for aTimeout milliseconds, or indefinitely if aTimeout is 0.
 		int waitingMessages = 0;
 
-		MessengerMutex.lock();
+		MessengerwaitingMessageIDsMutex.lock();
 		waitingMessages = (int)waitingMessageIDs.size();
-		MessengerMutex.unlock();
+		MessengerwaitingMessageIDsMutex.unlock();
 
 		if (waitingMessages == 0)
 		{
@@ -226,13 +229,13 @@ namespace DFSMessaging
 	Message Messenger::AcceptMessage(void)
 	{
 		Message newMessage;
-		MessengerMutex.lock();
+		MessengerwaitingMessageIDsMutex.lock();
 		if (waitingMessageIDs.size() > 0)
 		{
 			newMessage = parentServer->GetMessage(waitingMessageIDs[0]);
 			waitingMessageIDs.erase(waitingMessageIDs.begin());
 		}
-		MessengerMutex.unlock();
+		MessengerwaitingMessageIDsMutex.unlock();
 		return newMessage;
 	}
 
@@ -240,9 +243,9 @@ namespace DFSMessaging
 	{
 		int MessageCount = 0;
 
-		MessengerMutex.lock();
+		MessengerwaitingMessageIDsMutex.lock();
 		MessageCount = (int)this->waitingMessageIDs.size();
-		MessengerMutex.unlock();
+		MessengerwaitingMessageIDsMutex.unlock();
 
 		return (MessageCount > 0);
 	}
@@ -266,31 +269,31 @@ namespace DFSMessaging
 
 	void MessengerServer::DistributeMessage(Message aMessage)
 	{
-		MessageServerMutex.lock();
+		MessengerServerMessageQueueMutex.lock();
 		MessageQueue.push(aMessage);
-		MessageServerMutex.unlock();
+		MessengerServerMessageQueueMutex.unlock();
 		queueCondition.notify_all();
 	}
 
 	bool MessengerServer::ValidateMessenger(Messenger *aMessenger)
 	{
-		MessageServerMutex.lock();
+		MessengerServerMessengersMutex.lock();
 		for (auto& messenger : Messengers)
 		{
 			if (messenger == aMessenger)
 			{
-				MessageServerMutex.unlock();
+				MessengerServerMessengersMutex.unlock();
 				return true;
 			}
 		}
-		MessageServerMutex.unlock();
+		MessengerServerMessengersMutex.unlock();
 		return false;
 	}
 
 	Message MessengerServer::GetMessage(unsigned int aMessageID)
 	{
 		Message newMessage;
-		MessageServerMutex.lock();
+		MessengerServerSentMessagesMutex.lock();
 		if (sentMessages.find(aMessageID) != sentMessages.end())
 		{
 			newMessage = sentMessages[aMessageID];
@@ -303,16 +306,16 @@ namespace DFSMessaging
 			}
 			
 		}
-		MessageServerMutex.unlock();
+		MessengerServerSentMessagesMutex.unlock();
 		return newMessage;
 	}
 
 	// Any messages that have been around for longer than the timeout will be removed.
-	// WARNING: IT IS ASSUMED THE SERVER MUTEX IS LOCKED HERE.
 	void MessengerServer::PruneOldMessages(unsigned int atimeout)
 	{
 		auto now = std::time(nullptr);
 
+		MessengerServerSentMessagesMutex.lock();
 		for (auto it = sentMessages.begin(); it != sentMessages.end(); )
 		{
 			if (now - it->second.sendTime > atimeout)
@@ -324,6 +327,7 @@ namespace DFSMessaging
 				++it;
 			}
 		}
+		MessengerServerSentMessagesMutex.unlock();
 	}
 
 	void MessengerServer::MessengerServerRuntime(void)
@@ -339,14 +343,16 @@ namespace DFSMessaging
 			queueCondition.wait(queueLock);
 
 			// Distribute any messages in the queue.
-			MessageServerAddRemoveMutex.lock();
+			MessengerServerMessageQueueMutex.lock();
 			while (MessageQueue.size() > 0)
 			{
 				Message newMessage = MessageQueue.front();
 				MessageQueue.pop();
+				MessengerServerMessageQueueMutex.unlock();
 
 				if (newMessage.channel == MSG_TARGET_ALL)
 				{ // Send to all clients
+					MessengerServerMessengersMutex.lock();
 					for (auto& messenger : Messengers)
 					{
 						if (messenger == newMessage.identifyOrigin())
@@ -356,10 +362,12 @@ namespace DFSMessaging
 
 						messenger->AlertMessageID(nextMessageID);
 						newMessage.Pending++;
-					}				
+					}
+					MessengerServerMessengersMutex.unlock();
 				}
 				else
 				{ // Send to specific channel
+					MessengerServerMessengersMutex.lock();
 					for (auto& messenger : Messengers)
 					{
 						if (messenger == newMessage.identifyOrigin())
@@ -372,6 +380,7 @@ namespace DFSMessaging
 							newMessage.Pending++;
 						}
 					}
+					MessengerServerMessengersMutex.unlock();
 				}
 
 				// Add the message to the map.
@@ -382,9 +391,10 @@ namespace DFSMessaging
 
 				// Dispose of any messages that have been around for longer than 60 seconds.
 				this->PruneOldMessages(60);
-
+				MessengerServerMessageQueueMutex.lock();
 			}
-			MessageServerAddRemoveMutex.unlock();			
+			MessengerServerMessageQueueMutex.unlock();
+			
 		}
 	}
 
@@ -394,16 +404,16 @@ namespace DFSMessaging
 		
 		newMessenger = new Messenger(securityKey, this);
 
-		MessageServerAddRemoveMutex.lock();
+		MessengerServerMessengersMutex.lock();
 		Messengers.push_back(newMessenger);
-		MessageServerAddRemoveMutex.unlock();
+		MessengerServerMessengersMutex.unlock();
 
 		return Messengers.back();
 	}
 
 	void MessengerServer::DeactivateActiveMessenger(Messenger* aMessenger)
 	{
-		MessageServerAddRemoveMutex.lock();
+		MessengerServerMessengersMutex.lock();
 		for (int i = 0; i < Messengers.size(); i++)
 		{
 			if (Messengers[i] == aMessenger)
@@ -414,7 +424,7 @@ namespace DFSMessaging
 				break;
 			}
 		}
-		MessageServerAddRemoveMutex.unlock();
+		MessengerServerMessengersMutex.unlock();
 	}
 
 	MessengerServer::MessengerServer()
@@ -443,13 +453,13 @@ namespace DFSMessaging
 		// Start by destroying all Messengers
 		std::cout << " -=Messaging Service shutting down..." << std::endl;
 
-		MessageServerMutex.lock();
+		MessengerServerMessengersMutex.lock();
 		while (Messengers.size() > 0)
 		{
 			delete Messengers.back();
 			Messengers.pop_back();
 		}
-		MessageServerMutex.unlock();
+		MessengerServerMessengersMutex.unlock();
 
 		std::cout << " -=Messaging Service shutdown complete." << std::endl;
 	}

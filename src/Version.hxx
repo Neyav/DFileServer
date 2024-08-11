@@ -87,7 +87,7 @@ Configuration_t() // Just some default values.
 		BackLog = 100;
 		MaxConnections = 0;
 		MaxBandwidth = 0;
-		Verbose = false;
+		Verbose = true;
 		BasicCredentials = "";
 		LogFile = NULL;
 	}
