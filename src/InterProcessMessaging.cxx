@@ -84,7 +84,8 @@ namespace DFSMessaging
 		// Check if the message is in the map, if so, decrease the pending count.
 		if (parentServer->sentMessages.find(messageID) != parentServer->sentMessages.end())
 		{
-			if (parentServer->sentMessages[messageID].Pending-- == 0)
+			parentServer->sentMessages[messageID].Pending--;
+			if (parentServer->sentMessages[messageID].Pending == 0)
 			{	// This message has been rejected by everyone that looked at it. Erase it from the map.
 				parentServer->sentMessages.erase(messageID);
 			}
@@ -303,7 +304,8 @@ namespace DFSMessaging
 			newMessage = sentMessages[aMessageID];
 			if (!sentMessages[aMessageID].isTask)
 			{  // If it's not a task messages are accepted as received.
-				if (sentMessages[aMessageID].Pending-- == 0)
+				sentMessages[aMessageID].Pending--;
+				if (sentMessages[aMessageID].Pending == 0)
 				{
 					sentMessages.erase(aMessageID);
 				}
