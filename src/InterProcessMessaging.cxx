@@ -235,6 +235,8 @@ namespace DFSMessaging
 			newMessage = parentServer->GetMessage(waitingMessageIDs[0]);
 			waitingMessageIDs.erase(waitingMessageIDs.begin());
 		}
+		else
+			std::cout << " -=ERROR: AcceptMessages called while no messages to accept." << std::endl;
 		MessengerwaitingMessageIDsMutex.unlock();
 		return newMessage;
 	}
@@ -303,9 +305,13 @@ namespace DFSMessaging
 				{
 					sentMessages.erase(aMessageID);
 				}
-			}
-			
+			}	
 		}
+		else
+		{
+			std::cout << " -=ERROR: GetMessage called with invalid message ID." << std::endl;
+		}
+
 		MessengerServerSentMessagesMutex.unlock();
 		return newMessage;
 	}
