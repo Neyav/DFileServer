@@ -168,13 +168,15 @@ namespace DFSMessaging
 		MessengerRegisteredChannelsMutex.unlock();
 	}
 
+	// AlertMessageID is used to notify the messenger that a message is waiting for it.
+	// PRESUME THAT THE CALLER HAS LOCKED THE MessengerwaitingMessageIDsMutex
 	void Messenger::AlertMessageID(unsigned int aMessageID)
 	{
-		MessengerwaitingMessageIDsMutex.lock();
+		//MessengerwaitingMessageIDsMutex.lock();
 		waitingMessageIDs.push_back(aMessageID);
+		//MessengerwaitingMessageIDsMutex.unlock();
 		// If we're waiting for a message, notify us.
 		messengerCondition.notify_all();
-		MessengerwaitingMessageIDsMutex.unlock();
 	}
 
 	void Messenger::pauseForMessage(unsigned int aTimeout)
@@ -309,7 +311,7 @@ namespace DFSMessaging
 		}
 		else
 		{
-			std::cout << " -=ERROR: GetMessage called with invalid message ID." << std::endl;
+			//std::cout << " -=ERROR: GetMessage called with invalid message ID." << std::endl;
 		}
 
 		MessengerServerSentMessagesMutex.unlock();
@@ -317,11 +319,11 @@ namespace DFSMessaging
 	}
 
 	// Any messages that have been around for longer than the timeout will be removed.
+	// PRESUME the sent messages mutex has been locked.
 	void MessengerServer::PruneOldMessages(unsigned int atimeout)
 	{
 		auto now = std::time(nullptr);
 
-		MessengerServerSentMessagesMutex.lock();
 		for (auto it = sentMessages.begin(); it != sentMessages.end(); )
 		{
 			if (now - it->second.sendTime > atimeout)
@@ -333,7 +335,6 @@ namespace DFSMessaging
 				++it;
 			}
 		}
-		MessengerServerSentMessagesMutex.unlock();
 	}
 
 	void MessengerServer::MessengerServerRuntime(void)
@@ -350,11 +351,17 @@ namespace DFSMessaging
 
 			// Distribute any messages in the queue.
 			MessengerServerMessageQueueMutex.lock();
+			MessengerServerSentMessagesMutex.lock();
 			while (MessageQueue.size() > 0)
 			{
 				Message newMessage = MessageQueue.front();
 				MessageQueue.pop();
 				MessengerServerMessageQueueMutex.unlock();
+
+				// Add the message to the map.
+				newMessage.sendTime = (unsigned int)std::time(nullptr);
+				newMessage.messageID = nextMessageID;
+				sentMessages[nextMessageID] = newMessage;
 
 				if (newMessage.channel == MSG_TARGET_ALL)
 				{ // Send to all clients
@@ -367,7 +374,7 @@ namespace DFSMessaging
 						}
 
 						messenger->AlertMessageID(nextMessageID);
-						newMessage.Pending++;
+						sentMessages[nextMessageID].Pending++;
 					}
 					MessengerServerMessengersMutex.unlock();
 				}
@@ -383,22 +390,19 @@ namespace DFSMessaging
 						if (messenger->isRegisteredOnChannel(newMessage.channel))
 						{
 							messenger->AlertMessageID(nextMessageID);
-							newMessage.Pending++;
+							sentMessages[nextMessageID].Pending++;
 						}
 					}
 					MessengerServerMessengersMutex.unlock();
 				}
 
-				// Add the message to the map.
-				newMessage.sendTime = (unsigned int) std::time(nullptr);
-				newMessage.messageID = nextMessageID;
-				sentMessages[nextMessageID] = newMessage;
 				nextMessageID++;
 
 				// Dispose of any messages that have been around for longer than 60 seconds.
 				this->PruneOldMessages(60);
 				MessengerServerMessageQueueMutex.lock();
 			}
+			MessengerServerSentMessagesMutex.unlock();
 			MessengerServerMessageQueueMutex.unlock();
 			
 		}
