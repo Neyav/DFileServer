@@ -240,8 +240,10 @@ static std::string InsertIndexTable ( std::string *ArgVirtualPath, std::string A
 		// If it's not a folder, grab the size.
 		if ( !DirectoryEntry.Folder )
 			DirectoryEntry.Size = FileSize ( entry.path().string().c_str() );
+		else
+			DirectoryEntry.CompletePath += "/"; // Add a trailing slash to the folder.
 
-		// Is the file accessable?
+		// Is the file accessible?
 		if ( DirectoryEntry.Size == -1 )
 			continue; // Don't add it to the std::vector.
 
