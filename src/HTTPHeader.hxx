@@ -1,5 +1,4 @@
-#ifndef HTTPHEADER_HXX
-#define HTTPHEADER_HXX
+#pragma once
 
 #include <map>
 #include <string>
@@ -21,5 +20,3 @@ class HTTPHeader
 	std::string GetValue 	( std::string );
 	void SetValue		( std::string, std::string );
 };
-
-#endif

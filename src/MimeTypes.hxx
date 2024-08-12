@@ -1,3 +1,4 @@
+#pragma once
 typedef struct mimetype_s
 {
 	char extension[10];

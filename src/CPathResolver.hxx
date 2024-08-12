@@ -30,12 +30,7 @@
  *
  ******************************************************************************/
 
-
-
-#ifndef __C_PATH_RESOLVER_H
-#define __C_PATH_RESOLVER_H
-
-
+#pragma once
 
 #include <fstream>
 
@@ -104,8 +99,3 @@ class CPathResolver {
 		SPathNode *mPaths;
 
 }; /* end of CPathResolver */
-
-
-
-#endif
-
