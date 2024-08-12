@@ -13,27 +13,6 @@ extern bool ServerLockdown;
 
 namespace DFSNetworking
 {
-	/*void NetworkHandler::NetworkHandlerLoop(void)
-	{
-
-	}
-
-	NetworkHandler::NetworkHandler()
-	{
-		size_t PointerReference = std::uintptr_t(this);
-
-		NetworkHandlerMessanger = MessengerServer->ReceiveActiveMessenger();
-		NetworkHandlerMessanger->Name = "NetworkHandler " + std::to_string(PointerReference);
-		NetworkHandlerMessanger->RegisterOnChannel(MSG_TARGET_NETWORK);
-		NetworkHandlerMessanger->SendMessage(MSG_TARGET_CONSOLE, "NetworkHandler - Initalized.");
-	}
-
-	NetworkHandler::~NetworkHandler()
-	{
-		NetworkHandlerMessanger->SendMessage(MSG_TARGET_CONSOLE, "NetworkHandler - Terminated.");
-		delete NetworkHandlerMessanger;
-	}*/
-
 	void NetworkDaemon::IncomingConnection(void)
 	{
 		ClientConnection *IncomingClient;
