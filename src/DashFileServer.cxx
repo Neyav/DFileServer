@@ -1,7 +1,7 @@
 /*
 ** ($Header: /var/www/cvsroot/DFileServer/src/DashFileServer.cxx,v 1.61.2.19 2005/10/23 19:51:28 incubus Exp $)
 **
-** Copyright 2005, 2018 Chris Laverdure
+** Copyright 2005, 2018, 2023, 2024 Chris Laverdure
 ** All rights reserved.
 **
 ** Redistribution and use in source and binary forms, with or without

@@ -1,7 +1,7 @@
 /*
 ** ($Header: /var/www/cvsroot/DFileServer/src/HTTPHeader.cxx,v 1.4.2.1 2005/09/30 05:15:19 incubus Exp $)
 **
-** Copyright 2005 Chris Laverdure
+** Copyright 2005, 2024 Chris Laverdure
 ** All rights reserved.
 **
 ** Redistribution and use in source and binary forms, with or without

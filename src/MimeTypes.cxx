@@ -1,7 +1,7 @@
 /*
-** ($Header: /var/www/cvsroot/DFileServer/src/MimeTypes.cxx,v 1.2 2005/06/14 07:09:57 incubus Exp $)
+** ($Id)
 **
-** Copyright 2005 Chris Laverdure
+** Copyright 2005, 2024 Chris Laverdure
 ** All rights reserved.
 **
 ** Redistribution and use in source and binary forms, with or without

@@ -1,7 +1,7 @@
 /*
 ** ($Header: /var/www/cvsroot/DFileServer/src/ClientConnection.cxx,v 1.27.2.2 2005/10/04 06:55:59 incubus Exp $)
 **
-** Copyright 2005 Chris Laverdure
+** Copyright 2005, 2023, 2024 Chris Laverdure
 ** All rights reserved.
 **
 ** Redistribution and use in source and binary forms, with or without
