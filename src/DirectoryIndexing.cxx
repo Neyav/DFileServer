@@ -261,43 +261,7 @@ static std::string InsertIndexTable ( std::string *ArgVirtualPath, std::string A
 		// Resize it if we're about to run out of space.
 		if ( Buffer.capacity() - Buffer.size() < 100 )
 			Buffer.reserve(10000);
-     /*
-		// Alternate the CSS class for every other line.
-		if ( AlternatingVariable == true )
-		{
-			Buffer += "<tr class=\"DFS_eventablerow\">";
-			AlternatingVariable = false;
-		}
-		else
-		{
-			Buffer += "<tr class=\"DFS_oddtablerow\">";
-			AlternatingVariable = true;
-		}
-
-		// Entry Type
-		if ( Directoryvector[Iterator].Folder )
-			Buffer += "<td class=\"DFS_entrytype\">[DIR]</td>";
-		else
-			Buffer += "<td class=\"DFS_entrytype\">[FILE]</td>";
-
-		// Entry Name
-		if ( Directoryvector[Iterator].Folder )
-		{ // Give folders slashes on the end.
-			Buffer += "<td class=\"DFS_entryname\"><a href=\"" + Directoryvector[Iterator].CompletePath +
-						"/\" class=\"DFS_direntry\">" + Directoryvector[Iterator].Name + "/</a></td>";
-		}
-		else
-		{
-			Buffer += "<td class=\"DFS_entryname\"><a href=\"" + Directoryvector[Iterator].CompletePath +
-						"\" class=\"DFS_fileentry\">" + Directoryvector[Iterator].Name + "</a></td>";
-		}
-
-		// Entry Size
-		if ( Directoryvector[Iterator].Folder )
-			Buffer += "<td class=\"DFS_entrysize\">&nbsp;</td></tr>\n";
-		else
-			Buffer += "<td class=\"DFS_entrysize\">" + std::string( ConvertSizeToFriendly( Directoryvector[Iterator].Size ) ) + "</td></tr>\n";*/
-
+     
 		Buffer += "{ name: '" + Directoryvector[Iterator].Name + "'";
 
 		if (Directoryvector[Iterator].Folder)
