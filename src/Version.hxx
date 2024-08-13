@@ -32,11 +32,6 @@
 #define CC_CYAN			6
 #define CC_WHITE		7
 
-
-// Define background color codes
-
-
-
 // Define other formatting codes
 #define BOLD      "\033[1m"
 #define RESET     "\033[0m"
