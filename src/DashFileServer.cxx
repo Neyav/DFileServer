@@ -401,7 +401,7 @@ int main( int argc, char *argv[] )
 
    // Main Program Loop
    while (1)
-   {
+   {	   
 	   // Check for messages.
 	   ConsoleMessanger->pauseForMessage();
 

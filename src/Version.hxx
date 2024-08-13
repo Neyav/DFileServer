@@ -1,6 +1,7 @@
 #pragma once
 #include <string>
 #include <cstring>
+#include <iostream>
 
 #ifdef _WINDOWS
 #define strncasecmp _strnicmp
@@ -19,6 +20,27 @@
 
 #define MAXIDENTIFIERLEN 151
 
+// Define color codes
+#define FG_COLOUR		"\033[3";
+#define BG_COLOUR		"\033[4";
+#define CC_BLACK		0
+#define CC_RED			1
+#define CC_GREEN		2
+#define CC_YELLOW		3
+#define CC_BLUE			4
+#define CC_MAGENTA		5
+#define CC_CYAN			6
+#define CC_WHITE		7
+
+
+// Define background color codes
+
+
+
+// Define other formatting codes
+#define BOLD      "\033[1m"
+#define RESET     "\033[0m"
+
 namespace Version
 {
 	extern int MAJORVERSION;
@@ -30,7 +52,7 @@ namespace Version
 // The method for doing this is different depending on the platform.
 // TODO: Considering renaming this file to Configuration.hxx.
 #ifdef _WINDOWS
-class ConsoleSize
+class ConsoleControl
 {
 private:
 	CONSOLE_SCREEN_BUFFER_INFO csbi;
@@ -46,9 +68,41 @@ public:
 		GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
 		return csbi.srWindow.Bottom - csbi.srWindow.Top + 1;
 	}
+	void gotoxy(int x, int y)
+	{
+		COORD coord;
+		coord.X = x;
+		coord.Y = y;
+		SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), coord);
+	}
+	// Function to set text color
+	void setColour(int colourCode) 
+	{
+		std::cout << FG_COLOUR
+		std::cout << colourCode << "m";		
+	}
+
+	// Function to set background color
+	void setBackground(int colourCode) 
+	{
+		std::cout << BG_COLOUR
+		std::cout << colourCode << "m";
+	}
+
+	// Function to set bold text
+	void setBold() 
+	{
+		std::cout << BOLD;
+	}
+
+	// Function to reset formatting
+	void reset() 
+	{
+		std::cout << RESET;
+	}
 };
 #else
-class ConsoleSize
+class ConsoleControl
 {
 private:
 		struct winsize w;
@@ -64,6 +118,35 @@ public:
 		ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
 		return w.ws_row;
 	}
+	void gotoxy(int x, int y)
+	{
+		std::cout << "\033[" << y << ";" << x << "H";
+	}
+	// Function to set text color
+	void setColour(int colourCode)
+	{
+		std::cout << FG_COLOUR
+		std::cout << colourCode << "m";
+	}
+
+	// Function to set background color
+	void setBackground(int colourCode)
+	{
+		std::cout << BG_COLOUR
+		std::cout << colourCode << "m";
+	}
+
+	// Function to set bold text
+	void setBold()
+	{
+		std::cout << BOLD;
+	}
+
+	// Function to reset formatting
+	void reset()
+	{
+		std::cout << RESET;
+	}
 };
 #endif
 
@@ -76,7 +159,7 @@ struct Configuration_t
 	int MaxConnections;
 	int MaxBandwidth;
 	bool Verbose;
-	ConsoleSize Console;
+	ConsoleControl Console;
 	std::string BasicCredentials;
 	FILE* LogFile;
 
