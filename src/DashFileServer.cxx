@@ -205,9 +205,42 @@ inline void DisplayBannerString(std::string ArgBannerString)
 	std::cout << ArgBannerString << std::string(ConsoleBlankSpace, ' ');
 }
 
+inline void punchBannertoScreen(void)
+{
+	// FileServer Name/Version Banner
+		std::string VersionBanner;
+		std::string CopyrightBanner;
+		std::string CopyrightBanner2;
+
+		VersionBanner = "DFileServer Version " + std::to_string(Version::MAJORVERSION) + "." + std::to_string(Version::MINORVERSION) + "." + std::to_string(Version::PATCHVERSION) + " --> {" + Version::VERSIONTITLE + "}";
+		CopyrightBanner = "                    (c) 2005, 2018, 2023-2024 Christopher Laverdure";
+		CopyrightBanner2 = "                    All Rights Reserved.";
+
+		// First we want to clear the screen.
+		std::cout << "\u001B[2J\u001B[1;1H";
+		std::cout << "\u001B[41m\u001B[30m";
+		DisplayBannerString(VersionBanner);
+		std::cout << "**-]\u001B[0m" << std::endl;
+
+		std::cout << "\u001B[41m\u001B[30m";
+		DisplayBannerString(CopyrightBanner);
+		std::cout << "**-]\u001B[0m" << std::endl;
+
+		std::cout << "\u001B[41m\u001B[30m";
+		DisplayBannerString(CopyrightBanner2);
+		std::cout << "**-]\u001B[0m" << std::endl;
+}
+
 void interactiveConsole(DFSMessaging::Messenger* ConsoleMessenger)
 {
+	// Clear screen by default.
+	Configuration.Console.clearScreen();
+	punchBannertoScreen();
 
+	while (1)
+	{
+
+	}
 }
 
 void legacyConsole(DFSMessaging::Messenger* ConsoleMessenger)
@@ -259,29 +292,8 @@ int main( int argc, char *argv[] )
 #endif
 
    // FileServer Name/Version Banner
-   {
-	   std::string VersionBanner;
-	   std::string CopyrightBanner;
-	   std::string CopyrightBanner2;
-
-	   VersionBanner = "DFileServer Version " + std::to_string(Version::MAJORVERSION) + "." + std::to_string(Version::MINORVERSION) + "." + std::to_string(Version::PATCHVERSION) + " --> {" + Version::VERSIONTITLE + "}";
-	   CopyrightBanner = "                    (c) 2005, 2018, 2023-2024 Christopher Laverdure";
-	   CopyrightBanner2 = "                    All Rights Reserved.";
-
-	   // First we want to clear the screen.
-	   std::cout << "\u001B[2J\u001B[1;1H";
-	   std::cout << "\u001B[41m\u001B[30m";
-	   DisplayBannerString(VersionBanner);
-	   std::cout << "**-]\u001B[0m" << std::endl;
-
-	   std::cout << "\u001B[41m\u001B[30m";
-	   DisplayBannerString(CopyrightBanner);
-	   std::cout << "**-]\u001B[0m" << std::endl;
-
-	   std::cout << "\u001B[41m\u001B[30m";
-	   DisplayBannerString(CopyrightBanner2);
-	   std::cout << "**-]\u001B[0m" << std::endl;
-   }
+   Configuration.Console.clearScreen();
+   punchBannertoScreen();
 
    std::cout << "In memorial for all the code that was lost that one day when Sylvia wrote her last bit." << std::endl;
    std::cout << "Initializing..." << std::endl;
