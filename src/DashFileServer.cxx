@@ -205,6 +205,34 @@ inline void DisplayBannerString(std::string ArgBannerString)
 	std::cout << ArgBannerString << std::string(ConsoleBlankSpace, ' ');
 }
 
+void interactiveConsole(DFSMessaging::Messenger* ConsoleMessenger)
+{
+
+}
+
+void legacyConsole(DFSMessaging::Messenger* ConsoleMessenger)
+{
+	while (1)
+	{
+		// Check for messages.
+		ConsoleMessenger->pauseForMessage();
+
+		while (ConsoleMessenger->HasMessages())
+		{
+			DFSMessaging::Message MessagePacket = ConsoleMessenger->AcceptMessage();
+
+			if (Configuration.Verbose) // If we are in verbose mode, then we want to print out the message.
+				std::cout << std::string(TimeAndDate()) << " [" << MessagePacket.OriginName << "]: " << MessagePacket.message << std::endl;
+
+			if (Configuration.LogFile)
+			{
+				fprintf(Configuration.LogFile, "%s [%s]: %s\n", TimeAndDate(), MessagePacket.OriginName.c_str(), MessagePacket.message.c_str());
+				fflush(Configuration.LogFile);
+			}
+		}
+	}
+}
+
 int main( int argc, char *argv[] )
 {
 
@@ -214,7 +242,7 @@ int main( int argc, char *argv[] )
 #endif
 
    DFSNetworking::NetworkDaemon *NetworkDaemon = nullptr;
-   DFSMessaging::Messenger *ConsoleMessanger = nullptr;
+   DFSMessaging::Messenger *ConsoleMessenger = nullptr;
 
 
 #ifndef _WINDOWS
@@ -350,9 +378,9 @@ int main( int argc, char *argv[] )
    MessengerServer = new DFSMessaging::MessengerServer();
    NetworkDaemon = new DFSNetworking::NetworkDaemon();
    
-   ConsoleMessanger = MessengerServer->ReceiveActiveMessenger();
-   ConsoleMessanger->Name = "Console";
-   ConsoleMessanger->RegisterOnChannel(MSG_TARGET_CONSOLE);
+   ConsoleMessenger = MessengerServer->ReceiveActiveMessenger();
+   ConsoleMessenger->Name = "Console";
+   ConsoleMessenger->RegisterOnChannel(MSG_TARGET_CONSOLE);
 
    std::cout << " -=Initialize Network..." << std::endl;
 
@@ -400,25 +428,10 @@ int main( int argc, char *argv[] )
    NetworkThread.detach();
 
    // Main Program Loop
-   while (1)
-   {	   
-	   // Check for messages.
-	   ConsoleMessanger->pauseForMessage();
-
-	   while (ConsoleMessanger->HasMessages())
-	   {
-		   DFSMessaging::Message MessagePacket = ConsoleMessanger->AcceptMessage();
-		   
-		   if ( Configuration.Verbose ) // If we are in verbose mode, then we want to print out the message.
-				std::cout << std::string(TimeAndDate()) << " [" << MessagePacket.OriginName << "]: " << MessagePacket.message << std::endl;
-
-		   if ( Configuration.LogFile)
-		   {
-			   fprintf(Configuration.LogFile, "%s [%s]: %s\n", TimeAndDate(), MessagePacket.OriginName.c_str(), MessagePacket.message.c_str());
-			   fflush(Configuration.LogFile);
-		   }
-	   }
-   }
+   if (Configuration.interactiveConsole)
+	   interactiveConsole(ConsoleMessenger);
+   else
+	   legacyConsole(ConsoleMessenger);
 
    return 0;
 }

@@ -153,6 +153,7 @@ struct Configuration_t
 	int BackLog;
 	int MaxConnections;
 	int MaxBandwidth;
+	bool interactiveConsole;
 	bool Verbose;
 	ConsoleControl Console;
 	std::string BasicCredentials;
@@ -166,6 +167,7 @@ Configuration_t() // Just some default values.
 		MaxConnections = 0;
 		MaxBandwidth = 0;
 		Verbose = true;
+		interactiveConsole = false;
 		BasicCredentials = "";
 		LogFile = NULL;
 	}
