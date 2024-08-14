@@ -95,6 +95,11 @@ public:
 	{
 		std::cout << RESET;
 	}
+
+	void clearScreen()
+	{
+		std::cout << "\u001B[2J\u001B[1;1H";
+	}
 };
 #else
 class ConsoleControl
@@ -141,6 +146,11 @@ public:
 	void reset()
 	{
 		std::cout << RESET;
+	}
+
+	void clearScreen()
+	{
+		std::cout << "\u001B[2J\u001B[1;1H";
 	}
 };
 #endif
