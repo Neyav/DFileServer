@@ -48,8 +48,6 @@
 #include <arpa/inet.h>
 #include <sys/wait.h>
 
-#define Sleep sleep
-
 #endif
 #include <vector>
 #include <iterator>
@@ -69,6 +67,15 @@ namespace Version
 	int MINORVERSION = 1;
 	int PATCHVERSION = 0;
 	std::string VERSIONTITLE = "The Red Deer Redemption";
+}
+
+void DFSleep(int milliseconds)
+{
+#ifdef _WINDOWS
+	Sleep(milliseconds);
+#else
+	usleep(milliseconds * 1000);
+#endif
 }
 
 Configuration_t Configuration;
@@ -96,7 +103,7 @@ BOOL WINAPI InitiateServerShutdown(DWORD ArgSignal)
 
 		while (!ServerShutdownMessenger->HasMessages())
 		{ // Wait for the response.
-			Sleep(100);
+			DFSleep(100);
 		}
 	}
 	else
@@ -441,7 +448,11 @@ int main( int argc, char *argv[] )
 
    // Main Program Loop
    if (Configuration.interactiveConsole)
+   {
+	   // Give us one second for our threads to spawn.
+	   DFSleep(1000);
 	   interactiveConsole(ConsoleMessenger);
+   }
    else
 	   legacyConsole(ConsoleMessenger);
 

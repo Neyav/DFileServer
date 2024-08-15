@@ -44,6 +44,8 @@ namespace Version
 	extern std::string VERSIONTITLE;
 }
 
+void DFSleep(int milliseconds);
+
 // The method for doing this is different depending on the platform.
 // TODO: Considering renaming this file to Configuration.hxx.
 #ifdef _WINDOWS
@@ -177,7 +179,7 @@ Configuration_t() // Just some default values.
 		MaxConnections = 0;
 		MaxBandwidth = 0;
 		Verbose = true;
-		interactiveConsole = false;
+		interactiveConsole = true;
 		BasicCredentials = "";
 		LogFile = NULL;
 	}
