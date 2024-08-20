@@ -1,4 +1,16 @@
-   |---> DFileServer 2.0.0 - 2023-2024
+   |---> DFileServer 2.1.0 - [Date] [The Red Deer Redemption]
+   |
+   |
+   |
+   |
+   |   > DFileServer 2.0.1 - 2024-08-12
+   |   ^ - Fixed some memory leaks
+   |   | - Pushing lower case q and following it with an enter attempts to shutdown safely.
+   |   | - HTMLEncoding removed as it's been pushed to 2.1 or further.
+   |   | - Unix builds fixed.
+   |   | - Differenciate between Windows and UNIX Sleep.
+   |   |
+   |---> DFileServer 2.0.0 - 2023-2024 [The Port Colborne Comback]
    |   ^ - Update code to support C++17 features.
    |   | - Thread safe Interprocess Messanger to facilitate communication between threads.
    |   | - Platform specific C directory code converted to C++ unified directory code.
