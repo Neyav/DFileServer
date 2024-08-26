@@ -1,9 +1,14 @@
 #pragma once
 
-class TCPInterface
+namespace DFSNetworking
 {
-private:
 
-public:
+	class TCPInterface
+	{
+	private:
 
-};
+	public:
+
+	};
+
+}
