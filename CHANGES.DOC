@@ -1,7 +1,11 @@
    |---> DFileServer 2.1.0 - [Date] [The Red Deer Redemption]
-   |
-   |
-   |
+   |   | - Redesigned and updated Interprocess Messenger that allows task sending down a
+   |   |   channel that can be accepted and locked in by a single thread that can take it.
+   |   | - Interprocess Messengers can pause ( with or without a timeout ) until a message is
+   |   |   received, removing the need for sleep delays on threads that primarily respond to messages.
+   |   | - Network stack broken into a listener thread, and multiple HTTP delivery threads,
+   |   |   finally making good on the 2.0 promise of scalable threading.
+   |   | - Directory Index updated to a new modern cleaner look.
    |
    |   > DFileServer 2.0.1 - 2024-08-12
    |   ^ - Fixed some memory leaks
@@ -10,7 +14,7 @@
    |   | - Unix builds fixed.
    |   | - Differenciate between Windows and UNIX Sleep.
    |   |
-   |---> DFileServer 2.0.0 - 2023-2024 [The Port Colborne Comback]
+   |---> DFileServer 2.0.0 - 2023-2024 [The Port Colborne Comeback]
    |   ^ - Update code to support C++17 features.
    |   | - Thread safe Interprocess Messanger to facilitate communication between threads.
    |   | - Platform specific C directory code converted to C++ unified directory code.
