@@ -48,6 +48,9 @@
     <ClCompile Include="..\src\NetworkThread.cxx">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\TCPInterface.cxx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\ClientConnection.hxx">
@@ -84,6 +87,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\src\NetworkThread.hxx">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\TCPInterface.hxx">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

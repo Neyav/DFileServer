@@ -140,6 +140,7 @@
     <ClCompile Include="..\src\MimeTypes.cxx" />
     <ClCompile Include="..\src\Networking.cxx" />
     <ClCompile Include="..\src\NetworkThread.cxx" />
+    <ClCompile Include="..\src\TCPInterface.cxx" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\ClientConnection.hxx" />
@@ -153,6 +154,7 @@
     <ClInclude Include="..\src\MimeTypes.hxx" />
     <ClInclude Include="..\src\Networking.hxx" />
     <ClInclude Include="..\src\NetworkThread.hxx" />
+    <ClInclude Include="..\src\TCPInterface.hxx" />
     <ClInclude Include="..\src\Version.hxx" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

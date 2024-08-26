@@ -179,7 +179,7 @@ Configuration_t() // Just some default values.
 		MaxConnections = 0;
 		MaxBandwidth = 0;
 		Verbose = true;
-		interactiveConsole = true;
+		interactiveConsole = false;
 		BasicCredentials = "";
 		LogFile = NULL;
 	}
