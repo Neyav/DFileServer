@@ -18,8 +18,6 @@
 #include "ClientConnection.hxx"
 #include "InterProcessMessaging.hxx"
 
-extern DFSMessaging::MessengerServer* MessengerServer;
-
 namespace DFSNetworking
 {
 	class NetworkDaemon

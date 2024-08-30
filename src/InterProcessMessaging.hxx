@@ -13,11 +13,12 @@
 
 #define MESSAGE_DEBUG
 
-#define MSG_TARGET_ALL		1
-#define MSG_TARGET_CONSOLE  2
-#define MSG_TARGET_NETWORK  3
+#define MSG_TARGET_ALL		 1
+#define MSG_TARGET_CONSOLE   2
+#define MSG_TARGET_NETWORK   3
+#define MSG_TARGET_INTERFACE 4
 
-#define MESSAGE_NOMESSAGE	0
+#define MESSAGE_NOMESSAGE    0
 
 namespace DFSMessaging
 {
@@ -110,3 +111,5 @@ namespace DFSMessaging
 		~MessengerServer();
 	};
 }
+
+extern DFSMessaging::MessengerServer* MessengerServer;
