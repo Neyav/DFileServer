@@ -56,6 +56,7 @@
 #include <thread>
 
 #include "InterProcessMessaging.hxx"
+#include "TCPInterface.hxx"
 #include "Networking.hxx"
 #include "Version.hxx"
 
@@ -403,7 +404,9 @@ int main( int argc, char *argv[] )
 
    std::cout << " -=Initialize Network..." << std::endl;
 
-   if (NetworkDaemon->initializeNetwork(Configuration.Port, Configuration.BackLog) == false)
+   DFSNetworking::TCPInterface *IPv4Interface = new DFSNetworking::TCPInterface;
+
+   if (NetworkDaemon->addListener(Configuration.Port, Configuration.BackLog, IPv4Interface) == false)
    {
 	   std::cout << "CRITICAL ERROR: Couldn't initialize listening socket on port " << Configuration.Port << std::endl;
 	   exit(-1); // TODO: Replace with an exit function that cleans up after itself.

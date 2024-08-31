@@ -29,6 +29,8 @@ namespace DFSNetworking
 	public:
 		bool initializeInterface(unsigned int aPort, unsigned int aBackLog);
 
+		SOCKET getSocket(void) { return NetworkSocket; }
+
 		TCPInterface();
 		~TCPInterface();
 	};

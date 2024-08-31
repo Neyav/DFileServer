@@ -52,6 +52,10 @@ namespace DFSNetworking
 			return false;
 		}
 
+		// Change the name of the Messenger to include the IP address and port.
+		InterfaceMessenger->Name = "IPv4 Interface: " + std::string(inet_ntoa(ListenAddr.sin_addr)) + ":" + std::to_string(aPort);
+		InterfaceMessenger->SendMessage(MSG_TARGET_CONSOLE, "IPv4 Interface initialized.");
+
 		listenPort = aPort;
 		backLog = aBackLog;
 

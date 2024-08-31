@@ -17,24 +17,20 @@
 #include <string>
 #include "ClientConnection.hxx"
 #include "InterProcessMessaging.hxx"
+#include "TCPInterface.hxx"
 
 namespace DFSNetworking
 {
 	class NetworkDaemon
 	{
 	private:
-		unsigned int listenPort;
-		unsigned int backLog;
-		
 		std::vector<struct pollfd> PollStruct;
-		std::vector<ClientConnection*> ConnectionList;
-		DFSMessaging::Messenger* NetworkMessanger;
+		std::vector<TCPInterface*> InterfaceList;
+		DFSMessaging::Messenger* NetworkMessenger;
 
-		SOCKET NetworkSocket;
-
-		void IncomingConnection(void);
+		void IncomingConnection(SOCKET IncomingSocket);
 	public:
-		bool initializeNetwork(unsigned int aPort, unsigned int aBackLog);
+		bool addListener(unsigned int aPort, unsigned int aBacklog, TCPInterface *aInterface);
 
 		void NetworkLoop();
 

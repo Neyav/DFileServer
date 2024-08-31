@@ -13,14 +13,14 @@ extern bool ServerLockdown;
 
 namespace DFSNetworking
 {
-	void NetworkDaemon::IncomingConnection(void)
+	void NetworkDaemon::IncomingConnection(SOCKET IncomingSocket)
 	{
 		ClientConnection *IncomingClient;
 
 		IncomingClient = new ClientConnection;
 
 		// Accept the connection and break if there was an error.
-		if (IncomingClient->AcceptConnection(NetworkSocket) == -1)
+		if (IncomingClient->AcceptConnection(IncomingSocket) == -1)
 		{
 			delete IncomingClient;
 			return;
@@ -36,62 +36,22 @@ namespace DFSNetworking
 
 		ActiveConnections++;
 
-		NetworkMessanger->SendPointer(MSG_TARGET_NETWORK, (void *)IncomingClient);
+		NetworkMessenger->SendPointer(MSG_TARGET_NETWORK, (void *)IncomingClient);
 	}
 
-	bool NetworkDaemon::initializeNetwork(unsigned int aPort, unsigned int aBackLog)
+	bool NetworkDaemon::addListener(unsigned int aPort, unsigned int aBackLog, TCPInterface *aInterface)
 	{
-		struct sockaddr_in ListenAddr;
-		const char yes = 1;
-#ifdef _WINDOWS
-		WSADATA wsaData;
+		struct pollfd PollFDTemp;
+		memset(&PollFDTemp, 0, sizeof(struct pollfd));
 
-		if (WSAStartup(MAKEWORD(1, 1), &wsaData) != 0)
-		{
-			perror("InitializeNetwork -- WSAStartup()");
-			return false;
-		}
-#endif
-		std::cout << " -=Initializing Network Daemon..." << std::endl;
+		aInterface->initializeInterface(aPort, aBackLog);
 
-		// Grab the master socket.
-		if ((NetworkSocket = socket(AF_INET, SOCK_STREAM, 0)) == -1)
-		{
-			perror("InitializeNetwork -- socket()");
-			return false;
-		}
+		PollFDTemp.fd = aInterface->getSocket();
+		PollFDTemp.events = POLLIN;
 
-		// Clear the socket incase it hasn't been properly closed so that we may use it.
-		if (setsockopt(NetworkSocket, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int)) == -1)
-		{
-			perror("InitializeNetwork -- setsockopt()");
-			return false;
-		}
+		PollStruct.push_back(PollFDTemp);
 
-		// Set the listening network struct up.
-		ListenAddr.sin_family = AF_INET;
-		ListenAddr.sin_port = htons(aPort);
-		ListenAddr.sin_addr.s_addr = INADDR_ANY;
-		memset(&(ListenAddr.sin_zero), '\0', 8);
-
-		// Bind the socket to the listening network struct.
-		if (bind(NetworkSocket, (struct sockaddr*)&ListenAddr,
-			sizeof(struct sockaddr)) == -1)
-		{
-			perror("InitializeNetwork -- bind()");
-			return false;
-		}
-
-		// Start listening
-		if (listen(NetworkSocket, aBackLog) == -1)
-		{
-			perror("InitializeNetwork -- listen()");
-			return false;
-		}
-
-		PollStruct[0].fd = NetworkSocket;
-		PollStruct[0].events = POLLIN;
-		listenPort = aPort;
+		InterfaceList.push_back(aInterface);
 
 		// We were successful, return the socket.
 		return true;
@@ -99,7 +59,10 @@ namespace DFSNetworking
 
 	void NetworkDaemon::NetworkLoop(void)
 	{
-		std::cout << " -=Network Loop activated: Listening on port " << listenPort << "..." << std::endl;
+		if (PollStruct.size() < 2)
+			NetworkMessenger->SendMessage(MSG_TARGET_CONSOLE, "Network Loop activated: Listening on " + std::to_string(PollStruct.size()) + " Interface...");
+		else
+			NetworkMessenger->SendMessage(MSG_TARGET_CONSOLE, "Network Loop activated: Listening on " + std::to_string(PollStruct.size()) + " Interfaces...");
 
 		// Start the specified number of prime threads.
 		for (int i = 0; i < Configuration.primeThreads; i++)
@@ -108,33 +71,21 @@ namespace DFSNetworking
 		while (1)
 		{
 			// As of C++11, vectors are guaranteed to be contiguous in memory. So this new hackery works.
+			if (PollStruct.size() == 0)
+			{
+				NetworkMessenger->SendMessage(MSG_TARGET_CONSOLE, "No interfaces to listen on; exiting.");
+				break;
+			}
+
 			struct pollfd *CPollStruct = &PollStruct[0];
-			poll(CPollStruct, (int)PollStruct.size(), 100);
+			poll(CPollStruct, (int)PollStruct.size(), INFTIM);
 
 			// Do we have an incoming connection?
 			if ((PollStruct[0].revents & POLLIN) && (ActiveConnections != Configuration.MaxConnections || !Configuration.MaxConnections))
 			{
 				// Handle the incoming connection.
-				NetworkMessanger->SendMessage(MSG_TARGET_CONSOLE, "Accepting incoming connection; distributing to NetworkThreads");
-				IncomingConnection();
-			}
-
-			// Initate self destruct sequence.
-			if (ServerShutdown)
-			{
-				printf("Initating self destruct sequence...\n");
-
-				// Close the main server socket.
-#ifdef _WINDOWS
-				closesocket(NetworkSocket);
-
-				WSACleanup();
-#else
-				close(NetworkSocket);
-#endif
-
-				printf("Clean shutdown\n");
-				break; // Leave the main while loop, effectively terminating the program.
+				NetworkMessenger->SendMessage(MSG_TARGET_CONSOLE, "Accepting incoming connection; distributing to NetworkThreads");
+				IncomingConnection(PollStruct[0].fd);
 			}
 
 		} // while (1) : The main loop.
@@ -142,25 +93,17 @@ namespace DFSNetworking
 
 	NetworkDaemon::NetworkDaemon()
 	{
-		listenPort = 0;
-		backLog = 0;
-		NetworkSocket = 0;
-		struct pollfd PollFDTemp;
-		memset(&PollFDTemp, 0, sizeof(struct pollfd));
-
-		PollStruct.push_back(PollFDTemp); // Add the master socket to the poll structure.
-
 		if (MessengerServer)
 		{
-			NetworkMessanger = MessengerServer->ReceiveActiveMessenger();
-			NetworkMessanger->Name = "Network";
+			NetworkMessenger = MessengerServer->ReceiveActiveMessenger();
+			NetworkMessenger->Name = "Network";
 		}
 		else
-			NetworkMessanger = nullptr;
+			NetworkMessenger = nullptr;
 	}
 	NetworkDaemon::~NetworkDaemon()
 	{
-		if (NetworkMessanger)
-			delete NetworkMessanger;
+		if (NetworkMessenger)
+			delete NetworkMessenger;
 	}
 }
