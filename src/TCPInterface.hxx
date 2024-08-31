@@ -13,6 +13,8 @@
 #include <sys/wait.h>
 #endif
 
+#include "InterProcessMessaging.hxx"
+
 namespace DFSNetworking
 {
 
@@ -20,6 +22,7 @@ namespace DFSNetworking
 	{
 	private:
 		SOCKET NetworkSocket;
+		DFSMessaging::Messenger* InterfaceMessenger;
 		unsigned int listenPort;
 		unsigned int backLog;
 
@@ -28,7 +31,6 @@ namespace DFSNetworking
 
 		TCPInterface();
 		~TCPInterface();
-
 	};
 
 }

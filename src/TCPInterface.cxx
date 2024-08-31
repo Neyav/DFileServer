@@ -1,5 +1,3 @@
-#include <iostream>
-
 #include "TCPInterface.hxx"
 
 namespace DFSNetworking
@@ -17,7 +15,7 @@ namespace DFSNetworking
 			return false;
 		}
 #endif
-		std::cout << " -=Initializing IPv4 Interface..." << std::endl;
+		InterfaceMessenger->SendMessage(MSG_TARGET_CONSOLE, "Initializing IPv4 Interface...");
 
 		// Grab the master socket.
 		if ((NetworkSocket = socket(AF_INET, SOCK_STREAM, 0)) == -1)
@@ -65,6 +63,17 @@ namespace DFSNetworking
 		listenPort = 0;
 		backLog = 0;
 		NetworkSocket = 0;
+
+		if (MessengerServer)
+		{
+			InterfaceMessenger = MessengerServer->ReceiveActiveMessenger();
+			InterfaceMessenger->Name = "IPv4 Interface";
+		}
+		else
+		{
+			InterfaceMessenger = nullptr;
+		}
+		
 	}
 
 	TCPInterface::~TCPInterface()
@@ -78,5 +87,8 @@ namespace DFSNetworking
 		{
 			perror("TCPInterface::~TCPInterface -- close()");
 		}
+
+		if (InterfaceMessenger != nullptr)
+			delete InterfaceMessenger;
 	}
 }
