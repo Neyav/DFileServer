@@ -7,8 +7,8 @@ CFLAGS = -O2 -std=c++17
 LINKERFLAGS =
 
 # The default build target.
-dfileserver: CPathResolver.o DirectoryIndexing.o ClientConnection.o HTTPHeader.o DashFileServer.o MimeTypes.o Base64.o HTMLEncoding.o InterProcessMessaging.o Networking.o NetworkThread.o
-	$(CC) -o dfileserver CPathResolver.o DirectoryIndexing.o ClientConnection.o HTTPHeader.o DashFileServer.o MimeTypes.o Base64.o HTMLEncoding.o InterProcessMessaging.o Networking.o NetworkThread.o $(LINKERFLAGS)
+dfileserver: CPathResolver.o DirectoryIndexing.o ClientConnection.o HTTPHeader.o DashFileServer.o MimeTypes.o Base64.o HTMLEncoding.o InterProcessMessaging.o Networking.o NetworkThread.o TCPInterface.o
+	$(CC) -o dfileserver CPathResolver.o DirectoryIndexing.o ClientConnection.o HTTPHeader.o DashFileServer.o MimeTypes.o Base64.o HTMLEncoding.o InterProcessMessaging.o Networking.o NetworkThread.o TCPInterface.o $(LINKERFLAGS)
 	$(STRIP) --strip-all dfileserver
 
 CPathResolver.o: src/CPathResolver.cxx
@@ -43,6 +43,9 @@ Networking.o: src/Networking.cxx
 
 NetworkThread.o: src/NetworkThread.cxx
 	$(CC) $(CFLAGS) -o NetworkThread.o -c src/NetworkThread.cxx
+
+TCPInterface.o: src/TCPInterface.cxx
+	$(CC) $(CFLAGS) -o TCPInterface.o -c src/TCPInterface.cxx
 
 clean:
 	$(RM) *.o

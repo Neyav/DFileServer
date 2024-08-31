@@ -5,6 +5,7 @@
 
 #pragma comment(lib, "Ws2_32.lib")
 #else
+#define SOCKET int
 #include <unistd.h>
 #include <sys/poll.h>
 #include <sys/types.h>
