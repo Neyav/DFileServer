@@ -28,7 +28,7 @@ namespace DFSNetworking
 		std::vector<TCPInterface*> InterfaceList;
 		DFSMessaging::Messenger* NetworkMessenger;
 
-		void IncomingConnection(SOCKET IncomingSocket);
+		void IncomingConnection(TCPInterface *aInterface);
 	public:
 		bool addListener(unsigned int aPort, unsigned int aBacklog, TCPInterface *aInterface);
 

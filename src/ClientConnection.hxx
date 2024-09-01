@@ -10,14 +10,14 @@
 
 #include "HTTPHeader.hxx"
 #include "InterProcessMessaging.hxx"
+#include "TCPInterface.hxx"
 
 class ClientConnection
 {
 	private:
-		SOCKET				NetworkSocket;
-		struct sockaddr_in	SocketStruct;
-		time_t				LastAction;
-		DFSMessaging::Messenger* Messenger;
+		DFSNetworking::TCPInterface        *Interface;
+		time_t								LastAction;
+		DFSMessaging::Messenger			   *Messenger;
 	public:	
 
 		std::ifstream		*FileStream;
@@ -39,7 +39,7 @@ class ClientConnection
 		char *GetIP ( void );
 		size_t OpenFile ( char * );
 		void CloseFile ( void );
-		char AcceptConnection ( SOCKET );
+		char AcceptConnection ( DFSNetworking::TCPInterface *aInterface );
 		void DisconnectClient ( void );
 		int SendData ( char *, int );
 		size_t RecvData ( char *, int );

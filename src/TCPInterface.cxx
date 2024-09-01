@@ -1,3 +1,7 @@
+#ifdef _WINDOWS
+#define socklen_t int
+#endif
+
 #include "TCPInterface.hxx"
 
 namespace DFSNetworking
@@ -58,9 +62,61 @@ namespace DFSNetworking
 
 		listenPort = aPort;
 		backLog = aBackLog;
+		NetworkAddress = ListenAddr;
 
 		return true;
 	}
+
+	TCPInterface* TCPInterface::acceptConnection(void)
+	{
+		socklen_t sin_size = sizeof(struct sockaddr_in);
+		SOCKET NewSocket;
+		struct sockaddr_in SocketStruct;
+
+		if ((NewSocket = accept(NetworkSocket, (struct sockaddr*)&SocketStruct,
+			&sin_size)) == -1)
+		{
+			InterfaceMessenger->SendMessage(MSG_TARGET_CONSOLE, "TCPInterface::acceptConnection -- accept() failed.");
+
+			return nullptr;
+		}
+
+		InterfaceMessenger->SendMessage(MSG_TARGET_CONSOLE, "TCPInterface::acceptConnection -- Connection accepted from " + std::string(inet_ntoa(SocketStruct.sin_addr)));
+
+		TCPInterface* NewInterface = new TCPInterface;
+		NewInterface->NetworkSocket = NewSocket;
+		NewInterface->NetworkAddress = SocketStruct;
+		NewInterface->listenPort = listenPort;
+		NewInterface->backLog = backLog;
+
+		return NewInterface;
+	}
+
+	size_t TCPInterface::sendData(char* aData, int aLength)
+	{
+		size_t DataSent;
+
+		if ((DataSent = send(NetworkSocket, aData, aLength, 0)) == -1)
+		{
+			InterfaceMessenger->SendMessage(MSG_TARGET_CONSOLE, "TCPInterface::sendData -- send() failed.");
+			return 0;
+		}
+
+		return DataSent;
+	}
+	
+	size_t TCPInterface::receiveData(char* aData, int aLength)
+	{
+		size_t DataRecv;
+
+		if ((DataRecv = recv(NetworkSocket, aData, aLength - 1, 0)) == -1)
+		{
+			InterfaceMessenger->SendMessage(MSG_TARGET_CONSOLE, "TCPInterface::receiveData -- recv() failed.");
+			return -1;
+		}
+
+		return DataRecv;
+	}	
 
 	TCPInterface::TCPInterface()
 	{

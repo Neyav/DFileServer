@@ -50,15 +50,14 @@
 #endif
 
 #include "ClientConnection.hxx"
+#include "TCPInterface.hxx"
 
 ClientConnection::ClientConnection ()
 {
-
-	FileStream = NULL;
+	Interface = nullptr;
+	FileStream = nullptr;
 	BytesRemaining = BandwidthLeft = 0;
 	SendBufferIterator = 0;
-
-	NetworkSocket = -1;
 
 	LastBandReset = 0;
 
@@ -73,20 +72,21 @@ ClientConnection::ClientConnection ()
 ClientConnection::~ClientConnection()
 {
 	this->CloseFile();
-	this->DisconnectClient();
 
 	if (Messenger)
 		delete Messenger;
+	if (Interface)
+		delete Interface;
 }
 
 SOCKET ClientConnection::GetSocket ( void )
 {
-	return NetworkSocket;
+	return Interface->getSocket();
 }
 
 char *ClientConnection::GetIP ( void )
 {
-	return inet_ntoa(SocketStruct.sin_addr);
+	return Interface->getIP();
 }
 
 size_t ClientConnection::OpenFile ( char *ArgFilename )
@@ -133,38 +133,28 @@ void ClientConnection::CloseFile ( void )
 
 }
 
-char ClientConnection::AcceptConnection ( SOCKET ArgSocket )
+char ClientConnection::AcceptConnection ( DFSNetworking::TCPInterface *aInterface )
 {
 	socklen_t sin_size = sizeof(struct sockaddr_in);
 
 	LastAction = time ( NULL );
 
-	if ( ( NetworkSocket = accept(ArgSocket, (struct sockaddr *)&SocketStruct,
-			&sin_size)) == -1 )
+	if ( (Interface = aInterface->acceptConnection()) == nullptr )
 	{
-		Messenger->SendMessage(MSG_TARGET_CONSOLE, "ClientConnection::AcceptConnection -- accept() failed.");
-	
 		return -1;
 	}
 
-	Messenger->Name = "Client: " + std::string(inet_ntoa(SocketStruct.sin_addr));
+	Messenger->Name = "Client: " + std::string(Interface->getIP());
 
 	return 0;
 }
 
 void ClientConnection::DisconnectClient ( void )
 {
-	// Close the socket.
-#ifdef _WINDOWS
-	if ( closesocket (NetworkSocket) == -1 )
-#else
-	if ( close (NetworkSocket) == -1 )
-#endif
-	{
-		Messenger->SendMessage(MSG_TARGET_CONSOLE, "ClientConnection::DisconnectClient -- close() failed.");
-	}
+	if (Interface)
+		delete Interface;
 
-	NetworkSocket = -1;
+	Interface = nullptr;
 }
 
 int ClientConnection::SendData ( char *Argstring, int ArgSize )
@@ -177,9 +167,8 @@ int ClientConnection::SendData ( char *Argstring, int ArgSize )
 	else
 		DataSize = ArgSize;
 
-	if ( (DataSent = send( NetworkSocket, Argstring, DataSize, 0 )) == -1)
-	{
-		Messenger->SendMessage(MSG_TARGET_CONSOLE, "ClientConnection::SendData -- send() failed.");
+	if ((DataSent = Interface->sendData(Argstring, DataSize)) == -1)
+	{		
 		return 0;
 	}
 
@@ -195,7 +184,7 @@ size_t ClientConnection::RecvData ( char *Argstring, int ArgDataSize )
 
 	LastAction = time ( NULL );
 
-	if ( (DataRecv = recv( NetworkSocket, Argstring, ArgDataSize-1, 0 )) == -1)
+	if ( (DataRecv = Interface->receiveData(Argstring, ArgDataSize-1 )) == -1)
 	{
 		Messenger->SendMessage(MSG_TARGET_CONSOLE, "ClientConnection::RecvData -- recv() failed.");
 		return -1;

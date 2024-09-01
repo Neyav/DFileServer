@@ -13,14 +13,14 @@ extern bool ServerLockdown;
 
 namespace DFSNetworking
 {
-	void NetworkDaemon::IncomingConnection(SOCKET IncomingSocket)
+	void NetworkDaemon::IncomingConnection(TCPInterface *aInterface)
 	{
 		ClientConnection *IncomingClient;
 
 		IncomingClient = new ClientConnection;
 
 		// Accept the connection and break if there was an error.
-		if (IncomingClient->AcceptConnection(IncomingSocket) == -1)
+		if (IncomingClient->AcceptConnection(aInterface) == -1)
 		{
 			delete IncomingClient;
 			return;
@@ -85,7 +85,7 @@ namespace DFSNetworking
 			{
 				// Handle the incoming connection.
 				NetworkMessenger->SendMessage(MSG_TARGET_CONSOLE, "Accepting incoming connection; distributing to NetworkThreads");
-				IncomingConnection(PollStruct[0].fd);
+				IncomingConnection(InterfaceList[0]);
 			}
 
 		} // while (1) : The main loop.
