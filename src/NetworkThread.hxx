@@ -1,9 +1,6 @@
 #pragma once
 
 #ifdef _WINDOWS
-#include <winsock.h>
-#include "contrib/fakepoll.h"
-
 #pragma comment(lib, "Ws2_32.lib")
 #else
 #include <unistd.h>
@@ -31,7 +28,11 @@ namespace DFSNetworking
 		bool primeThread;
 		int localConnections;
 
+#ifdef _WINDOWS
+		std::vector<WSAPOLLFD> PollStruct;
+#else
 		std::vector<struct pollfd> PollStruct;
+#endif
 		std::vector<ClientConnection*> ConnectionList;
 		DFSMessaging::Messenger* NetworkThreadMessenger;
 

@@ -1,5 +1,12 @@
 #include <iostream>
 
+#ifdef _WINDOWS
+#include <WinSock2.h>
+#include <WS2tcpip.h>
+#define _WINSOCK_DEPRECATED_NO_WARNINGS
+#pragma comment(lib, "Ws2_32.lib")
+#endif
+
 #include "Networking.hxx"
 #include "NetworkThread.hxx"
 #include "Version.hxx"
@@ -41,8 +48,14 @@ namespace DFSNetworking
 
 	bool NetworkDaemon::addListener(unsigned int aPort, unsigned int aBackLog, TCPInterface *aInterface)
 	{
+#ifdef _WINDOWS
+		WSAPOLLFD PollFDTemp;
+		memset(&PollFDTemp, 0, sizeof(WSAPOLLFD));
+#else
 		struct pollfd PollFDTemp;
 		memset(&PollFDTemp, 0, sizeof(struct pollfd));
+#endif
+		
 
 		aInterface->initializeInterface(aPort, aBackLog);
 
@@ -60,9 +73,9 @@ namespace DFSNetworking
 	void NetworkDaemon::NetworkLoop(void)
 	{
 		if (PollStruct.size() < 2)
-			NetworkMessenger->SendMessage(MSG_TARGET_CONSOLE, "Network Loop activated: Listening on " + std::to_string(PollStruct.size()) + " Interface...");
+			NetworkMessenger->sendMessage(MSG_TARGET_CONSOLE, "Network Loop activated: Listening on " + std::to_string(PollStruct.size()) + " Interface...");
 		else
-			NetworkMessenger->SendMessage(MSG_TARGET_CONSOLE, "Network Loop activated: Listening on " + std::to_string(PollStruct.size()) + " Interfaces...");
+			NetworkMessenger->sendMessage(MSG_TARGET_CONSOLE, "Network Loop activated: Listening on " + std::to_string(PollStruct.size()) + " Interfaces...");
 
 		// Start the specified number of prime threads.
 		for (int i = 0; i < Configuration.primeThreads; i++)
@@ -73,19 +86,33 @@ namespace DFSNetworking
 			// As of C++11, vectors are guaranteed to be contiguous in memory. So this new hackery works.
 			if (PollStruct.size() == 0)
 			{
-				NetworkMessenger->SendMessage(MSG_TARGET_CONSOLE, "No interfaces to listen on; exiting.");
+				NetworkMessenger->sendMessage(MSG_TARGET_CONSOLE, "No interfaces to listen on; exiting.");
 				break;
 			}
+			//Q: Why is the argument invalid?
+			//A: Because the argument is a pointer to a vector of pollfd structs, not a pointer to a pollfd struct.
+			//Q: How do I fix it?
+			//A: Use the address-of operator to pass the address
+			//Q: Example?
+			//A: poll(&PollStruct[0], PollStruct.size(), INFTIM);			
 
-			struct pollfd *CPollStruct = &PollStruct[0];
-			poll(CPollStruct, (int)PollStruct.size(), INFTIM);
+#ifdef _WINDOWS
+			WSAPOLLFD* CPollStruct = (WSAPOLLFD*)&PollStruct[0];
+			WSAPoll(CPollStruct, PollStruct.size(), INFTIM);
+#else
+			struct pollfd *CPollStruct = (struct pollfd *) &PollStruct[0];
+			poll(CPollStruct, PollStruct.size(), INFTIM);
+#endif
 
-			// Do we have an incoming connection?
-			if ((PollStruct[0].revents & POLLIN) && (ActiveConnections != Configuration.MaxConnections || !Configuration.MaxConnections))
+			for (int i = 0; i < PollStruct.size(); i++)
 			{
-				// Handle the incoming connection.
-				NetworkMessenger->SendMessage(MSG_TARGET_CONSOLE, "Accepting incoming connection; distributing to NetworkThreads");
-				IncomingConnection(InterfaceList[0]);
+				// Do we have an incoming connection?
+				if ((PollStruct[i].revents & POLLIN) && (ActiveConnections != Configuration.MaxConnections || !Configuration.MaxConnections))
+				{
+					// Handle the incoming connection.
+					NetworkMessenger->sendMessage(MSG_TARGET_CONSOLE, "Accepting incoming connection; distributing to NetworkThreads");
+					IncomingConnection(InterfaceList[i]);
+				}
 			}
 
 		} // while (1) : The main loop.

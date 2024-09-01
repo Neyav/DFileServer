@@ -7,10 +7,6 @@
 #include <vector>
 #include <atomic>
 
-#ifdef SendMessage
-#undef SendMessage
-#endif
-
 #define MESSAGE_DEBUG
 
 #define MSG_TARGET_ALL		 1
@@ -70,7 +66,7 @@ namespace DFSMessaging
 
 		void AlertMessageID(unsigned int aMessageID);
 		void pauseForMessage(unsigned int aTimeout = 0);
-		void SendMessage(unsigned int aChannel, std::string aMessage);
+		void sendMessage(unsigned int aChannel, std::string aMessage);
 		void SendPointer(unsigned int aChannel, void* aPointer);
 		bool HasMessages(void);
 		Message AcceptMessage(void);

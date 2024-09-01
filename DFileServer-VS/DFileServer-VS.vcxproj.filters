@@ -74,9 +74,6 @@
     <ClInclude Include="..\src\contrib\Base64.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\contrib\fakepoll.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\InterProcessMessaging.hxx">
       <Filter>Header Files</Filter>
     </ClInclude>

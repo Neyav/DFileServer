@@ -226,7 +226,7 @@ namespace DFSNetworking
 					NetworkThreadMessenger->pauseForMessage(120000);
 					if (!NetworkThreadMessenger->HasMessages())
 					{
-						NetworkThreadMessenger->SendMessage(MSG_TARGET_CONSOLE, "Network Thread[" + std::to_string(NetworkThreadID) + "] has been idle for 2 minutes and is self destructing.");
+						NetworkThreadMessenger->sendMessage(MSG_TARGET_CONSOLE, "Network Thread[" + std::to_string(NetworkThreadID) + "] has been idle for 2 minutes and is self destructing.");
 						delete this;
 						return;
 					}
@@ -243,7 +243,11 @@ namespace DFSNetworking
 					ClientConnection* NewConnection = (ClientConnection*)NewMessage.Pointer;
 
 					// Add the new connection to the poll structure.
+#ifdef _WINDOWS
+					WSAPOLLFD NewPollStruct;
+#else
 					struct pollfd NewPollStruct;
+#endif
 					NewPollStruct.fd = NewConnection->GetSocket();
 					NewPollStruct.events = (POLLIN | POLLOUT);
 					PollStruct.push_back(NewPollStruct);
@@ -254,7 +258,7 @@ namespace DFSNetworking
 					localConnections++;
 
 					// Send a message to the console.
-					NetworkThreadMessenger->SendMessage(MSG_TARGET_CONSOLE, "New connection accepted from " + std::string(NewConnection->GetIP()));
+					NetworkThreadMessenger->sendMessage(MSG_TARGET_CONSOLE, "New connection accepted from " + std::string(NewConnection->GetIP()));
 				}				
 			}
 
@@ -263,8 +267,13 @@ namespace DFSNetworking
 				continue;
 			}
 
+#ifdef _WINDOWS
+			WSAPOLLFD* CPollStruct = &PollStruct[0];
+			WSAPoll(CPollStruct, (ULONG)PollStruct.size(), 0);
+#else
 			struct pollfd* CPollStruct = &PollStruct[0];
 			poll(CPollStruct, (int)PollStruct.size(), 0);
+#endif
 			
 			// Go through the list looking for connections that have incoming data.
 			for (int ConnectionListIterator = 0; ConnectionListIterator < ConnectionList.size(); ConnectionListIterator++)
@@ -279,7 +288,7 @@ namespace DFSNetworking
 					if ((DataRecved = ConnectionList[ConnectionListIterator]->RecvData(DataBuffer, sizeof(DataBuffer))) < 1)
 					{ // Disconnection or error. Terminate client.
 
-						NetworkThreadMessenger->SendMessage(MSG_TARGET_CONSOLE, std::string(ConnectionList[ConnectionListIterator]->GetIP()) + " - Disconnected w/o complete data.");
+						NetworkThreadMessenger->sendMessage(MSG_TARGET_CONSOLE, std::string(ConnectionList[ConnectionListIterator]->GetIP()) + " - Disconnected w/o complete data.");
 
 						TerminateConnection(ConnectionListIterator);
 						ConnectionListIterator--;
@@ -354,8 +363,8 @@ namespace DFSNetworking
 							strcpy(ResourceType, ReturnMimeType(Resource));
 						}
 
-						NetworkThreadMessenger->SendMessage(MSG_TARGET_CONSOLE, std::string(ConnectionList[ConnectionListIterator]->GetIP()) + " - [" + ConnectionList[ConnectionListIterator]->Resource + "]");
-						NetworkThreadMessenger->SendMessage(MSG_TARGET_CONSOLE, "Resolved resource to: -> " + std::string(Resource));
+						NetworkThreadMessenger->sendMessage(MSG_TARGET_CONSOLE, std::string(ConnectionList[ConnectionListIterator]->GetIP()) + " - [" + ConnectionList[ConnectionListIterator]->Resource + "]");
+						NetworkThreadMessenger->sendMessage(MSG_TARGET_CONSOLE, "Resolved resource to: -> " + std::string(Resource));
 
 						// If there is no sendbuffer, try to open the file, and if you can't, terminate the connection.
 						if (ConnectionList[ConnectionListIterator]->SendBuffer.empty() &&
@@ -397,9 +406,9 @@ namespace DFSNetworking
 									if (Base64Encoding.decode(Base64Authorization) != Configuration.BasicCredentials)
 									{
 										if (Base64Authorization == "")
-											NetworkThreadMessenger->SendMessage(MSG_TARGET_CONSOLE, std::string(ConnectionList[ConnectionListIterator]->GetIP()) + " - Protected Resource Requested; Authentication Requested.");
+											NetworkThreadMessenger->sendMessage(MSG_TARGET_CONSOLE, std::string(ConnectionList[ConnectionListIterator]->GetIP()) + " - Protected Resource Requested; Authentication Requested.");
 										else
-											NetworkThreadMessenger->SendMessage(MSG_TARGET_CONSOLE, std::string(ConnectionList[ConnectionListIterator]->GetIP()) + " - Protected Resource Requested; Failed Authentication.");
+											NetworkThreadMessenger->sendMessage(MSG_TARGET_CONSOLE, std::string(ConnectionList[ConnectionListIterator]->GetIP()) + " - Protected Resource Requested; Failed Authentication.");
 
 										ConnectionList[ConnectionListIterator]->ServerResponse.AccessPath = "401"; // Authorization Required
 
@@ -557,7 +566,7 @@ namespace DFSNetworking
 			NetworkThreadMessenger = MessengerServer->ReceiveActiveMessenger();
 			NetworkThreadMessenger->Name = "Network Thread[" + std::to_string(NetworkThreadID) + "]";
 			NetworkThreadMessenger->RegisterOnChannel(MSG_TARGET_NETWORK);
-			NetworkThreadMessenger->SendMessage(MSG_TARGET_CONSOLE, "Network Thread initialized.");
+			NetworkThreadMessenger->sendMessage(MSG_TARGET_CONSOLE, "Network Thread initialized.");
 		}
 		else
 			NetworkThreadMessenger = nullptr;

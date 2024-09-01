@@ -35,9 +35,7 @@
 #include <fcntl.h>
 #include <signal.h>
 #ifdef _WINDOWS
-#include <winsock.h>
 #include <io.h>
-#include "contrib/fakepoll.h"
 
 #pragma comment(lib, "Ws2_32.lib")
 #else
@@ -100,7 +98,7 @@ BOOL WINAPI InitiateServerShutdown(DWORD ArgSignal)
 
 		ServerShutdownMessenger = MessengerServer->ReceiveActiveMessenger();
 
-		ServerShutdownMessenger->SendMessage(MSG_TARGET_NETWORK, "SHUTDOWN");
+		ServerShutdownMessenger->sendMessage(MSG_TARGET_NETWORK, "SHUTDOWN");
 
 		while (!ServerShutdownMessenger->HasMessages())
 		{ // Wait for the response.
@@ -405,8 +403,15 @@ int main( int argc, char *argv[] )
    std::cout << " -=Initialize Network..." << std::endl;
 
    DFSNetworking::TCPInterface *IPv4Interface = new DFSNetworking::TCPInterface;
+   DFSNetworking::IPv6Interface* IPv6Interface = new DFSNetworking::IPv6Interface;
 
    if (NetworkDaemon->addListener(Configuration.Port, Configuration.BackLog, IPv4Interface) == false)
+   {
+	   std::cout << "CRITICAL ERROR: Couldn't initialize listening socket on port " << Configuration.Port << std::endl;
+	   exit(-1); // TODO: Replace with an exit function that cleans up after itself.
+   }
+
+   if (NetworkDaemon->addListener(Configuration.Port, Configuration.BackLog, IPv6Interface) == false)
    {
 	   std::cout << "CRITICAL ERROR: Couldn't initialize listening socket on port " << Configuration.Port << std::endl;
 	   exit(-1); // TODO: Replace with an exit function that cleans up after itself.

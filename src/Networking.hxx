@@ -1,7 +1,5 @@
 #pragma once
 #ifdef _WINDOWS
-#include <winsock.h>
-#include "contrib/fakepoll.h"
 
 #pragma comment(lib, "Ws2_32.lib")
 #else
@@ -24,7 +22,11 @@ namespace DFSNetworking
 	class NetworkDaemon
 	{
 	private:
+#ifdef _WINDOWS
+		std::vector<WSAPOLLFD> PollStruct;
+#else
 		std::vector<struct pollfd> PollStruct;
+#endif
 		std::vector<TCPInterface*> InterfaceList;
 		DFSMessaging::Messenger* NetworkMessenger;
 

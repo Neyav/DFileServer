@@ -209,7 +209,7 @@ namespace DFSMessaging
 		}
 	}
 
-    void Messenger::SendMessage(unsigned int aChannel, std::string aMessage)
+    void Messenger::sendMessage(unsigned int aChannel, std::string aMessage)
 	{
 		Message newMessage(false, false, this, securityKey);
 

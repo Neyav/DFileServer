@@ -1,8 +1,10 @@
 #pragma once
 #ifdef _WINDOWS
-#include <winsock.h>
-#include "contrib/fakepoll.h"
+#define WIN32_LEAN_AND_MEAN
 
+#define _WINSOCK_DEPRECATED_NO_WARNINGS
+#include <winsock2.h>
+#include <ws2tcpip.h>
 #pragma comment(lib, "Ws2_32.lib")
 #else
 #define SOCKET int
@@ -21,7 +23,7 @@ namespace DFSNetworking
 
 	class TCPInterface
 	{
-	private:
+	protected:
 		SOCKET						NetworkSocket;
 		struct sockaddr_in			NetworkAddress;
 		DFSMessaging::Messenger		*InterfaceMessenger;
@@ -29,17 +31,33 @@ namespace DFSNetworking
 		unsigned int				backLog;
 
 	public:
-		bool initializeInterface(unsigned int aPort, unsigned int aBackLog);
-		TCPInterface *acceptConnection(void);
+		virtual bool initializeInterface(unsigned int aPort, unsigned int aBackLog);
+		virtual TCPInterface *acceptConnection(void);
 
 		size_t sendData(char* aData, int aLength);
 		size_t receiveData(char* aData, int aLength);
 
 		SOCKET getSocket(void) { return NetworkSocket; }
-		char* getIP(void) { return inet_ntoa(NetworkAddress.sin_addr); }
+		virtual char* getIP(void);
 
 		TCPInterface();
 		~TCPInterface();
 	};
+
+	class IPv6Interface : public TCPInterface
+	{
+	private:
+		struct sockaddr_in6			NetworkAddress;
+
+	public:
+		bool initializeInterface(unsigned int aPort, unsigned int aBackLog) override;
+		TCPInterface* acceptConnection(void) override;
+
+		char* getIP(void) override;
+
+		IPv6Interface();
+		~IPv6Interface();
+	};
+
 
 }
