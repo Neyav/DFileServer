@@ -1,3 +1,5 @@
+#include <string>
+
 #include "TCPInterface.hxx"
 
 namespace DFSNetworking
