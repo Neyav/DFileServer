@@ -2,6 +2,8 @@
 #define socklen_t int
 #endif
 
+#include <string>
+
 #include "TCPInterface.hxx"
 
 namespace DFSNetworking
