@@ -186,13 +186,14 @@ namespace DFSNetworking
 		}
 
 		// Set the listening network struct up.
+		memset(&ListenAddr, 0, sizeof(struct sockaddr_in6));
 		ListenAddr.sin6_family = AF_INET6;
 		ListenAddr.sin6_port = htons(aPort);
 		ListenAddr.sin6_addr = in6addr_any;
 
 		// Bind the socket to the listening network struct.
 		if (bind(NetworkSocket, (struct sockaddr*)&ListenAddr,
-			sizeof(struct sockaddr)) == -1)
+			sizeof(struct sockaddr_in6)) == -1)
 		{
 			perror("InitializeNetwork -- bind()");
 			return false;
