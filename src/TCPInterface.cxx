@@ -392,12 +392,12 @@ namespace DFSNetworking
 		if ((NewSocket = accept(NetworkSocket, (struct sockaddr*)&SocketStruct,
 			&sin_size)) == -1)
 		{
-			InterfaceMessenger->sendMessage(MSG_TARGET_CONSOLE, "TCPInterface::acceptConnection -- accept() failed.");
+			InterfaceMessenger->sendMessage(MSG_TARGET_CONSOLE, "HTTPSIPv4Interface::acceptConnection -- accept() failed.");
 
 			return nullptr;
 		}
 
-		InterfaceMessenger->sendMessage(MSG_TARGET_CONSOLE, "TCPInterface::acceptConnection -- Connection accepted from " + std::string(inet_ntoa(SocketStruct.sin_addr)));
+		InterfaceMessenger->sendMessage(MSG_TARGET_CONSOLE, "HTTPSIPv4Interface::acceptConnection -- Connection accepted from " + std::string(inet_ntoa(SocketStruct.sin_addr)));
 
 		HTTPSIPv4Interface* NewInterface = new HTTPSIPv4Interface;
 		NewInterface->NetworkSocket = NewSocket;
