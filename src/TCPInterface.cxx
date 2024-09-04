@@ -311,21 +311,64 @@ namespace DFSNetworking
 		X509_sign(*x509, *pkey, EVP_sha256());
 	}
 
-	HTTPSIPv4Interface::HTTPSIPv4Interface()
+	bool HTTPSIPv4Interface::initializeInterface(unsigned int aPort, unsigned int aBackLog)
 	{
-		listenPort = 0;
-		backLog = 0;
-		NetworkSocket = 0;
+		struct sockaddr_in ListenAddr;
+		const char yes = 1;
+#ifdef _WINDOWS
+		WSADATA wsaData;
 
-		if (MessengerServer)
+		if (WSAStartup(MAKEWORD(1, 1), &wsaData) != 0)
 		{
-			InterfaceMessenger = MessengerServer->ReceiveActiveMessenger();
-			InterfaceMessenger->Name = "HTTPS IPv4 Interface";
+			perror("InitializeNetwork -- WSAStartup()");
+			return false;
 		}
-		else
+#endif
+		InterfaceMessenger->sendMessage(MSG_TARGET_CONSOLE, "Initializing HTTPS IPv4 Interface...");
+
+		// Grab the master socket.
+		if ((NetworkSocket = socket(AF_INET, SOCK_STREAM, 0)) == -1)
 		{
-			InterfaceMessenger = nullptr;
+			perror("InitializeNetwork -- socket()");
+			return false;
 		}
+
+		// Clear the socket incase it hasn't been properly closed so that we may use it.
+		if (setsockopt(NetworkSocket, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int)) == -1)
+		{
+			perror("InitializeNetwork -- setsockopt()");
+			return false;
+		}
+
+		// Set the listening network struct up.
+		ListenAddr.sin_family = AF_INET;
+		ListenAddr.sin_port = htons(aPort);
+		ListenAddr.sin_addr.s_addr = INADDR_ANY;
+		memset(&(ListenAddr.sin_zero), '\0', 8);
+
+		// Bind the socket to the listening network struct.
+		if (bind(NetworkSocket, (struct sockaddr*)&ListenAddr,
+			sizeof(struct sockaddr)) == -1)
+		{
+			perror("InitializeNetwork -- bind()");
+			return false;
+		}
+
+		// Start listening
+		if (listen(NetworkSocket, aBackLog) == -1)
+		{
+			perror("InitializeNetwork -- listen()");
+			return false;
+		}
+
+		// Change the name of the Messenger to include the IP address and port.
+		InterfaceMessenger->Name = "HTTPS IPv4 Interface: " + std::string(inet_ntoa(ListenAddr.sin_addr)) + ":" + std::to_string(aPort);
+		InterfaceMessenger->sendMessage(MSG_TARGET_CONSOLE, "HTTPS IPv4 Interface initialized.");
+
+		listenPort = aPort;
+		backLog = aBackLog;
+		NetworkAddress = ListenAddr;
+
 
 		method = TLS_server_method();
 		ctx = SSL_CTX_new(method);
@@ -336,11 +379,102 @@ namespace DFSNetworking
 		SSL_CTX_use_PrivateKey(ctx, pkey);
 
 		InterfaceMessenger->sendMessage(MSG_TARGET_CONSOLE, "SSL Certificate generated and self signed.");
+
+		return true;
+	}
+
+	TCPInterface* HTTPSIPv4Interface::acceptConnection(void)
+	{
+		socklen_t sin_size = sizeof(struct sockaddr_in);
+		SOCKET NewSocket;
+		struct sockaddr_in SocketStruct;
+
+		if ((NewSocket = accept(NetworkSocket, (struct sockaddr*)&SocketStruct,
+			&sin_size)) == -1)
+		{
+			InterfaceMessenger->sendMessage(MSG_TARGET_CONSOLE, "TCPInterface::acceptConnection -- accept() failed.");
+
+			return nullptr;
+		}
+
+		InterfaceMessenger->sendMessage(MSG_TARGET_CONSOLE, "TCPInterface::acceptConnection -- Connection accepted from " + std::string(inet_ntoa(SocketStruct.sin_addr)));
+
+		HTTPSIPv4Interface* NewInterface = new HTTPSIPv4Interface;
+		NewInterface->NetworkSocket = NewSocket;
+		NewInterface->NetworkAddress = SocketStruct;
+		NewInterface->listenPort = listenPort;
+		NewInterface->backLog = backLog;
+		NewInterface->ctx = ctx;
+		NewInterface->pkey = pkey;
+		NewInterface->x509 = x509;
+		NewInterface->method = method;
+
+		NewInterface->ssl = SSL_new(ctx);
+		SSL_set_fd(NewInterface->ssl, NewSocket);
+
+		if (SSL_accept(ssl) <= 0)
+		{
+			InterfaceMessenger->sendMessage(MSG_TARGET_CONSOLE, "SSL Accept failed!");
+
+			delete NewInterface;
+			return nullptr;
+		}
+
+		return NewInterface;
+	}
+
+	HTTPSIPv4Interface::HTTPSIPv4Interface()
+	{
+		listenPort = 0;
+		backLog = 0;
+		NetworkSocket = 0;
+		ssl = nullptr;
+
+		if (MessengerServer)
+		{
+			InterfaceMessenger = MessengerServer->ReceiveActiveMessenger();
+			InterfaceMessenger->Name = "HTTPS IPv4 Interface";
+		}
+		else
+		{
+			InterfaceMessenger = nullptr;
+		}
+	}
+
+	size_t HTTPSIPv4Interface::sendData(char* aData, int aLength)
+	{
+		return SSL_write(ssl, aData, aLength);
+	}
+
+	size_t HTTPSIPv4Interface::receiveData(char* aData, int aLength)
+	{
+		int bytes_read;
+
+		bytes_read = SSL_read(ssl, aData, aLength - 1);
+
+		return (size_t)bytes_read;
 	}
 
 	HTTPSIPv4Interface::~HTTPSIPv4Interface()
 	{
+		// Close the socket.
+#ifdef _WINDOWS
+		if (closesocket(NetworkSocket) == -1)
+#else
+		if (close(NetworkSocket) == -1)
+#endif
+		{
+			perror("HTTPSIPv4Interface::~HTTPSIPv4Interface -- close()");
+		}
 
+		if (InterfaceMessenger != nullptr)
+			delete InterfaceMessenger;
+
+		if (ssl)
+		{
+			SSL_shutdown(ssl);
+			SSL_free(ssl);
+		}
 	}
 #endif
 }

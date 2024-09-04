@@ -51,8 +51,8 @@ namespace DFSNetworking
 		virtual bool initializeInterface(unsigned int aPort, unsigned int aBackLog);
 		virtual TCPInterface *acceptConnection(void);
 
-		size_t sendData(char* aData, int aLength);
-		size_t receiveData(char* aData, int aLength);
+		virtual size_t sendData(char* aData, int aLength);
+		virtual size_t receiveData(char* aData, int aLength);
 
 		SOCKET getSocket(void) { return NetworkSocket; }
 		virtual char* getIP(void);
@@ -87,7 +87,15 @@ namespace DFSNetworking
 
 		EVP_PKEY* pkey = nullptr;
 		X509* x509 = nullptr;
+
+		SSL* ssl;
 	public:
+		bool initializeInterface(unsigned int aPort, unsigned int aBackLog) override;
+		TCPInterface *acceptConnection(void) override;
+
+		virtual size_t sendData(char* aData, int aLength) override;
+		virtual size_t receiveData(char* aData, int aLength) override;
+
 		HTTPSIPv4Interface();
 		~HTTPSIPv4Interface();
 	};
