@@ -410,6 +410,13 @@ namespace DFSNetworking
 		NewInterface->method = method;
 
 		NewInterface->ssl = SSL_new(ctx);
+
+		if (!NewInterface->ssl) {
+			InterfaceMessenger->sendMessage(MSG_TARGET_CONSOLE, "SSL_new failed!");
+			delete NewInterface;
+			return nullptr;
+		}
+
 		SSL_set_fd(NewInterface->ssl, NewSocket);
 
 		if (SSL_accept(ssl) <= 0)
@@ -432,7 +439,7 @@ namespace DFSNetworking
 
 		if (MessengerServer)
 		{
-			InterfaceMessenger = MessengerServer->ReceiveActiveMessenger();
+			//InterfaceMessenger = MessengerServer->ReceiveActiveMessenger();
 			InterfaceMessenger->Name = "HTTPS IPv4 Interface";
 		}
 		else
@@ -463,7 +470,7 @@ namespace DFSNetworking
 			SSL_free(ssl);
 		}
 
-		// Close the socket.
+	/*	// Close the socket.
 #ifdef _WINDOWS
 		if (closesocket(NetworkSocket) == -1)
 #else
@@ -477,7 +484,7 @@ namespace DFSNetworking
 		{
 			delete InterfaceMessenger;
 			InterfaceMessenger = nullptr;
-		}
+		}*/
 	}
 #endif
 }
