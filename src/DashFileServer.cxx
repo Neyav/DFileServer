@@ -280,6 +280,15 @@ int main( int argc, char *argv[] )
    std::string ConfigurationChrootFolder;
 #endif
 
+#ifdef _DFS_USE_OPENSSL
+#ifdef _WINDOWS
+#pragma comment(lib, "Crypt32.lib")
+#endif
+   SSL_library_init();
+   OpenSSL_add_all_algorithms();
+   SSL_load_error_strings();
+#endif
+
    DFSNetworking::NetworkDaemon *NetworkDaemon = nullptr;
    DFSMessaging::Messenger *ConsoleMessenger = nullptr;
 
@@ -404,6 +413,7 @@ int main( int argc, char *argv[] )
 
    DFSNetworking::TCPInterface *IPv4Interface = new DFSNetworking::TCPInterface;
    DFSNetworking::IPv6Interface* IPv6Interface = new DFSNetworking::IPv6Interface;
+   DFSNetworking::HTTPSIPv4Interface* HTTPSIPv4Interface = new DFSNetworking::HTTPSIPv4Interface;
 
    if (NetworkDaemon->addListener(Configuration.Port, Configuration.BackLog, IPv4Interface) == false)
    {
@@ -416,6 +426,13 @@ int main( int argc, char *argv[] )
 	   std::cout << "CRITICAL ERROR: Couldn't initialize listening socket on port " << Configuration.Port << std::endl;
 	   exit(-1); // TODO: Replace with an exit function that cleans up after itself.
    }
+#ifdef _DFS_USE_OPENSSL
+   if (NetworkDaemon->addListener(4433, Configuration.BackLog, HTTPSIPv4Interface) == false)
+   {
+	   std::cout << "CRITICAL ERROR: Couldn't initialize listening socket on port " << Configuration.Port << std::endl;
+	   exit(-1); // TODO: Replace with an exit function that cleans up after itself.
+   }
+#endif
 
 #ifndef _WINDOWS
 
