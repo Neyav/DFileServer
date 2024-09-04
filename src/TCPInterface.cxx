@@ -457,6 +457,12 @@ namespace DFSNetworking
 
 	HTTPSIPv4Interface::~HTTPSIPv4Interface()
 	{
+		if (ssl)
+		{
+			SSL_shutdown(ssl);
+			SSL_free(ssl);
+		}
+
 		// Close the socket.
 #ifdef _WINDOWS
 		if (closesocket(NetworkSocket) == -1)
@@ -468,12 +474,9 @@ namespace DFSNetworking
 		}
 
 		if (InterfaceMessenger != nullptr)
-			delete InterfaceMessenger;
-
-		if (ssl)
 		{
-			SSL_shutdown(ssl);
-			SSL_free(ssl);
+			delete InterfaceMessenger;
+			InterfaceMessenger = nullptr;
 		}
 	}
 #endif
