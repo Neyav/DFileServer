@@ -419,9 +419,10 @@ namespace DFSNetworking
 
 		SSL_set_fd(NewInterface->ssl, NewSocket);
 
-		if (SSL_accept(ssl) <= 0)
+		if (SSL_accept(NewInterface->ssl) <= 0)
 		{
 			InterfaceMessenger->sendMessage(MSG_TARGET_CONSOLE, "SSL Accept failed!");
+			//ERR_print_errors_fp(stderr); // Print OpenSSL error messages
 
 			delete NewInterface;
 			return nullptr;
