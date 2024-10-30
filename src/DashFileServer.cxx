@@ -36,6 +36,7 @@
 #include <signal.h>
 #ifdef _WINDOWS
 #include <io.h>
+#include <conio.h>
 
 #pragma comment(lib, "Ws2_32.lib")
 #else
@@ -254,7 +255,7 @@ void legacyConsole(DFSMessaging::Messenger* ConsoleMessenger)
 	while (1)
 	{
 		// Check for messages.
-		ConsoleMessenger->pauseForMessage();
+		ConsoleMessenger->pauseForMessage(250);
 
 		while (ConsoleMessenger->HasMessages())
 		{
@@ -267,6 +268,17 @@ void legacyConsole(DFSMessaging::Messenger* ConsoleMessenger)
 			{
 				fprintf(Configuration.LogFile, "%s [%s]: %s\n", TimeAndDate(), MessagePacket.OriginName.c_str(), MessagePacket.message.c_str());
 				fflush(Configuration.LogFile);
+			}
+		}
+
+		if (_kbhit())
+		{
+			char keyhit = _getch();
+
+			if (keyhit == 'q' || keyhit == 'Q')
+			{
+				std::cout << " -=Termination Key hit, sending SHUTDOWN message." << std::endl;
+				ConsoleMessenger->sendMessage(MSG_TARGET_ALL, "SHUTDOWN");
 			}
 		}
 	}

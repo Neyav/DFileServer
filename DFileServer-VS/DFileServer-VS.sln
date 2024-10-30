@@ -9,6 +9,8 @@ Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
 		Debug|x86 = Debug|x86
+		Debug-NoSSL|x64 = Debug-NoSSL|x64
+		Debug-NoSSL|x86 = Debug-NoSSL|x86
 		Release|x64 = Release|x64
 		Release|x86 = Release|x86
 	EndGlobalSection
@@ -17,6 +19,10 @@ Global
 		{AB780401-0224-41CE-9386-383C953DE3D5}.Debug|x64.Build.0 = Debug|x64
 		{AB780401-0224-41CE-9386-383C953DE3D5}.Debug|x86.ActiveCfg = Debug|Win32
 		{AB780401-0224-41CE-9386-383C953DE3D5}.Debug|x86.Build.0 = Debug|Win32
+		{AB780401-0224-41CE-9386-383C953DE3D5}.Debug-NoSSL|x64.ActiveCfg = Debug-NoSSL|x64
+		{AB780401-0224-41CE-9386-383C953DE3D5}.Debug-NoSSL|x64.Build.0 = Debug-NoSSL|x64
+		{AB780401-0224-41CE-9386-383C953DE3D5}.Debug-NoSSL|x86.ActiveCfg = Debug-NoSSL|Win32
+		{AB780401-0224-41CE-9386-383C953DE3D5}.Debug-NoSSL|x86.Build.0 = Debug-NoSSL|Win32
 		{AB780401-0224-41CE-9386-383C953DE3D5}.Release|x64.ActiveCfg = Release|x64
 		{AB780401-0224-41CE-9386-383C953DE3D5}.Release|x64.Build.0 = Release|x64
 		{AB780401-0224-41CE-9386-383C953DE3D5}.Release|x86.ActiveCfg = Release|Win32
