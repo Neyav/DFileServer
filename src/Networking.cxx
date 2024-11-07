@@ -98,11 +98,23 @@ namespace DFSNetworking
 
 #ifdef _WINDOWS
 			WSAPOLLFD* CPollStruct = (WSAPOLLFD*)&PollStruct[0];
-			WSAPoll(CPollStruct, PollStruct.size(), INFTIM);
+			WSAPoll(CPollStruct, PollStruct.size(), 100);
 #else
 			struct pollfd *CPollStruct = (struct pollfd *) &PollStruct[0];
-			poll(CPollStruct, PollStruct.size(), INFTIM);
+			poll(CPollStruct, PollStruct.size(), 100);
 #endif
+
+			if (NetworkMessenger->HasMessages())
+			{
+				DFSMessaging::Message IncomingMessage = NetworkMessenger->AcceptMessage();
+
+				if (IncomingMessage.message == "SHUTDOWN")
+				{
+					NetworkMessenger->sendMessage(MSG_TARGET_CONSOLE, "Shutdown signal received, shutting down interfaces.");
+					delete this;
+					return;
+				}
+			}
 
 			for (int i = 0; i < PollStruct.size(); i++)
 			{
@@ -132,5 +144,8 @@ namespace DFSNetworking
 	{
 		if (NetworkMessenger)
 			delete NetworkMessenger;
+
+		for (int i = 0; i < InterfaceList.size(); i++)
+			delete InterfaceList[i];
 	}
 }

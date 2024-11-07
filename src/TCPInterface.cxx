@@ -153,7 +153,10 @@ namespace DFSNetworking
 		}
 
 		if (InterfaceMessenger != nullptr)
+		{
+			InterfaceMessenger->sendMessage(MSG_TARGET_CONSOLE, "Interface shutdown.");
 			delete InterfaceMessenger;
+		}
 	}
 
 	bool IPv6Interface::initializeInterface(unsigned int aPort, unsigned int aBackLog)
@@ -270,18 +273,7 @@ namespace DFSNetworking
 
 	IPv6Interface::~IPv6Interface()
 	{
-		// Close the socket.
-#ifdef _WINDOWS
-		if (closesocket(NetworkSocket) == -1)
-#else
-		if (close(NetworkSocket) == -1)
-#endif
-		{
-			perror("IPv6Interface::~IPv6Interface -- close()");
-		}
 
-		if (InterfaceMessenger != nullptr)
-			delete InterfaceMessenger;
 	}
 
 #ifdef _DFS_USE_OPENSSL
@@ -470,22 +462,6 @@ namespace DFSNetworking
 			SSL_shutdown(ssl);
 			SSL_free(ssl);
 		}
-
-	/*	// Close the socket.
-#ifdef _WINDOWS
-		if (closesocket(NetworkSocket) == -1)
-#else
-		if (close(NetworkSocket) == -1)
-#endif
-		{
-			perror("HTTPSIPv4Interface::~HTTPSIPv4Interface -- close()");
-		}
-
-		if (InterfaceMessenger != nullptr)
-		{
-			delete InterfaceMessenger;
-			InterfaceMessenger = nullptr;
-		}*/
 	}
 #endif
 }
