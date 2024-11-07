@@ -82,6 +82,7 @@ namespace DFSMessaging
 	class MessengerServer
 	{
 	private:
+		bool serverShutdown;
 		unsigned int securityKey;
 		unsigned int nextMessageID;
 		std::vector<Messenger*> Messengers;
@@ -99,6 +100,8 @@ namespace DFSMessaging
 		bool ValidateMessenger(Messenger *aMessanger);
 
 		Message GetMessage(unsigned int aMessageID);
+
+		void ShutdownServer(void);
 
 		Messenger* ReceiveActiveMessenger(void);
 		void DeactivateActiveMessenger(Messenger* aMessanger);

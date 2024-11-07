@@ -410,6 +410,18 @@ namespace DFSMessaging
 		}
 	}
 
+	void MessengerServer::ShutdownServer(void)
+	{
+		Message ShutdownMessage;
+
+		serverShutdown = true;
+
+		ShutdownMessage.channel = MSG_TARGET_ALL;
+		ShutdownMessage.message = "SHUTDOWN";
+
+		this->DistributeMessage(ShutdownMessage);
+	}
+
 	Messenger* MessengerServer::ReceiveActiveMessenger(void)
 	{
 		Messenger* newMessenger;
@@ -454,6 +466,7 @@ namespace DFSMessaging
 		std::cout << " -=Messenger Service Security Key generated. [" << securityKey << "]" << std::endl;
 
 		nextMessageID = 0;
+		serverShutdown = false;
 
 		// Start Messenger Server Runtime
 		std::thread MessengerServerThread(&MessengerServer::MessengerServerRuntime, this);

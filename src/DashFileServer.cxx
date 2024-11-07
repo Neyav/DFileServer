@@ -278,7 +278,8 @@ void legacyConsole(DFSMessaging::Messenger* ConsoleMessenger)
 			if (keyhit == 'q' || keyhit == 'Q')
 			{
 				std::cout << " -=Termination Key hit, sending SHUTDOWN message." << std::endl;
-				ConsoleMessenger->sendMessage(MSG_TARGET_ALL, "SHUTDOWN");
+				if (MessengerServer != nullptr)
+					MessengerServer->ShutdownServer();
 			}
 		}
 	}
