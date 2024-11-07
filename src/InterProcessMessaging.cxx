@@ -418,6 +418,7 @@ namespace DFSMessaging
 
 		ShutdownMessage.channel = MSG_TARGET_ALL;
 		ShutdownMessage.message = "SHUTDOWN";
+		ShutdownMessage.OriginName = "Messaging Service";
 
 		this->DistributeMessage(ShutdownMessage);
 	}
