@@ -181,7 +181,7 @@ namespace DFSNetworking
 			{
 				if ((iterator1 + 2) < BufferLength) // Make sure we don't go past the end.
 				{
-					char HexCode[2];
+					char HexCode[3] = { 0 };
 					char* CharPointer;
 					long Value;
 
