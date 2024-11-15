@@ -53,6 +53,10 @@
 #include <string>
 #include <iostream>
 #include <thread>
+#include <unordered_set>
+#include <sstream>
+#include <iomanip>
+#include <string_view>
 
 #include "InterProcessMessaging.hxx"
 #include "TCPInterface.hxx"
@@ -140,56 +144,33 @@ void InitateServerShutdown ( int ArgSignal )
 }
 #endif
 
-// This function contributed by Markus Thiele
-std::string i2hex( unsigned int n, unsigned int minWidth, bool upperCase ) 
+// Helper function to convert an integer to a hex string
+std::string i2hex(unsigned int value, int width, bool lowercase = true)
 {
-	std::string out; 
-	{
-		char charA = upperCase ? 'A' : 'a'; 
-		char digit; 
-		while( n != 0 || out.size() < minWidth ) 
-		{
-			digit = n % 16; 
-			n /= 16; 
+	std::ostringstream stream;
+	stream << std::setw(width) << std::setfill('0') << std::hex << (lowercase ? std::nouppercase : std::uppercase) << value;
+	return stream.str();
+}
 
-			if( digit < 10 ) 
-			{
-				digit = '0' + digit;
-			} 
-			else 
-			{
-			digit = charA + digit - 10;
-			}
-			
-			out.insert( out.begin(), digit ); 
+void URLEncode(std::string& ArgBuffer)
+{
+	static const std::unordered_set<char> unreservedChars = { '-', '.', '_', '~' };
+	std::ostringstream encodedStream;
+	std::string_view bufferView(ArgBuffer);
+
+	for (unsigned char c : bufferView)
+	{
+		if ((c >= '0' && c <= '9') || (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') || unreservedChars.count(c))
+		{
+			encodedStream << c; // Append unreserved characters as-is
+		}
+		else
+		{
+			encodedStream << "%" << i2hex(static_cast<unsigned int>(c), 2); // Append URL-encoded characters
 		}
 	}
 
-   return out;
-} 
-
-void URLEncode( std::string &ArgBuffer )
-{
-	unsigned int iterator;
-	
-	for (iterator = 0; iterator < ArgBuffer.size(); iterator++)
-	{
-		// Should it be URL encoded?
-		if ( (ArgBuffer[iterator] < 40 || ArgBuffer[iterator] > 57) && 
-			(ArgBuffer[iterator] < 65 || ArgBuffer[iterator] > 90) &&
-				(ArgBuffer[iterator] < 97 || ArgBuffer[iterator] > 122) )
-		{
-			// URL encode this character
-			std::string URLEncodedCharacter;
-
-			URLEncodedCharacter = "%" + i2hex( (unsigned int) 
-					( (unsigned char) ArgBuffer[iterator] ), 2, true );
-
-			// Swap the character out with the URL encoded version.
-			ArgBuffer.replace (iterator, 1, URLEncodedCharacter);
-		}
-	}
-
+	ArgBuffer = encodedStream.str(); // Replace the original string with the encoded string
 }
 
 char *TimeAndDate ( void )
