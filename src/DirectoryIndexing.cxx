@@ -287,7 +287,7 @@ char GenerateFolderIndex( std::string ArgVirtualPath, char *ArgPath, std::string
 	ifstream FileStream;
 	std::vector<DirectoryEntryStruct> Directoryvector;
 
-	// Determine wheter it's a directory or a filesystem. Now using C++17 filesystem library.
+	// Determine whether it's a directory or a filesystem. Now using C++17 filesystem library.
 	if (!filesystem::is_directory(ArgPath))
 	{
 		// Try to open it as a file now.
@@ -429,7 +429,6 @@ char GenerateFolderIndex( std::string ArgVirtualPath, char *ArgPath, std::string
     <script>
         const fileGrid = document.getElementById('file-grid');
 
-        // Example data
         const items = [
 )";
 
