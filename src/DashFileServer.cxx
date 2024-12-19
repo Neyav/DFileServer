@@ -154,7 +154,7 @@ std::string i2hex(unsigned int value, int width, bool lowercase = true)
 
 void URLEncode(std::string& ArgBuffer)
 {
-	static const std::unordered_set<char> unreservedChars = { '-', '.', '_', '~' };
+	static const std::unordered_set<char> unreservedChars = { '-', '.', '_', '~', '/'};
 	std::ostringstream encodedStream;
 	std::string_view bufferView(ArgBuffer);
 
