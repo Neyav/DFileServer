@@ -3,7 +3,7 @@
 #include <condition_variable>
 #include <mutex>
 #include <queue>
-#include <map>
+#include <unordered_map>
 #include <vector>
 #include <atomic>
 
@@ -88,7 +88,7 @@ namespace DFSMessaging
 		std::vector<Messenger*> Messengers;
 		std::condition_variable queueCondition;
 		std::queue<Message> MessageQueue;
-		std::map<unsigned int, Message> sentMessages;
+		std::unordered_map<unsigned int, Message> sentMessages;
 
 		void PruneOldMessages(unsigned int atimeout);
 
