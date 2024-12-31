@@ -330,7 +330,7 @@ char GenerateFolderIndex( std::string ArgVirtualPath, char *ArgPath, std::string
           content="width=device-width, 
                    initial-scale=1.0">
     <title>)";
-	ArgBuffer += "DFileServer [" + std::to_string(Version::MAJORVERSION) + "." + std::to_string(Version::MINORVERSION) + "." + std::to_string(Version::PATCHVERSION) + "] " + ArgVirtualPath;
+	ArgBuffer += "DFileServer [" + std::to_string(Version::MAJORVERSION) + "." + std::to_string(Version::MINORVERSION) + "." + std::to_string(Version::PATCHVERSION) + "] ";
 	ArgBuffer += R"(</title>
     <style>
         body {
