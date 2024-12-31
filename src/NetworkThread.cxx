@@ -238,6 +238,13 @@ namespace DFSNetworking
 			{
 				DFSMessaging::Message NewMessage = NetworkThreadMessenger->AcceptMessage();
 
+				if (NewMessage.message == "SHUTDOWN")
+				{
+					NetworkThreadMessenger->sendMessage(MSG_TARGET_CONSOLE, "Shutdown signal received, shutting down thread.");
+					delete this;
+					return;
+				}
+
 				if (NewMessage.Pointer && NewMessage.acceptTask())
 				{
 					ClientConnection* NewConnection = (ClientConnection*)NewMessage.Pointer;
@@ -578,6 +585,11 @@ namespace DFSNetworking
 
 	NetworkThread::~NetworkThread()
 	{
+		while (ConnectionList.size())
+		{
+			TerminateConnection(0);
+		}
+
 		if (NetworkThreadMessenger)
 			delete NetworkThreadMessenger;
 	}
