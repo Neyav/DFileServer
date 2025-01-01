@@ -46,6 +46,8 @@
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #include <sys/wait.h>
+#include <termios.h>
+#include <sys/ioctl.h>
 
 #endif
 #include <vector>
@@ -62,6 +64,42 @@
 #include "TCPInterface.hxx"
 #include "Networking.hxx"
 #include "Version.hxx"
+
+#ifndef _WINDOWS
+// Terminal Control functions that mimic Windows ones in UNIX.
+int _kbhit(void)
+{
+	struct timeval tv;
+	fd_set fds;
+	tv.tv_sec = 0;
+	tv.tv_usec = 0;
+	FD_ZERO(&fds);
+	FD_SET(STDIN_FILENO, &fds); //STDIN_FILENO is 0
+	select(STDIN_FILENO + 1, &fds, NULL, NULL, &tv);
+	return FD_ISSET(STDIN_FILENO, &fds);
+}
+char _getch(void)
+{
+	char buf = 0;
+	struct termios old = { 0 };
+	fflush(stdout);
+	if (tcgetattr(0, &old) < 0)
+		perror("tcsetattr()");
+	old.c_lflag &= ~ICANON;
+	old.c_lflag &= ~ECHO;
+	old.c_cc[VMIN] = 1;
+	old.c_cc[VTIME] = 0;
+	if (tcsetattr(0, TCSANOW, &old) < 0)
+		perror("tcsetattr ICANON");
+	if (read(0, &buf, 1) < 0)
+		perror("read()");
+	old.c_lflag |= ICANON;
+	old.c_lflag |= ECHO;
+	if (tcsetattr(0, TCSADRAIN, &old) < 0)
+		perror("tcsetattr ~ICANON");
+	return (buf);
+}
+#endif
 
 DFSMessaging::MessengerServer* MessengerServer = nullptr;
 
