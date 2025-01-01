@@ -9,6 +9,7 @@ HOST = '127.0.0.1'
 PORT = 2000
 TIMEOUT = 60  # minutes
 FAILED = False
+lock = threading.Lock()
 
 # Function to process URLs
 def process_url(url):
@@ -26,10 +27,12 @@ def process_url(url):
                 threading.Thread(target=process_url, args=(u,)).start()
         else:
             print(f'Failed to retrieve {url}. Status: {response.status}')
-            FAILED = True
+            with lock:
+                FAILED = True
     except Exception as e:
         print(f'Error processing {url}: {e}')
-        FAILED = True
+        with lock:
+            FAILED = True
     finally:
         conn.close()
 
@@ -56,12 +59,16 @@ def main():
                     t.join()
             else:
                 print(f'Failed to retrieve root. Status: {response.status}')
-                FAILED = True
+                with lock:
+                    FAILED = True
                 break
         except Exception as e:
             print(f'Error: {e}')
-            FAILED = True
+            with lock:
+                FAILED = True
             break
+        finally:
+            conn.close()
         time.sleep(1)
     if not FAILED:
         print('Successfully completed')

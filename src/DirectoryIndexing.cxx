@@ -195,13 +195,14 @@ std::string InsertFile ( const char *ArgPath, const char *ArgFile )
 
 static std::string InsertIndexTable ( std::string *ArgVirtualPath, std::string ArgPath, set<std::string> &ArgHidden )
 {
-        struct dirent *DirentPointer = NULL;
-        bool AlternatingVariable = false;
-		std::string Buffer;
-        std::vector<DirectoryEntryStruct> Directoryvector;
+    struct dirent *DirentPointer = NULL;
+    bool AlternatingVariable = false;
+	std::string Buffer;
+    std::vector<DirectoryEntryStruct> Directoryvector;
          
+		// Ensure we have a .. entry, unless we are at the root.
+	if (*ArgVirtualPath != "/")
 	{
-		// Ensure we have a .. entry.
 		DirectoryEntryStruct DirectoryEntry;
 		DirectoryEntry.Name = "..";
 		DirectoryEntry.CompletePath = FullPath(*ArgVirtualPath, "..");
@@ -209,6 +210,8 @@ static std::string InsertIndexTable ( std::string *ArgVirtualPath, std::string A
 		DirectoryEntry.Size = 0;
 		Directoryvector.push_back(DirectoryEntry);
 	}
+
+
 
 	// Walk through the folder grabbing files and adding them to our std::vector, using the new filesystem library.
     for (const auto& entry : filesystem::directory_iterator(ArgPath))
