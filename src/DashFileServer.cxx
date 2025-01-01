@@ -127,61 +127,6 @@ bool ServerShutdown = false;
 
 int ActiveConnections = 0;
 
-#ifdef _WINDOWS
-BOOL WINAPI InitiateServerShutdown(DWORD ArgSignal)
-{
-	if (signal != CTRL_C_EVENT)
-		return FALSE;
-
-	std::cout << " -=Caught Ctrl-C, Initiating Server Shutdown..." << std::endl;	
-
-	if (MessengerServer)
-	{
-		DFSMessaging::Messenger* ServerShutdownMessenger;
-
-		ServerShutdownMessenger = MessengerServer->ReceiveActiveMessenger();
-
-		ServerShutdownMessenger->sendMessage(MSG_TARGET_NETWORK, "SHUTDOWN");
-
-		while (!ServerShutdownMessenger->HasMessages())
-		{ // Wait for the response.
-			DFSleep(100);
-		}
-	}
-	else
-	{
-		ServerShutdown = true;	
-	}
-
-	return TRUE;
-}
-#else
-void InitateServerShutdown ( int ArgSignal )
-{
-	if (MessengerServer)
-	{
-		DFSMessaging::Messenger* ServerShutdownMessanger;
-
-		ServerShutdownMessanger = MessengerServer->ReceiveActiveMessenger();
-	
-	}
-
-	/*
-	printf("Recieved Signal %i\n", ArgSignal );
-
-	// First lockdown the server and close when all the connections are done.
-	// If the controlling user insists, then terminate immediately.
-	if ( ServerLockdown || ActiveConnections == 0 )
-		ServerShutdown = true;
-	else
-	{
-		ServerLockdown = true;
-
-		printf( "Initating Server Lockdown, waiting on %i Client(s).\n", ActiveConnections );
-	}*/
-}
-#endif
-
 // Helper function to convert an integer to a hex string
 std::string i2hex(unsigned int value, int width, bool lowercase = true)
 {
@@ -299,6 +244,14 @@ void legacyConsole(DFSMessaging::Messenger* ConsoleMessenger)
 				std::cout << " -=Termination Key hit, sending SHUTDOWN message." << std::endl;
 				if (MessengerServer != nullptr)
 					MessengerServer->ShutdownServer();
+
+				std::cout << " -=Waiting 5 seconds for all threads to terminate..." << std::endl;
+				DFSleep(5000);
+
+				if (Configuration.LogFile)
+					fclose(Configuration.LogFile);
+
+				exit(0);
 			}
 		}
 	}
@@ -323,20 +276,6 @@ int main( int argc, char *argv[] )
 
    DFSNetworking::NetworkDaemon *NetworkDaemon = nullptr;
    DFSMessaging::Messenger *ConsoleMessenger = nullptr;
-
-
-#ifndef _WINDOWS
-   // Catch SIGPIPE and ignore it.
-   signal( SIGPIPE, SIG_IGN );
-   signal(SIGTERM, InitateServerShutdown);
-   signal(SIGINT, InitateServerShutdown);
-   signal(SIGQUIT, InitateServerShutdown);
-#else
-   if (!SetConsoleCtrlHandler(InitiateServerShutdown, TRUE)) {
-	   std::cout << " -=Control Handler capture failed." << std::endl;
-	   return 1;
-   }
-#endif
 
    // FileServer Name/Version Banner
    Configuration.Console.clearScreen();

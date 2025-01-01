@@ -7,6 +7,7 @@
 
 #include "InterProcessMessaging.hxx"
 
+extern void DFSleep(int milliseconds);	
 
 namespace DFSMessaging
 {
@@ -420,7 +421,7 @@ namespace DFSMessaging
 		ShutdownMessage.message = "SHUTDOWN";
 		ShutdownMessage.OriginName = "Messaging Service";
 
-		this->DistributeMessage(ShutdownMessage);
+		this->DistributeMessage(ShutdownMessage);	
 	}
 
 	Messenger* MessengerServer::ReceiveActiveMessenger(void)
