@@ -284,15 +284,68 @@ int main( int argc, char *argv[] )
    std::cout << "In memorial for all the code that was lost that one day when Sylvia wrote her last bit." << std::endl;
    std::cout << "Initializing..." << std::endl;
    std::cout << " -=Parameters..." << std::endl;
+
+   bool interfacesActivated = false;
+
+   MessengerServer = new DFSMessaging::MessengerServer();
+   NetworkDaemon = new DFSNetworking::NetworkDaemon();
+
+   ConsoleMessenger = MessengerServer->ReceiveActiveMessenger();
+   ConsoleMessenger->Name = "Console";
+   ConsoleMessenger->RegisterOnChannel(MSG_TARGET_CONSOLE);
+
    // Parse for command line parameters.
    for (int x = 1; x < argc; x++)
    {
-	if ( strcasecmp( "-port", argv[x] ) == 0 )
+	if ( strcasecmp( "-ipv4", argv[x] ) == 0 )
 	{
+		int port;
 		x++;
 
-		Configuration.Port = atoi(argv[x]);
-		printf(" -=Configuration: Port -> %i\n", Configuration.Port);
+		port = atoi(argv[x]);
+
+		DFSNetworking::TCPInterface* IPv4Interface = new DFSNetworking::TCPInterface;
+		
+		printf(" -=Configuration: Added IPv4 Port -> %i\n", port);
+
+		if (NetworkDaemon->addListener(port, Configuration.BackLog, IPv4Interface) == false)
+		{
+			std::cout << "CRITICAL ERROR: Couldn't initialize listening socket on port " << port << std::endl;
+			exit(-1); // TODO: Replace with an exit function that cleans up after itself.
+		}
+		interfacesActivated = true;
+	}
+	else if (strcasecmp("-ipv6", argv[x]) == 0)
+	{
+		int port;
+		x++;
+		port = atoi(argv[x]);
+
+		DFSNetworking::IPv6Interface* IPv6Interface = new DFSNetworking::IPv6Interface;
+		printf(" -=Configuration: Added IPv6 Port -> %i\n", port);
+		if (NetworkDaemon->addListener(port, Configuration.BackLog, IPv6Interface) == false)
+		{
+			std::cout << "CRITICAL ERROR: Couldn't initialize listening socket on port " << port << std::endl;
+			exit(-1); // TODO: Replace with an exit function that cleans up after itself.
+		}
+		interfacesActivated = true;
+	}
+	else if (strcasecmp("-ipv4s", argv[x]) == 0)
+	{
+#ifdef _DFS_USE_OPENSSL
+		int port;
+		x++;
+		port = atoi(argv[x]);
+		printf(" -=Configuration: Added HTTPS IPv4 Port -> %i\n", port);
+		DFSNetworking::HTTPSIPv4Interface* HTTPSIPv4Interface = new DFSNetworking::HTTPSIPv4Interface;
+		if (NetworkDaemon->addListener(port, Configuration.BackLog, HTTPSIPv4Interface) == false)
+		{
+			std::cout << "CRITICAL ERROR: Couldn't initialize listening socket on port " << port << std::endl;
+			exit(-1); // TODO: Replace with an exit function that cleans up after itself.
+		}
+#else
+		std::cout " -=Configuration: SSL Support not compiled in. Ignoring -ipv4s\n";
+#endif
 	}
 	else if ( strcasecmp( "-backlog", argv[x] ) == 0 )
 	{
@@ -373,15 +426,21 @@ int main( int argc, char *argv[] )
 #endif
    }
 
-   MessengerServer = new DFSMessaging::MessengerServer();
-   NetworkDaemon = new DFSNetworking::NetworkDaemon();
-   
-   ConsoleMessenger = MessengerServer->ReceiveActiveMessenger();
-   ConsoleMessenger->Name = "Console";
-   ConsoleMessenger->RegisterOnChannel(MSG_TARGET_CONSOLE);
+   if (interfacesActivated == false)
+   {
+	   DFSNetworking::TCPInterface* IPv4Interface = new DFSNetworking::TCPInterface;
+
+	   printf(" -=Configuration: Added default IPv4 Port -> %i\n", 2000);
+
+	   if (NetworkDaemon->addListener(2000, Configuration.BackLog, IPv4Interface) == false)
+	   {
+		   std::cout << "CRITICAL ERROR: Couldn't initialize listening socket on port " << 2000 << std::endl;
+		   exit(-1); // TODO: Replace with an exit function that cleans up after itself.
+	   }
+   } 
 
    std::cout << " -=Initialize Network..." << std::endl;
-
+   /*
    DFSNetworking::TCPInterface *IPv4Interface = new DFSNetworking::TCPInterface;
    DFSNetworking::IPv6Interface* IPv6Interface = new DFSNetworking::IPv6Interface;
 
@@ -405,6 +464,8 @@ int main( int argc, char *argv[] )
 	   exit(-1); // TODO: Replace with an exit function that cleans up after itself.
    }
 #endif
+
+*/
 
 #ifndef _WINDOWS
 
