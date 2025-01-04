@@ -72,10 +72,6 @@ namespace DFSNetworking
 
 	void NetworkDaemon::NetworkLoop(void)
 	{
-		if (PollStruct.size() < 2)
-			NetworkMessenger->sendMessage(MSG_TARGET_CONSOLE, "Network Loop activated: Listening on " + std::to_string(PollStruct.size()) + " Interface...");
-		else
-			NetworkMessenger->sendMessage(MSG_TARGET_CONSOLE, "Network Loop activated: Listening on " + std::to_string(PollStruct.size()) + " Interfaces...");
 
 		// Start the specified number of prime threads.
 
@@ -83,6 +79,11 @@ namespace DFSNetworking
 
 		for (int i = 0; i < Configuration.primeThreads; i++)
 			NetworkThread* PrimeNetworkThread = new NetworkThread(true);
+
+		if (PollStruct.size() < 2)
+			NetworkMessenger->sendMessage(MSG_TARGET_CONSOLE, "Network Loop activated: Listening on " + std::to_string(PollStruct.size()) + " Interface...");
+		else
+			NetworkMessenger->sendMessage(MSG_TARGET_CONSOLE, "Network Loop activated: Listening on " + std::to_string(PollStruct.size()) + " Interfaces...");
 		
 		while (1)
 		{
