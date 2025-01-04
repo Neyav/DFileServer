@@ -315,29 +315,103 @@ namespace DFSNetworking
 
 #ifdef _DFS_USE_OPENSSL
 
-	void generate_self_signed_cert(EVP_PKEY** pkey, X509** x509) 
+	bool generate_self_signed_cert(EVP_PKEY** pkey, X509** x509)
 	{
 		*pkey = EVP_PKEY_new();
+		if (!*pkey) {
+			return false;
+		}
+
 		EVP_PKEY_CTX* pctx = EVP_PKEY_CTX_new_id(EVP_PKEY_RSA, nullptr);
-		EVP_PKEY_keygen_init(pctx);
-		EVP_PKEY_CTX_set_rsa_keygen_bits(pctx, 2048);
-		EVP_PKEY_keygen(pctx, pkey);
+		if (!pctx) {
+			EVP_PKEY_free(*pkey);
+			return false;
+		}
+
+		if (EVP_PKEY_keygen_init(pctx) <= 0) {
+			EVP_PKEY_CTX_free(pctx);
+			EVP_PKEY_free(*pkey);
+			return false;
+		}
+
+		if (EVP_PKEY_CTX_set_rsa_keygen_bits(pctx, 2048) <= 0) {
+			EVP_PKEY_CTX_free(pctx);
+			EVP_PKEY_free(*pkey);
+			return false;
+		}
+
+		if (EVP_PKEY_keygen(pctx, pkey) <= 0) {
+			EVP_PKEY_CTX_free(pctx);
+			EVP_PKEY_free(*pkey);
+			return false;
+		}
+
 		EVP_PKEY_CTX_free(pctx);
 
 		*x509 = X509_new();
-		X509_set_version(*x509, 2);
-		ASN1_INTEGER_set(X509_get_serialNumber(*x509), 0);
-		X509_gmtime_adj(X509_get_notBefore(*x509), 0);
-		X509_gmtime_adj(X509_get_notAfter(*x509), 31536000L); // 1 year
-		X509_set_pubkey(*x509, *pkey);
+		if (!*x509) {
+			EVP_PKEY_free(*pkey);
+			return false;
+		}
+
+		if (X509_set_version(*x509, 2) != 1) {
+			X509_free(*x509);
+			EVP_PKEY_free(*pkey);
+			return false;
+		}
+
+		if (ASN1_INTEGER_set(X509_get_serialNumber(*x509), 0) != 1) {
+			X509_free(*x509);
+			EVP_PKEY_free(*pkey);
+			return false;
+		}
+
+		if (X509_gmtime_adj(X509_get_notBefore(*x509), 0) == nullptr) {
+			X509_free(*x509);
+			EVP_PKEY_free(*pkey);
+			return false;
+		}
+
+		if (X509_gmtime_adj(X509_get_notAfter(*x509), 31536000L) == nullptr) { // 1 year
+			X509_free(*x509);
+			EVP_PKEY_free(*pkey);
+			return false;
+		}
+
+		if (X509_set_pubkey(*x509, *pkey) != 1) {
+			X509_free(*x509);
+			EVP_PKEY_free(*pkey);
+			return false;
+		}
 
 		X509_NAME* name = X509_get_subject_name(*x509);
-		X509_NAME_add_entry_by_txt(name, "C", MBSTRING_ASC, (unsigned char*)"US", -1, -1, 0);
-		X509_NAME_add_entry_by_txt(name, "O", MBSTRING_ASC, (unsigned char*)"My Company", -1, -1, 0);
-		X509_NAME_add_entry_by_txt(name, "CN", MBSTRING_ASC, (unsigned char*)"localhost", -1, -1, 0);
-		X509_set_issuer_name(*x509, name);
+		if (!name) {
+			X509_free(*x509);
+			EVP_PKEY_free(*pkey);
+			return false;
+		}
 
-		X509_sign(*x509, *pkey, EVP_sha256());
+		if (X509_NAME_add_entry_by_txt(name, "C", MBSTRING_ASC, (unsigned char*)"US", -1, -1, 0) != 1 ||
+			X509_NAME_add_entry_by_txt(name, "O", MBSTRING_ASC, (unsigned char*)"My Company", -1, -1, 0) != 1 ||
+			X509_NAME_add_entry_by_txt(name, "CN", MBSTRING_ASC, (unsigned char*)"localhost", -1, -1, 0) != 1) {
+			X509_free(*x509);
+			EVP_PKEY_free(*pkey);
+			return false;
+		}
+
+		if (X509_set_issuer_name(*x509, name) != 1) {
+			X509_free(*x509);
+			EVP_PKEY_free(*pkey);
+			return false;
+		}
+
+		if (X509_sign(*x509, *pkey, EVP_sha256()) == 0) {
+			X509_free(*x509);
+			EVP_PKEY_free(*pkey);
+			return false;
+		}
+
+		return true;
 	}
 
 	bool HTTPSIPv4Interface::initializeInterface(unsigned int aPort, unsigned int aBackLog)
@@ -402,7 +476,11 @@ namespace DFSNetworking
 		method = TLS_server_method();
 		ctx = SSL_CTX_new(method);
 
-		generate_self_signed_cert(&pkey, &x509);
+		if (!generate_self_signed_cert(&pkey, &x509))
+		{
+			InterfaceMessenger->sendMessage(MSG_TARGET_CONSOLE, "Failed to generate self signed certificate.");
+			return false;
+		}
 
 		SSL_CTX_use_certificate(ctx, x509);
 		SSL_CTX_use_PrivateKey(ctx, pkey);
