@@ -216,6 +216,15 @@ namespace DFSNetworking
 			return false;
 		}
 
+#ifndef _WINDOWS
+		// Set the socket to allow dual-stack (IPv4 and IPv6) connections.
+		if (setsockopt(NetworkSocket, IPPROTO_IPV6, IPV6_V6ONLY, &yes, sizeof(int)) == -1)
+		{
+			InterfaceMessenger->sendMessage(MSG_TARGET_CONSOLE, "InitializeNetwork -- setsockopt(IPV6_V6ONLY) failed.");
+			return false;
+		}
+#endif
+
 		// Set the listening network struct up.
 		memset(&ListenAddr, 0, sizeof(struct sockaddr_in6));
 		ListenAddr.sin6_family = AF_INET6;
