@@ -343,6 +343,7 @@ int main( int argc, char *argv[] )
 			std::cout << "CRITICAL ERROR: Couldn't initialize listening socket on port " << port << std::endl;
 			exit(-1); // TODO: Replace with an exit function that cleans up after itself.
 		}
+		interfacesActivated = true;
 #else
 		std::cout " -=Configuration: SSL Support not compiled in. Ignoring -ipv4s\n";
 #endif
@@ -428,7 +429,7 @@ int main( int argc, char *argv[] )
 
    if (interfacesActivated == false)
    {
-	   DFSNetworking::TCPInterface* IPv4Interface = new DFSNetworking::IPv4Interface;
+	   DFSNetworking::IPv4Interface* IPv4Interface = new DFSNetworking::IPv4Interface;
 
 	   printf(" -=Configuration: Added default IPv4 Port -> %i\n", 2000);
 
