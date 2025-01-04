@@ -7,6 +7,84 @@ namespace DFSNetworking
 {
 	bool TCPInterface::initializeInterface(unsigned int aPort, unsigned int aBackLog)
 	{
+		return false;
+	}
+
+	TCPInterface* TCPInterface::acceptConnection(void)
+	{
+		return nullptr;
+	}
+
+	size_t TCPInterface::sendData(char* aData, int aLength)
+	{
+		size_t DataSent;
+
+		if ((DataSent = send(NetworkSocket, aData, aLength, 0)) == -1)
+		{
+			InterfaceMessenger->sendMessage(MSG_TARGET_CONSOLE, "TCPInterface::sendData -- send() failed.");
+			return 0;
+		}
+
+		return DataSent;
+	}
+	
+	size_t TCPInterface::receiveData(char* aData, int aLength)
+	{
+		size_t DataRecv;
+
+		if ((DataRecv = recv(NetworkSocket, aData, aLength - 1, 0)) == -1)
+		{
+			InterfaceMessenger->sendMessage(MSG_TARGET_CONSOLE, "TCPInterface::receiveData -- recv() failed.");
+			return -1;
+		}
+
+		return DataRecv;
+	}	
+
+	char *TCPInterface::getIP(void)
+	{
+		return nullptr;
+	}
+
+	TCPInterface::TCPInterface()
+	{
+		listenPort = 0;
+		backLog = 0;
+		NetworkSocket = 0;
+
+		if (MessengerServer)
+		{
+			InterfaceMessenger = MessengerServer->ReceiveActiveMessenger();
+			InterfaceMessenger->Name = "TCP Interface";
+		}
+		else
+		{
+			InterfaceMessenger = nullptr;
+		}
+		
+	}
+
+	TCPInterface::~TCPInterface()
+	{
+		// Close the socket.
+#ifdef _WINDOWS
+		if (closesocket(NetworkSocket) == -1)
+#else
+		if (close(NetworkSocket) == -1)
+#endif
+		{
+			perror("TCPInterface::~TCPInterface -- close()");
+		}
+
+		if (InterfaceMessenger != nullptr)
+		{
+			InterfaceMessenger->sendMessage(MSG_TARGET_CONSOLE, "Interface shutdown.");
+			delete InterfaceMessenger;
+		}
+	}
+
+	bool IPv4Interface::initializeInterface(unsigned int aPort, unsigned int aBackLog)
+	{
 		struct sockaddr_in ListenAddr;
 		const char yes = 1;
 #ifdef _WINDOWS
@@ -66,7 +144,7 @@ namespace DFSNetworking
 		return true;
 	}
 
-	TCPInterface* TCPInterface::acceptConnection(void)
+	TCPInterface* IPv4Interface::acceptConnection(void)
 	{
 		socklen_t sin_size = sizeof(struct sockaddr_in);
 		SOCKET NewSocket;
@@ -82,7 +160,7 @@ namespace DFSNetworking
 
 		InterfaceMessenger->sendMessage(MSG_TARGET_CONSOLE, "TCPInterface::acceptConnection -- Connection accepted from " + std::string(inet_ntoa(SocketStruct.sin_addr)));
 
-		TCPInterface* NewInterface = new TCPInterface;
+		IPv4Interface* NewInterface = new IPv4Interface;
 		NewInterface->NetworkSocket = NewSocket;
 		NewInterface->NetworkAddress = SocketStruct;
 		NewInterface->listenPort = listenPort;
@@ -91,72 +169,22 @@ namespace DFSNetworking
 		return NewInterface;
 	}
 
-	size_t TCPInterface::sendData(char* aData, int aLength)
-	{
-		size_t DataSent;
-
-		if ((DataSent = send(NetworkSocket, aData, aLength, 0)) == -1)
-		{
-			InterfaceMessenger->sendMessage(MSG_TARGET_CONSOLE, "TCPInterface::sendData -- send() failed.");
-			return 0;
-		}
-
-		return DataSent;
-	}
-	
-	size_t TCPInterface::receiveData(char* aData, int aLength)
-	{
-		size_t DataRecv;
-
-		if ((DataRecv = recv(NetworkSocket, aData, aLength - 1, 0)) == -1)
-		{
-			InterfaceMessenger->sendMessage(MSG_TARGET_CONSOLE, "TCPInterface::receiveData -- recv() failed.");
-			return -1;
-		}
-
-		return DataRecv;
-	}	
-
-	char *TCPInterface::getIP(void)
+	char* IPv4Interface::getIP(void)
 	{
 		return inet_ntoa(NetworkAddress.sin_addr);
 	}
 
-	TCPInterface::TCPInterface()
+	IPv4Interface::IPv4Interface()
 	{
-		listenPort = 0;
-		backLog = 0;
-		NetworkSocket = 0;
-
-		if (MessengerServer)
-		{
-			InterfaceMessenger = MessengerServer->ReceiveActiveMessenger();
+		if (InterfaceMessenger)
+		{		
 			InterfaceMessenger->Name = "IPv4 Interface";
-		}
-		else
-		{
-			InterfaceMessenger = nullptr;
-		}
-		
+		}		
 	}
 
-	TCPInterface::~TCPInterface()
+	IPv4Interface::~IPv4Interface()
 	{
-		// Close the socket.
-#ifdef _WINDOWS
-		if (closesocket(NetworkSocket) == -1)
-#else
-		if (close(NetworkSocket) == -1)
-#endif
-		{
-			perror("TCPInterface::~TCPInterface -- close()");
-		}
 
-		if (InterfaceMessenger != nullptr)
-		{
-			InterfaceMessenger->sendMessage(MSG_TARGET_CONSOLE, "Interface shutdown.");
-			delete InterfaceMessenger;
-		}
 	}
 
 	bool IPv6Interface::initializeInterface(unsigned int aPort, unsigned int aBackLog)
@@ -425,20 +453,12 @@ namespace DFSNetworking
 
 	HTTPSIPv4Interface::HTTPSIPv4Interface()
 	{
-		listenPort = 0;
-		backLog = 0;
-		NetworkSocket = 0;
 		ssl = nullptr;
 
-		if (MessengerServer)
+		if (InterfaceMessenger)
 		{
-			//InterfaceMessenger = MessengerServer->ReceiveActiveMessenger();
 			InterfaceMessenger->Name = "HTTPS IPv4 Interface";
-		}
-		else
-		{
-			InterfaceMessenger = nullptr;
-		}
+		}		
 	}
 
 	size_t HTTPSIPv4Interface::sendData(char* aData, int aLength)

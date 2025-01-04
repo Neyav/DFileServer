@@ -7,7 +7,7 @@ import time
 # Constants
 HOST = '127.0.0.1'
 PORT = 2000
-TIMEOUT = 60  # minutes
+TIMEOUT = 2  # minutes
 FAILED = False
 lock = threading.Lock()
 

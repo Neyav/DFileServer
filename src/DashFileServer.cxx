@@ -304,7 +304,7 @@ int main( int argc, char *argv[] )
 
 		port = atoi(argv[x]);
 
-		DFSNetworking::TCPInterface* IPv4Interface = new DFSNetworking::TCPInterface;
+		DFSNetworking::TCPInterface* IPv4Interface = new DFSNetworking::IPv4Interface;
 		
 		printf(" -=Configuration: Added IPv4 Port -> %i\n", port);
 
@@ -428,7 +428,7 @@ int main( int argc, char *argv[] )
 
    if (interfacesActivated == false)
    {
-	   DFSNetworking::TCPInterface* IPv4Interface = new DFSNetworking::TCPInterface;
+	   DFSNetworking::TCPInterface* IPv4Interface = new DFSNetworking::IPv4Interface;
 
 	   printf(" -=Configuration: Added default IPv4 Port -> %i\n", 2000);
 
@@ -440,19 +440,13 @@ int main( int argc, char *argv[] )
    } 
 
    std::cout << " -=Initialize Network..." << std::endl;
-   /*
-   DFSNetworking::TCPInterface *IPv4Interface = new DFSNetworking::TCPInterface;
+
+
    DFSNetworking::IPv6Interface* IPv6Interface = new DFSNetworking::IPv6Interface;
 
-   if (NetworkDaemon->addListener(Configuration.Port, Configuration.BackLog, IPv4Interface) == false)
+   if (NetworkDaemon->addListener(2000, Configuration.BackLog, IPv6Interface) == false)
    {
-	   std::cout << "CRITICAL ERROR: Couldn't initialize listening socket on port " << Configuration.Port << std::endl;
-	   exit(-1); // TODO: Replace with an exit function that cleans up after itself.
-   }
-
-   if (NetworkDaemon->addListener(Configuration.Port, Configuration.BackLog, IPv6Interface) == false)
-   {
-	   std::cout << "CRITICAL ERROR: Couldn't initialize listening socket on port " << Configuration.Port << std::endl;
+	   std::cout << "CRITICAL ERROR: Couldn't initialize listening socket on port " << 2000 << std::endl;
 	   exit(-1); // TODO: Replace with an exit function that cleans up after itself.
    }
 #ifdef _DFS_USE_OPENSSL
@@ -460,12 +454,10 @@ int main( int argc, char *argv[] )
 
    if (NetworkDaemon->addListener(443, Configuration.BackLog, HTTPSIPv4Interface) == false)
    {
-	   std::cout << "CRITICAL ERROR: Couldn't initialize listening socket on port " << Configuration.Port << std::endl;
+	   std::cout << "CRITICAL ERROR: Couldn't initialize listening socket on port " << 443 << std::endl;
 	   exit(-1); // TODO: Replace with an exit function that cleans up after itself.
    }
 #endif
-
-*/
 
 #ifndef _WINDOWS
 

@@ -42,7 +42,6 @@ namespace DFSNetworking
 	{
 	protected:
 		SOCKET						NetworkSocket;
-		struct sockaddr_in			NetworkAddress;
 		DFSMessaging::Messenger		*InterfaceMessenger;
 		unsigned int				listenPort;
 		unsigned int				backLog;
@@ -54,11 +53,25 @@ namespace DFSNetworking
 		virtual size_t sendData(char* aData, int aLength);
 		virtual size_t receiveData(char* aData, int aLength);
 
-		SOCKET getSocket(void) { return NetworkSocket; }
+		SOCKET getSocket(void) { return NetworkSocket; };
 		virtual char* getIP(void);
 
 		TCPInterface();
 		~TCPInterface();
+	};
+
+	class IPv4Interface : public TCPInterface
+	{
+	protected:		
+		struct sockaddr_in			NetworkAddress;
+	public:
+		bool initializeInterface(unsigned int aPort, unsigned int aBackLog) override;
+		TCPInterface* acceptConnection(void) override;
+
+		char* getIP(void) override;
+
+		IPv4Interface();
+		~IPv4Interface();
 	};
 
 	class IPv6Interface : public TCPInterface
@@ -79,7 +92,7 @@ namespace DFSNetworking
 
 #ifdef _DFS_USE_OPENSSL
 
-	class HTTPSIPv4Interface : public TCPInterface
+	class HTTPSIPv4Interface : public IPv4Interface
 	{
 	private:
 		const SSL_METHOD* method;
