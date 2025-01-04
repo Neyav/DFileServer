@@ -184,7 +184,7 @@ inline void punchBannertoScreen(void)
 		std::string CopyrightBanner2;
 
 		VersionBanner = "DFileServer Version " + std::to_string(Version::MAJORVERSION) + "." + std::to_string(Version::MINORVERSION) + "." + std::to_string(Version::PATCHVERSION) + " --> {" + Version::VERSIONTITLE + "}";
-		CopyrightBanner = "                    (c) 2005, 2018, 2023-2024 Christopher Laverdure";
+		CopyrightBanner = "                    (c) 2005, 2018, 2023-2025 Christopher Laverdure";
 		CopyrightBanner2 = "                    All Rights Reserved.";
 
 		// First we want to clear the screen.
