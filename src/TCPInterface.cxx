@@ -205,14 +205,14 @@ namespace DFSNetworking
 		// Grab the master socket.
 		if ((NetworkSocket = socket(AF_INET6, SOCK_STREAM, 0)) == -1)
 		{
-			perror("InitializeNetwork -- socket()");
+			InterfaceMessenger->sendMessage(MSG_TARGET_CONSOLE, "InitializeNetwork -- socket() failed.");			
 			return false;
 		}
 
 		// Clear the socket incase it hasn't been properly closed so that we may use it.
 		if (setsockopt(NetworkSocket, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int)) == -1)
 		{
-			perror("InitializeNetwork -- setsockopt()");
+			InterfaceMessenger->sendMessage(MSG_TARGET_CONSOLE, "InitializeNetwork -- setsockopt() failed.");			
 			return false;
 		}
 
@@ -226,14 +226,14 @@ namespace DFSNetworking
 		if (bind(NetworkSocket, (struct sockaddr*)&ListenAddr,
 			sizeof(struct sockaddr_in6)) == -1)
 		{
-			perror("InitializeNetwork -- bind()");
+			InterfaceMessenger->sendMessage(MSG_TARGET_CONSOLE, "InitializeNetwork -- bind() failed.");			
 			return false;
 		}
 
 		// Start listening
 		if (listen(NetworkSocket, aBackLog) == -1)
 		{
-			perror("InitializeNetwork -- listen()");
+			InterfaceMessenger->sendMessage(MSG_TARGET_CONSOLE, "InitializeNetwork -- listen() failed.");
 			return false;
 		}
 
