@@ -78,6 +78,9 @@ namespace DFSNetworking
 			NetworkMessenger->sendMessage(MSG_TARGET_CONSOLE, "Network Loop activated: Listening on " + std::to_string(PollStruct.size()) + " Interfaces...");
 
 		// Start the specified number of prime threads.
+
+		NetworkMessenger->sendMessage(MSG_TARGET_CONSOLE, "Starting " + std::to_string(Configuration.primeThreads) + " prime network threads.");
+
 		for (int i = 0; i < Configuration.primeThreads; i++)
 			NetworkThread* PrimeNetworkThread = new NetworkThread(true);
 		
