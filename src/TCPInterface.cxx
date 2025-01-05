@@ -73,7 +73,7 @@ namespace DFSNetworking
 		if (close(NetworkSocket) == -1)
 #endif
 		{
-			perror("TCPInterface::~TCPInterface -- close()");
+			InterfaceMessenger->sendMessage(MSG_TARGET_CONSOLE, "TCPInterface::~TCPInterface -- close() failed.");
 		}
 
 		if (InterfaceMessenger != nullptr)
