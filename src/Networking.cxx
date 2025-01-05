@@ -15,8 +15,6 @@
 #include "contrib/Base64.h"
 
 extern int ActiveConnections;
-extern bool ServerShutdown;
-extern bool ServerLockdown;
 
 namespace DFSNetworking
 {
@@ -30,14 +28,6 @@ namespace DFSNetworking
 		if (IncomingClient->AcceptConnection(aInterface) == -1)
 		{
 			delete IncomingClient;
-			return;
-		}
-
-		// If we're in serverlockdown, close the connection right away.
-		if (ServerLockdown)
-		{
-			delete IncomingClient;
-
 			return;
 		}
 

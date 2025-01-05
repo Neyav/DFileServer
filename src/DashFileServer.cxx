@@ -122,9 +122,6 @@ void DFSleep(int milliseconds)
 
 Configuration_t Configuration;
 
-bool ServerLockdown = false;
-bool ServerShutdown = false;
-
 int ActiveConnections = 0;
 
 // Helper function to convert an integer to a hex string
