@@ -14,6 +14,10 @@
 #define MSG_TARGET_NETWORK   3
 #define MSG_TARGET_INTERFACE 4
 
+#define VISIBILITY_ALL		 0
+#define VISIBILITY_VERBOSE	 1
+#define VISIBILITY_DEBUG	 2
+
 #define MESSAGE_NOMESSAGE    0
 
 namespace DFSMessaging
@@ -26,6 +30,7 @@ namespace DFSMessaging
 	private:		
 		bool isPointer;
 		bool isTask;
+		unsigned int visibility;
 		unsigned int securityKey;
 		unsigned int messageID;
 		Messenger* Origin;
@@ -44,7 +49,7 @@ namespace DFSMessaging
 		bool acceptTask(void);
 		void refuseTask(void);
 
-		Message(bool aisPointer, bool aisTask, Messenger *aOrigin, unsigned int asecurityKey);
+		Message(bool aisPointer, bool aisTask, Messenger *aOrigin, unsigned int asecurityKey, unsigned int aVisibility);
 		Message();
 		~Message();
 		
@@ -66,7 +71,7 @@ namespace DFSMessaging
 
 		void AlertMessageID(unsigned int aMessageID);
 		void pauseForMessage(unsigned int aTimeout = 0);
-		void sendMessage(unsigned int aChannel, std::string aMessage);
+		void sendMessage(unsigned int aChannel, unsigned int aVisibility, std::string aMessage);
 		void SendPointer(unsigned int aChannel, void* aPointer);
 		bool HasMessages(void);
 		Message AcceptMessage(void);

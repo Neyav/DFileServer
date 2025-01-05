@@ -181,7 +181,7 @@ size_t ClientConnection::RecvData ( char *Argstring, int ArgDataSize )
 
 	if ( (DataRecv = Interface->receiveData(Argstring, ArgDataSize-1 )) == -1)
 	{
-		Messenger->sendMessage(MSG_TARGET_CONSOLE, "ClientConnection::RecvData -- recv() failed.");
+		Messenger->sendMessage(MSG_TARGET_CONSOLE, VISIBILITY_DEBUG, "ClientConnection::RecvData -- recv() failed.");
 		return -1;
 	}
 

@@ -65,22 +65,22 @@ namespace DFSNetworking
 
 		// Start the specified number of prime threads.
 
-		NetworkMessenger->sendMessage(MSG_TARGET_CONSOLE, "Starting " + std::to_string(Configuration.primeThreads) + " prime network threads.");
+		NetworkMessenger->sendMessage(MSG_TARGET_CONSOLE, VISIBILITY_ALL, "Starting " + std::to_string(Configuration.primeThreads) + " prime network threads.");
 
 		for (int i = 0; i < Configuration.primeThreads; i++)
 			NetworkThread* PrimeNetworkThread = new NetworkThread(true);
 
 		if (PollStruct.size() < 2)
-			NetworkMessenger->sendMessage(MSG_TARGET_CONSOLE, "Network Loop activated: Listening on " + std::to_string(PollStruct.size()) + " Interface...");
+			NetworkMessenger->sendMessage(MSG_TARGET_CONSOLE, VISIBILITY_ALL, "Network Loop activated: Listening on " + std::to_string(PollStruct.size()) + " Interface...");
 		else
-			NetworkMessenger->sendMessage(MSG_TARGET_CONSOLE, "Network Loop activated: Listening on " + std::to_string(PollStruct.size()) + " Interfaces...");
+			NetworkMessenger->sendMessage(MSG_TARGET_CONSOLE, VISIBILITY_ALL, "Network Loop activated: Listening on " + std::to_string(PollStruct.size()) + " Interfaces...");
 		
 		while (1)
 		{
 			// As of C++11, vectors are guaranteed to be contiguous in memory. So this new hackery works.
 			if (PollStruct.size() == 0)
 			{
-				NetworkMessenger->sendMessage(MSG_TARGET_CONSOLE, "No interfaces to listen on; exiting.");
+				NetworkMessenger->sendMessage(MSG_TARGET_CONSOLE, VISIBILITY_ALL, "No interfaces to listen on; exiting.");
 				break;
 			}
 			//Q: Why is the argument invalid?
@@ -104,7 +104,7 @@ namespace DFSNetworking
 
 				if (IncomingMessage.message == "SHUTDOWN")
 				{
-					NetworkMessenger->sendMessage(MSG_TARGET_CONSOLE, "Shutdown signal received, shutting down interfaces.");
+					NetworkMessenger->sendMessage(MSG_TARGET_CONSOLE, VISIBILITY_ALL, "Shutdown signal received, shutting down interfaces.");
 					delete this;
 					return;
 				}
@@ -116,7 +116,7 @@ namespace DFSNetworking
 				if ((PollStruct[i].revents & POLLIN) && (ActiveConnections != Configuration.MaxConnections || !Configuration.MaxConnections))
 				{
 					// Handle the incoming connection.
-					NetworkMessenger->sendMessage(MSG_TARGET_CONSOLE, "Accepting incoming connection; distributing to NetworkThreads");
+					NetworkMessenger->sendMessage(MSG_TARGET_CONSOLE, VISIBILITY_ALL, "Accepting incoming connection; distributing to NetworkThreads");
 					IncomingConnection(InterfaceList[i]);
 				}
 			}

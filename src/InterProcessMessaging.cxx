@@ -94,7 +94,7 @@ namespace DFSMessaging
 		MessengerServerSentMessagesMutex.unlock();
 	}
 
-	Message::Message(bool aisPointer, bool aisTask, Messenger* aOrigin, unsigned int asecurityKey)
+	Message::Message(bool aisPointer, bool aisTask, Messenger* aOrigin, unsigned int asecurityKey, unsigned int aVisibility)
 	{
 		isPointer = aisPointer;
 		isTask = aisTask;
@@ -102,6 +102,7 @@ namespace DFSMessaging
 		OriginName = aOrigin->Name;
 		securityKey = asecurityKey;
 		Pointer = nullptr;
+		visibility = aVisibility;
 		Pending = 0;
 		messageID = 0;
 	}
@@ -112,6 +113,7 @@ namespace DFSMessaging
 		isTask = false;
 		Origin = nullptr;
 		Pointer = nullptr;
+		visibility = VISIBILITY_VERBOSE;
 		Pending = 0;
 		OriginName = "Invalid Message";
 		securityKey = 0;
@@ -210,9 +212,9 @@ namespace DFSMessaging
 		}
 	}
 
-    void Messenger::sendMessage(unsigned int aChannel, std::string aMessage)
+    void Messenger::sendMessage(unsigned int aChannel, unsigned int aVisibility, std::string aMessage)
 	{
-		Message newMessage(false, false, this, securityKey);
+		Message newMessage(false, false, this, securityKey, aVisibility);
 
 		newMessage.message = aMessage;
 		newMessage.channel = aChannel;
@@ -222,7 +224,7 @@ namespace DFSMessaging
 
 	void Messenger::SendPointer(unsigned int aChannel, void* aPointer)
 	{
-		Message newMessage(true, true, this, securityKey);
+		Message newMessage(true, true, this, securityKey, VISIBILITY_DEBUG);
 
 		newMessage.Pointer = aPointer;
 		newMessage.channel = aChannel;

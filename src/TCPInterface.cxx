@@ -21,7 +21,7 @@ namespace DFSNetworking
 
 		if ((DataSent = send(NetworkSocket, aData, aLength, 0)) == -1)
 		{
-			InterfaceMessenger->sendMessage(MSG_TARGET_CONSOLE, "TCPInterface::sendData -- send() failed.");
+			InterfaceMessenger->sendMessage(MSG_TARGET_CONSOLE, VISIBILITY_DEBUG, "TCPInterface::sendData -- send() failed.");
 			return 0;
 		}
 
@@ -34,7 +34,7 @@ namespace DFSNetworking
 
 		if ((DataRecv = recv(NetworkSocket, aData, aLength - 1, 0)) == -1)
 		{
-			InterfaceMessenger->sendMessage(MSG_TARGET_CONSOLE, "TCPInterface::receiveData -- recv() failed.");
+			InterfaceMessenger->sendMessage(MSG_TARGET_CONSOLE, VISIBILITY_DEBUG, "TCPInterface::receiveData -- recv() failed.");
 			return -1;
 		}
 
@@ -73,12 +73,12 @@ namespace DFSNetworking
 		if (close(NetworkSocket) == -1)
 #endif
 		{
-			InterfaceMessenger->sendMessage(MSG_TARGET_CONSOLE, "TCPInterface::~TCPInterface -- close() failed.");
+			InterfaceMessenger->sendMessage(MSG_TARGET_CONSOLE, VISIBILITY_DEBUG, "TCPInterface::~TCPInterface -- close() failed.");
 		}
 
 		if (InterfaceMessenger != nullptr)
 		{
-			InterfaceMessenger->sendMessage(MSG_TARGET_CONSOLE, "Interface shutdown.");
+			InterfaceMessenger->sendMessage(MSG_TARGET_CONSOLE, VISIBILITY_DEBUG, "Interface shutdown.");
 			delete InterfaceMessenger;
 		}
 	}
@@ -96,7 +96,7 @@ namespace DFSNetworking
 			return false;
 		}
 #endif
-		InterfaceMessenger->sendMessage(MSG_TARGET_CONSOLE, "Initializing IPv4 Interface...");
+		InterfaceMessenger->sendMessage(MSG_TARGET_CONSOLE, VISIBILITY_ALL, "Initializing IPv4 Interface...");
 
 		// Grab the master socket.
 		if ((NetworkSocket = socket(AF_INET, SOCK_STREAM, 0)) == -1)
@@ -135,7 +135,7 @@ namespace DFSNetworking
 
 		// Change the name of the Messenger to include the IP address and port.
 		InterfaceMessenger->Name = "IPv4 Interface: " + std::string(inet_ntoa(ListenAddr.sin_addr)) + ":" + std::to_string(aPort);
-		InterfaceMessenger->sendMessage(MSG_TARGET_CONSOLE, "IPv4 Interface initialized.");
+		InterfaceMessenger->sendMessage(MSG_TARGET_CONSOLE, VISIBILITY_ALL, "IPv4 Interface initialized.");
 
 		listenPort = aPort;
 		backLog = aBackLog;
@@ -153,12 +153,12 @@ namespace DFSNetworking
 		if ((NewSocket = accept(NetworkSocket, (struct sockaddr*)&SocketStruct,
 			&sin_size)) == -1)
 		{
-			InterfaceMessenger->sendMessage(MSG_TARGET_CONSOLE, "TCPInterface::acceptConnection -- accept() failed.");
+			InterfaceMessenger->sendMessage(MSG_TARGET_CONSOLE, VISIBILITY_DEBUG, "TCPInterface::acceptConnection -- accept() failed.");
 
 			return nullptr;
 		}
 
-		InterfaceMessenger->sendMessage(MSG_TARGET_CONSOLE, "TCPInterface::acceptConnection -- Connection accepted from " + std::string(inet_ntoa(SocketStruct.sin_addr)));
+		InterfaceMessenger->sendMessage(MSG_TARGET_CONSOLE, VISIBILITY_DEBUG, "TCPInterface::acceptConnection -- Connection accepted from " + std::string(inet_ntoa(SocketStruct.sin_addr)));
 
 		IPv4Interface* NewInterface = new IPv4Interface;
 		NewInterface->NetworkSocket = NewSocket;
@@ -200,19 +200,19 @@ namespace DFSNetworking
 			return false;
 		}
 #endif
-		InterfaceMessenger->sendMessage(MSG_TARGET_CONSOLE, "Initializing IPv6 Interface...");
+		InterfaceMessenger->sendMessage(MSG_TARGET_CONSOLE, VISIBILITY_ALL, "Initializing IPv6 Interface...");
 
 		// Grab the master socket.
 		if ((NetworkSocket = socket(AF_INET6, SOCK_STREAM, 0)) == -1)
 		{
-			InterfaceMessenger->sendMessage(MSG_TARGET_CONSOLE, "InitializeNetwork -- socket() failed.");			
+			InterfaceMessenger->sendMessage(MSG_TARGET_CONSOLE, VISIBILITY_ALL, "InitializeNetwork -- socket() failed.");			
 			return false;
 		}
 
 		// Clear the socket incase it hasn't been properly closed so that we may use it.
 		if (setsockopt(NetworkSocket, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int)) == -1)
 		{
-			InterfaceMessenger->sendMessage(MSG_TARGET_CONSOLE, "InitializeNetwork -- setsockopt() failed.");			
+			InterfaceMessenger->sendMessage(MSG_TARGET_CONSOLE, VISIBILITY_ALL, "InitializeNetwork -- setsockopt() failed.");			
 			return false;
 		}
 
@@ -220,7 +220,7 @@ namespace DFSNetworking
 		// Set the socket to allow dual-stack (IPv4 and IPv6) connections.
 		if (setsockopt(NetworkSocket, IPPROTO_IPV6, IPV6_V6ONLY, &yes, sizeof(int)) == -1)
 		{
-			InterfaceMessenger->sendMessage(MSG_TARGET_CONSOLE, "InitializeNetwork -- setsockopt(IPV6_V6ONLY) failed.");
+			InterfaceMessenger->sendMessage(MSG_TARGET_CONSOLE, VISIBILITY_ALL, "InitializeNetwork -- setsockopt(IPV6_V6ONLY) failed.");
 			return false;
 		}
 #endif
@@ -235,20 +235,20 @@ namespace DFSNetworking
 		if (bind(NetworkSocket, (struct sockaddr*)&ListenAddr,
 			sizeof(struct sockaddr_in6)) == -1)
 		{
-			InterfaceMessenger->sendMessage(MSG_TARGET_CONSOLE, "InitializeNetwork -- bind() failed.");			
+			InterfaceMessenger->sendMessage(MSG_TARGET_CONSOLE, VISIBILITY_ALL, "InitializeNetwork -- bind() failed.");			
 			return false;
 		}
 
 		// Start listening
 		if (listen(NetworkSocket, aBackLog) == -1)
 		{
-			InterfaceMessenger->sendMessage(MSG_TARGET_CONSOLE, "InitializeNetwork -- listen() failed.");
+			InterfaceMessenger->sendMessage(MSG_TARGET_CONSOLE, VISIBILITY_ALL, "InitializeNetwork -- listen() failed.");
 			return false;
 		}
 
 		// Change the name of the Messenger to include the IP address and port.
 		InterfaceMessenger->Name = "IPv6 Interface: " + std::string(this->getIP()) + ":" + std::to_string(aPort);
-		InterfaceMessenger->sendMessage(MSG_TARGET_CONSOLE, "IPv6 Interface initialized.");
+		InterfaceMessenger->sendMessage(MSG_TARGET_CONSOLE, VISIBILITY_ALL, "IPv6 Interface initialized.");
 
 		listenPort = aPort;
 		backLog = aBackLog;
@@ -266,12 +266,12 @@ namespace DFSNetworking
 		if ((NewSocket = accept(NetworkSocket, (struct sockaddr*)&SocketStruct,
 			&sin_size)) == -1)
 		{
-			InterfaceMessenger->sendMessage(MSG_TARGET_CONSOLE, "IPv6Interface::acceptConnection -- accept() failed.");
+			InterfaceMessenger->sendMessage(MSG_TARGET_CONSOLE, VISIBILITY_DEBUG, "IPv6Interface::acceptConnection -- accept() failed.");
 
 			return nullptr;
 		}
 
-		InterfaceMessenger->sendMessage(MSG_TARGET_CONSOLE, "IPv6Interface::acceptConnection -- Connection accepted from " + std::string(this->getIP()));
+		InterfaceMessenger->sendMessage(MSG_TARGET_CONSOLE, VISIBILITY_DEBUG, "IPv6Interface::acceptConnection -- Connection accepted from " + std::string(this->getIP()));
 
 		IPv6Interface* NewInterface = new IPv6Interface;
 		NewInterface->NetworkSocket = NewSocket;
@@ -427,7 +427,7 @@ namespace DFSNetworking
 			return false;
 		}
 #endif
-		InterfaceMessenger->sendMessage(MSG_TARGET_CONSOLE, "Initializing HTTPS IPv4 Interface...");
+		InterfaceMessenger->sendMessage(MSG_TARGET_CONSOLE, VISIBILITY_ALL, "Initializing HTTPS IPv4 Interface...");
 
 		// Grab the master socket.
 		if ((NetworkSocket = socket(AF_INET, SOCK_STREAM, 0)) == -1)
@@ -466,7 +466,7 @@ namespace DFSNetworking
 
 		// Change the name of the Messenger to include the IP address and port.
 		InterfaceMessenger->Name = "HTTPS IPv4 Interface: " + std::string(inet_ntoa(ListenAddr.sin_addr)) + ":" + std::to_string(aPort);
-		InterfaceMessenger->sendMessage(MSG_TARGET_CONSOLE, "HTTPS IPv4 Interface initialized.");
+		InterfaceMessenger->sendMessage(MSG_TARGET_CONSOLE, VISIBILITY_ALL, "HTTPS IPv4 Interface initialized.");
 
 		listenPort = aPort;
 		backLog = aBackLog;
@@ -478,14 +478,14 @@ namespace DFSNetworking
 
 		if (!generate_self_signed_cert(&pkey, &x509))
 		{
-			InterfaceMessenger->sendMessage(MSG_TARGET_CONSOLE, "Failed to generate self signed certificate.");
+			InterfaceMessenger->sendMessage(MSG_TARGET_CONSOLE, VISIBILITY_ALL, "Failed to generate self signed certificate.");
 			return false;
 		}
 
 		SSL_CTX_use_certificate(ctx, x509);
 		SSL_CTX_use_PrivateKey(ctx, pkey);
 
-		InterfaceMessenger->sendMessage(MSG_TARGET_CONSOLE, "SSL Certificate generated and self signed.");
+		InterfaceMessenger->sendMessage(MSG_TARGET_CONSOLE, VISIBILITY_ALL, "SSL Certificate generated and self signed.");
 
 		return true;
 	}
@@ -499,12 +499,12 @@ namespace DFSNetworking
 		if ((NewSocket = accept(NetworkSocket, (struct sockaddr*)&SocketStruct,
 			&sin_size)) == -1)
 		{
-			InterfaceMessenger->sendMessage(MSG_TARGET_CONSOLE, "HTTPSIPv4Interface::acceptConnection -- accept() failed.");
+			InterfaceMessenger->sendMessage(MSG_TARGET_CONSOLE, VISIBILITY_DEBUG, "HTTPSIPv4Interface::acceptConnection -- accept() failed.");
 
 			return nullptr;
 		}
 
-		InterfaceMessenger->sendMessage(MSG_TARGET_CONSOLE, "HTTPSIPv4Interface::acceptConnection -- Connection accepted from " + std::string(inet_ntoa(SocketStruct.sin_addr)));
+		InterfaceMessenger->sendMessage(MSG_TARGET_CONSOLE, VISIBILITY_DEBUG, "HTTPSIPv4Interface::acceptConnection -- Connection accepted from " + std::string(inet_ntoa(SocketStruct.sin_addr)));
 
 		HTTPSIPv4Interface* NewInterface = new HTTPSIPv4Interface;
 		NewInterface->NetworkSocket = NewSocket;
@@ -519,7 +519,7 @@ namespace DFSNetworking
 		NewInterface->ssl = SSL_new(ctx);
 
 		if (!NewInterface->ssl) {
-			InterfaceMessenger->sendMessage(MSG_TARGET_CONSOLE, "SSL_new failed!");
+			InterfaceMessenger->sendMessage(MSG_TARGET_CONSOLE, VISIBILITY_DEBUG, "SSL_new failed!");
 			delete NewInterface;
 			return nullptr;
 		}
@@ -528,7 +528,7 @@ namespace DFSNetworking
 
 		if (SSL_accept(NewInterface->ssl) <= 0)
 		{
-			InterfaceMessenger->sendMessage(MSG_TARGET_CONSOLE, "SSL Accept failed!");
+			InterfaceMessenger->sendMessage(MSG_TARGET_CONSOLE, VISIBILITY_DEBUG, "SSL Accept failed!");
 			//ERR_print_errors_fp(stderr); // Print OpenSSL error messages
 
 			delete NewInterface;
