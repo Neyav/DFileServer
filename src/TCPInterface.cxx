@@ -524,7 +524,7 @@ namespace DFSNetworking
 			return nullptr;
 		}
 
-		SSL_set_fd(NewInterface->ssl, NewSocket);
+		SSL_set_fd(NewInterface->ssl, (int) NewSocket);
 
 		if (SSL_accept(NewInterface->ssl) <= 0)
 		{

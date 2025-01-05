@@ -92,7 +92,7 @@ namespace DFSNetworking
 
 #ifdef _WINDOWS
 			WSAPOLLFD* CPollStruct = (WSAPOLLFD*)&PollStruct[0];
-			WSAPoll(CPollStruct, PollStruct.size(), 100);
+			WSAPoll(CPollStruct, (ULONG) PollStruct.size(), 100);
 #else
 			struct pollfd *CPollStruct = (struct pollfd *) &PollStruct[0];
 			poll(CPollStruct, PollStruct.size(), 100);
