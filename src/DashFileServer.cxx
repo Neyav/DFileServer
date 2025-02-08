@@ -342,7 +342,7 @@ int main( int argc, char *argv[] )
 		}
 		interfacesActivated = true;
 #else
-		std::cout " -=Configuration: SSL Support not compiled in. Ignoring -ipv4s\n";
+		std::cout << " -=Configuration: SSL Support not compiled in. Ignoring -ipv4s\n";
 #endif
 	}
 	else if ( strcasecmp( "-backlog", argv[x] ) == 0 )
