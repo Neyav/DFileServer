@@ -442,7 +442,7 @@ namespace DFSNetworking
 			InterfaceMessenger->sendMessage(MSG_TARGET_CONSOLE, VISIBILITY_DEBUG, "InitializeNetwork -- setsockopt() failed.");
 			return false;
 		}
-
+				
 		// Set the listening network struct up.
 		ListenAddr.sin_family = AF_INET;
 		ListenAddr.sin_port = htons(aPort);
