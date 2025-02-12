@@ -83,12 +83,7 @@ namespace DFSNetworking
 				NetworkMessenger->sendMessage(MSG_TARGET_CONSOLE, VISIBILITY_ALL, "No interfaces to listen on; exiting.");
 				break;
 			}
-			//Q: Why is the argument invalid?
-			//A: Because the argument is a pointer to a vector of pollfd structs, not a pointer to a pollfd struct.
-			//Q: How do I fix it?
-			//A: Use the address-of operator to pass the address
-			//Q: Example?
-			//A: poll(&PollStruct[0], PollStruct.size(), INFTIM);			
+		
 
 #ifdef _WINDOWS
 			WSAPOLLFD* CPollStruct = (WSAPOLLFD*)&PollStruct[0];
