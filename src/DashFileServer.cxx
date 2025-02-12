@@ -299,7 +299,19 @@ int main( int argc, char *argv[] )
 		int port;
 		x++;
 
+		if (x > argc)
+		{
+			std::cout << "-=CRITICAL ERROR: -ipv4 requires a port number." << std::endl;
+			exit(-1);
+		}
+
 		port = atoi(argv[x]);
+
+		if (!(port > 0 && port < 65536))
+		{
+			std::cout << "-=CRITICAL ERROR: Invalid port number for -ipv4." << std::endl;
+			exit(-1);
+		}
 
 		DFSNetworking::TCPInterface* IPv4Interface = new DFSNetworking::IPv4Interface;
 		
@@ -315,8 +327,22 @@ int main( int argc, char *argv[] )
 	else if (strcasecmp("-ipv6", argv[x]) == 0)
 	{
 		int port;
+		
 		x++;
+
+		if (x > argc)
+		{
+			std::cout << "-=CRITICAL ERROR: -ipv6 requires a port number." << std::endl;
+			exit(-1);
+		}
+
 		port = atoi(argv[x]);
+
+		if (!(port > 0 && port < 65536))
+		{
+			std::cout << "-=CRITICAL ERROR: Invalid port number for -ipv6." << std::endl;
+			exit(-1);
+		}
 
 		DFSNetworking::IPv6Interface* IPv6Interface = new DFSNetworking::IPv6Interface;
 		printf(" -=Configuration: Added IPv6 Port -> %i\n", port);
@@ -332,7 +358,21 @@ int main( int argc, char *argv[] )
 #ifdef _DFS_USE_OPENSSL
 		int port;
 		x++;
+		
+		if (x > argc)
+		{
+			std::cout << "-=CRITICAL ERROR: -ipv4s requires a port number." << std::endl;
+			exit(-1);
+		}
+
 		port = atoi(argv[x]);
+
+		if (!(port > 0 && port < 65536))
+		{
+			std::cout << "-=CRITICAL ERROR: Invalid port number for -ipv4s." << std::endl;
+			exit(-1);
+		}
+
 		printf(" -=Configuration: Added HTTPS IPv4 Port -> %i\n", port);
 		DFSNetworking::HTTPSIPv4Interface* HTTPSIPv4Interface = new DFSNetworking::HTTPSIPv4Interface;
 		if (NetworkDaemon->addListener(port, Configuration.BackLog, HTTPSIPv4Interface) == false)
