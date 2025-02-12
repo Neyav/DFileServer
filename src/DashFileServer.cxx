@@ -424,6 +424,8 @@ int main( int argc, char *argv[] )
 #endif
    }
 
+   std::cout << " -=Initialize Network..." << std::endl;
+
    if (interfacesActivated == false)
    {
 	   DFSNetworking::IPv4Interface* IPv4Interface = new DFSNetworking::IPv4Interface;
@@ -435,30 +437,27 @@ int main( int argc, char *argv[] )
 		   std::cout << "CRITICAL ERROR: Couldn't initialize listening socket on port " << 2000 << std::endl;
 		   exit(-1); // TODO: Replace with an exit function that cleans up after itself.
 	   }
-   } 
 
-   std::cout << " -=Initialize Network..." << std::endl;
+	   DFSNetworking::IPv6Interface* IPv6Interface = new DFSNetworking::IPv6Interface;
 
-
-   DFSNetworking::IPv6Interface* IPv6Interface = new DFSNetworking::IPv6Interface;
-
-   if (NetworkDaemon->addListener(2000, Configuration.BackLog, IPv6Interface) == false)
-   {
-	   std::cout << "CRITICAL ERROR: Couldn't initialize listening socket on port " << 2000 << std::endl;
-	   exit(-1); // TODO: Replace with an exit function that cleans up after itself.
-   }
+	   if (NetworkDaemon->addListener(2000, Configuration.BackLog, IPv6Interface) == false)
+	   {
+		   std::cout << "CRITICAL ERROR: Couldn't initialize listening socket on port " << 2000 << std::endl;
+		   exit(-1); // TODO: Replace with an exit function that cleans up after itself.
+	   }
 #ifdef _DFS_USE_OPENSSL
-   DFSNetworking::HTTPSIPv4Interface* HTTPSIPv4Interface = new DFSNetworking::HTTPSIPv4Interface;
+	   DFSNetworking::HTTPSIPv4Interface* HTTPSIPv4Interface = new DFSNetworking::HTTPSIPv4Interface;
 
-   // The proper port for SSL connections is 443, but without root access on Linux we can't bind to that port. I could make
-   // this a platform specific change, but that would be too confusing. So out of respect for portability, we'll stick with 2001
-   // for now.
-   if (NetworkDaemon->addListener(2001, Configuration.BackLog, HTTPSIPv4Interface) == false)
-   {
-	   std::cout << "CRITICAL ERROR: Couldn't initialize listening socket on port " << 443 << std::endl;
-	   exit(-1); // TODO: Replace with an exit function that cleans up after itself.
-   }
+	   // The proper port for SSL connections is 443, but without root access on Linux we can't bind to that port. I could make
+	   // this a platform specific change, but that would be too confusing. So out of respect for portability, we'll stick with 2001
+	   // for now.
+	   if (NetworkDaemon->addListener(2001, Configuration.BackLog, HTTPSIPv4Interface) == false)
+	   {
+		   std::cout << "CRITICAL ERROR: Couldn't initialize listening socket on port " << 443 << std::endl;
+		   exit(-1); // TODO: Replace with an exit function that cleans up after itself.
+	   }
 #endif
+   }
 
 #ifndef _WINDOWS
 
