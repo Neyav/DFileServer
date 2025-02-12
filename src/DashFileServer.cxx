@@ -299,9 +299,9 @@ int main( int argc, char *argv[] )
 		int port;
 		x++;
 
-		if (x > argc)
+		if (x >= argc)
 		{
-			std::cout << "-=CRITICAL ERROR: -ipv4 requires a port number." << std::endl;
+			std::cout << " -=CRITICAL ERROR: -ipv4 requires a port number." << std::endl;
 			exit(-1);
 		}
 
@@ -309,7 +309,7 @@ int main( int argc, char *argv[] )
 
 		if (!(port > 0 && port < 65536))
 		{
-			std::cout << "-=CRITICAL ERROR: Invalid port number for -ipv4." << std::endl;
+			std::cout << " -=CRITICAL ERROR: Invalid port number for -ipv4." << std::endl;
 			exit(-1);
 		}
 
@@ -330,9 +330,9 @@ int main( int argc, char *argv[] )
 		
 		x++;
 
-		if (x > argc)
+		if (x >= argc)
 		{
-			std::cout << "-=CRITICAL ERROR: -ipv6 requires a port number." << std::endl;
+			std::cout << " -=CRITICAL ERROR: -ipv6 requires a port number." << std::endl;
 			exit(-1);
 		}
 
@@ -340,7 +340,7 @@ int main( int argc, char *argv[] )
 
 		if (!(port > 0 && port < 65536))
 		{
-			std::cout << "-=CRITICAL ERROR: Invalid port number for -ipv6." << std::endl;
+			std::cout << " -=CRITICAL ERROR: Invalid port number for -ipv6." << std::endl;
 			exit(-1);
 		}
 
@@ -356,12 +356,12 @@ int main( int argc, char *argv[] )
 	else if (strcasecmp("-ipv4s", argv[x]) == 0)
 	{
 #ifdef _DFS_USE_OPENSSL
-		int port;
-		x++;
+		int port;	
 		
-		if (x > argc)
+		x++;
+		if (x >= argc)
 		{
-			std::cout << "-=CRITICAL ERROR: -ipv4s requires a port number." << std::endl;
+			std::cout << " -=CRITICAL ERROR: -ipv4s requires a port number." << std::endl;
 			exit(-1);
 		}
 
@@ -369,7 +369,7 @@ int main( int argc, char *argv[] )
 
 		if (!(port > 0 && port < 65536))
 		{
-			std::cout << "-=CRITICAL ERROR: Invalid port number for -ipv4s." << std::endl;
+			std::cout << " -=CRITICAL ERROR: Invalid port number for -ipv4s." << std::endl;
 			exit(-1);
 		}
 
