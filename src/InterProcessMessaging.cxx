@@ -113,7 +113,7 @@ namespace DFSMessaging
 		isTask = false;
 		Origin = nullptr;
 		Pointer = nullptr;
-		visibility = VISIBILITY_VERBOSE;
+		visibility = VISIBILITY_ALL;
 		Pending = 0;
 		OriginName = "Invalid Message";
 		securityKey = 0;

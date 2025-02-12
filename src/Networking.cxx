@@ -65,7 +65,7 @@ namespace DFSNetworking
 
 		// Start the specified number of prime threads.
 
-		NetworkMessenger->sendMessage(MSG_TARGET_CONSOLE, VISIBILITY_ALL, "Starting " + std::to_string(Configuration.primeThreads) + " prime network threads.");
+		NetworkMessenger->sendMessage(MSG_TARGET_CONSOLE, VISIBILITY_SYSTEM, "Starting " + std::to_string(Configuration.primeThreads) + " prime network threads.");
 
 		for (int i = 0; i < Configuration.primeThreads; i++)
 			NetworkThread* PrimeNetworkThread = new NetworkThread(true);
@@ -111,7 +111,7 @@ namespace DFSNetworking
 				if ((PollStruct[i].revents & POLLIN) && (ActiveConnections != Configuration.MaxConnections || !Configuration.MaxConnections))
 				{
 					// Handle the incoming connection.
-					NetworkMessenger->sendMessage(MSG_TARGET_CONSOLE, VISIBILITY_ALL, "Accepting incoming connection; distributing to NetworkThreads");
+					NetworkMessenger->sendMessage(MSG_TARGET_CONSOLE, VISIBILITY_CONNECTIONS, "Accepting incoming connection; distributing to NetworkThreads");
 					IncomingConnection(InterfaceList[i]);
 				}
 			}

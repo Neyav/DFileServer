@@ -78,7 +78,7 @@ namespace DFSNetworking
 
 		if (InterfaceMessenger != nullptr)
 		{
-			InterfaceMessenger->sendMessage(MSG_TARGET_CONSOLE, VISIBILITY_DEBUG, "Interface shutdown.");
+			InterfaceMessenger->sendMessage(MSG_TARGET_CONSOLE, VISIBILITY_SYSTEM, "Interface shutdown.");
 			delete InterfaceMessenger;
 		}
 	}
@@ -205,14 +205,14 @@ namespace DFSNetworking
 		// Grab the master socket.
 		if ((NetworkSocket = socket(AF_INET6, SOCK_STREAM, 0)) == -1)
 		{
-			InterfaceMessenger->sendMessage(MSG_TARGET_CONSOLE, VISIBILITY_ALL, "InitializeNetwork -- socket() failed.");			
+			InterfaceMessenger->sendMessage(MSG_TARGET_CONSOLE, VISIBILITY_DEBUG, "InitializeNetwork -- socket() failed.");			
 			return false;
 		}
 
 		// Clear the socket incase it hasn't been properly closed so that we may use it.
 		if (setsockopt(NetworkSocket, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int)) == -1)
 		{
-			InterfaceMessenger->sendMessage(MSG_TARGET_CONSOLE, VISIBILITY_ALL, "InitializeNetwork -- setsockopt() failed.");			
+			InterfaceMessenger->sendMessage(MSG_TARGET_CONSOLE, VISIBILITY_DEBUG, "InitializeNetwork -- setsockopt() failed.");			
 			return false;
 		}
 
@@ -220,7 +220,7 @@ namespace DFSNetworking
 		// Set the socket to allow dual-stack (IPv4 and IPv6) connections.
 		if (setsockopt(NetworkSocket, IPPROTO_IPV6, IPV6_V6ONLY, &yes, sizeof(int)) == -1)
 		{
-			InterfaceMessenger->sendMessage(MSG_TARGET_CONSOLE, VISIBILITY_ALL, "InitializeNetwork -- setsockopt(IPV6_V6ONLY) failed.");
+			InterfaceMessenger->sendMessage(MSG_TARGET_CONSOLE, VISIBILITY_DEBUG, "InitializeNetwork -- setsockopt(IPV6_V6ONLY) failed.");
 			return false;
 		}
 #endif
@@ -235,14 +235,14 @@ namespace DFSNetworking
 		if (bind(NetworkSocket, (struct sockaddr*)&ListenAddr,
 			sizeof(struct sockaddr_in6)) == -1)
 		{
-			InterfaceMessenger->sendMessage(MSG_TARGET_CONSOLE, VISIBILITY_ALL, "InitializeNetwork -- bind() failed.");			
+			InterfaceMessenger->sendMessage(MSG_TARGET_CONSOLE, VISIBILITY_DEBUG, "InitializeNetwork -- bind() failed.");			
 			return false;
 		}
 
 		// Start listening
 		if (listen(NetworkSocket, aBackLog) == -1)
 		{
-			InterfaceMessenger->sendMessage(MSG_TARGET_CONSOLE, VISIBILITY_ALL, "InitializeNetwork -- listen() failed.");
+			InterfaceMessenger->sendMessage(MSG_TARGET_CONSOLE, VISIBILITY_DEBUG, "InitializeNetwork -- listen() failed.");
 			return false;
 		}
 
