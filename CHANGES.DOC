@@ -6,6 +6,12 @@
    |   | - Network stack broken into a listener thread, and multiple HTTP delivery threads,
    |   |   finally making good on the 2.0 promise of scalable threading.
    |   | - Directory Index updated to a new modern cleaner look.
+   |   | - IPv6 support and HTTPS ( IPv4 ) support.
+   |   | - Newly implemented TCPInterfaces structure that allows for multiple Interfaces
+   |   |   (IPv4, IPv6, HTTPS IPv4) to be bound to ports, and allowing for them to be active
+   |   |   at the same time if wanted, allowing for the server to distribute across a vast array
+   |   |   of protocols simutaniously. Work is going to be going on this to allow them to distribute
+   |   |   differently as well in the future, but for now this works.
    |
    |   > DFileServer 2.0.1 - 2024-08-12
    |   ^ - Fixed some memory leaks
