@@ -7,8 +7,8 @@ CFLAGS = -O2 -std=c++17
 LINKERFLAGS =
 
 # The default build target.
-dfileserver: CPathResolver.o DirectoryIndexing.o ClientConnection.o HTTPHeader.o DashFileServer.o MimeTypes.o Base64.o HTMLEncoding.o InterProcessMessaging.o Networking.o NetworkThread.o TCPInterface.o
-	$(CC) -o dfileserver CPathResolver.o DirectoryIndexing.o ClientConnection.o HTTPHeader.o DashFileServer.o MimeTypes.o Base64.o HTMLEncoding.o InterProcessMessaging.o Networking.o NetworkThread.o TCPInterface.o $(LINKERFLAGS)
+dfileserver: CPathResolver.o DirectoryIndexing.o ClientConnection.o HTTPHeader.o DashFileServer.o MimeTypes.o Base64.o InterProcessMessaging.o Networking.o NetworkThread.o TCPInterface.o
+	$(CC) -o dfileserver CPathResolver.o DirectoryIndexing.o ClientConnection.o HTTPHeader.o DashFileServer.o MimeTypes.o Base64.o InterProcessMessaging.o Networking.o NetworkThread.o TCPInterface.o $(LINKERFLAGS)
 	$(STRIP) --strip-all dfileserver
 
 CPathResolver.o: src/CPathResolver.cxx
@@ -31,10 +31,7 @@ MimeTypes.o: src/MimeTypes.cxx
 	
 Base64.o: src/contrib/Base64.cpp
 	$(CC) $(CFLAGS) -o Base64.o -c src/contrib/Base64.cpp
-	
-HTMLEncoding.o: src/HTMLEncoding.cxx
-	$(CC) $(CFLAGS) -o HTMLEncoding.o -c src/HTMLEncoding.cxx
-	
+
 InterProcessMessaging.o: src/InterProcessMessaging.cxx
 	$(CC) $(CFLAGS) -o InterProcessMessaging.o -c src/InterProcessMessaging.cxx
 	
