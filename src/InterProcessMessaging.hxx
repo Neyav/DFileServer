@@ -50,6 +50,7 @@ namespace DFSMessaging
 		Messenger *identifyOrigin(void);
 		bool acceptTask(void);
 		void refuseTask(void);
+		bool isMessageVisible(unsigned int aVisibility);
 
 		Message(bool aisPointer, bool aisTask, Messenger *aOrigin, unsigned int asecurityKey, unsigned int aVisibility);
 		Message();

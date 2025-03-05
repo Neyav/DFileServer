@@ -94,6 +94,17 @@ namespace DFSMessaging
 		MessengerServerSentMessagesMutex.unlock();
 	}
 
+	// Returns true if the message is visible to the visibility mask.
+	bool Message::isMessageVisible(unsigned int aVisibility)
+	{
+		if (visibility == VISIBILITY_ALL)  // If the message is visible to all, return true.
+		{
+			return true;
+		}
+
+		return ((visibility & aVisibility) != 0);
+	}
+
 	Message::Message(bool aisPointer, bool aisTask, Messenger* aOrigin, unsigned int asecurityKey, unsigned int aVisibility)
 	{
 		isPointer = aisPointer;

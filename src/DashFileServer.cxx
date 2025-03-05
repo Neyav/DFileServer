@@ -51,7 +51,6 @@
 
 #endif
 #include <vector>
-//#include <iterator>
 #include <string>
 #include <iostream>
 #include <thread>
@@ -222,10 +221,10 @@ void legacyConsole(DFSMessaging::Messenger* ConsoleMessenger)
 		{
 			DFSMessaging::Message MessagePacket = ConsoleMessenger->AcceptMessage();
 
-			if (Configuration.Verbose) // If we are in verbose mode, then we want to print out the message.
+			if (MessagePacket.isMessageVisible(Configuration.ConsoleVisibility)) // Is this message in our visibility scope.
 				std::cout << std::string(TimeAndDate()) << " [" << MessagePacket.OriginName << "]: " << MessagePacket.message << std::endl;
 
-			if (Configuration.LogFile)
+			if (Configuration.LogFile && MessagePacket.isMessageVisible(Configuration.ConsoleVisibility))
 			{
 				fprintf(Configuration.LogFile, "%s [%s]: %s\n", TimeAndDate(), MessagePacket.OriginName.c_str(), MessagePacket.message.c_str());
 				fflush(Configuration.LogFile);
@@ -411,11 +410,35 @@ int main( int argc, char *argv[] )
 		else
 			printf(" -=Configuration: MaxBandwidth -> %i B/s\n", Configuration.MaxBandwidth);
 	}
-	else if ( strcasecmp( "-verbose", argv[x] ) == 0)
+	else if ( strcasecmp( "-verbose_all", argv[x] ) == 0)
 	{
-		Configuration.Verbose = true;
+		Configuration.ConsoleVisibility = VISIBILITY_ALL;
 
 		printf(" -=Configuration: Verbose Console Messages Enabled.\n");
+	}
+	else if (strcasecmp("-verbose_connections", argv[x]) == 0)
+	{
+		Configuration.ConsoleVisibility |= VISIBILITY_CONNECTIONS;
+
+		printf(" -=Configuration: Verbose Connection Messages Enabled.\n");
+	}
+	else if (strcasecmp("-verbose_fileaccess", argv[x]) == 0)
+	{
+		Configuration.ConsoleVisibility |= VISIBILITY_FILEACCESS;
+
+		printf(" -=Configuration: Verbose File Access Messages Enabled.\n");
+	}
+	else if (strcasecmp("-verbose_system", argv[x]) == 0)
+	{
+		Configuration.ConsoleVisibility |= VISIBILITY_SYSTEM;
+
+		printf(" -=Configuration: Verbose System Messages Enabled.\n");
+	}
+	else if (strcasecmp("-verbose_debug", argv[x]) == 0)
+	{
+		Configuration.ConsoleVisibility |= VISIBILITY_DEBUG;
+
+		printf(" -=Configuration: Verbose Debug Messages Enabled.\n");
 	}
 	else if ( strcasecmp( "-log", argv[x] ) == 0 )
 	{
