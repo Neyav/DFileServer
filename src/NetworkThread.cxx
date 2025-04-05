@@ -60,108 +60,28 @@ namespace DFSNetworking
 
 	char NetworkThread::LocateResource(std::string Resource, ClientConnection* ArgClient, char* DstResource, char* DstResourceType)
 	{
-		FILE* FileStream;
-		char FieldName[31];
-		char ResolveIdentifier[MAXIDENTIFIERLEN];
-		char RealIdentifier[MAXIDENTIFIERLEN];
-		char IPRange[17];
-		char ResourceType[MAXIDENTIFIERLEN];
-
 		// No resource defined.
 		if (Resource.empty())
 		{
 			return -1;
 		}
 
-		if ((FileStream = fopen("resource.cfg", "r")) == NULL)
+		try
 		{
-			// Resource.cfg file couldn't be opened, so just make a dummy index for where we are.
-			try
-			{
-				CPathResolver PathResolver;
+			CPathResolver PathResolver;
 
-				PathResolver.Add("/", ".");  // Make the root of the tree our current location.
+			PathResolver.Add("/", ".");  // Make the root of the tree our current location.
 
-				strcpy(DstResource, PathResolver(Resource).c_str());
-				strcpy(DstResourceType, "redirect");
+			strcpy(DstResource, PathResolver(Resource).c_str());
+			strcpy(DstResourceType, "redirect");
 
-				return 1;
-			}
-			catch (CPathResolver::exn_t exn)
-			{ // Invalid path.
-				return -1;
-			}
+			return 1;
+		}
+		catch (CPathResolver::exn_t exn)
+		{ // Invalid path.
+			return -1;
 		}
 
-		// Find the resource identifier.
-		while (!feof(FileStream))
-		{
-			fscanf(FileStream, "%30s %150s %150s", FieldName, ResolveIdentifier, ResourceType);
-
-			if (strcmp(FieldName, "RESOURCE") == 0) // A resource.
-			{
-				if (strcmp(ResourceType, "redirect") == 0) // redirect
-				{
-					if (strncmp(ResolveIdentifier, Resource.c_str(), strlen(ResolveIdentifier)) == 0)
-					{
-						strcpy(DstResourceType, ResourceType);
-						break;
-					}
-				}
-
-				if (strcmp(ResolveIdentifier, Resource.c_str()) == 0) // A match.
-				{
-					strcpy(DstResourceType, ResourceType);
-					break;
-				}
-			}
-		}
-
-		// Find the first IP match.
-		while (!feof(FileStream))
-		{
-			fscanf(FileStream, "%30s %16s %150s", FieldName, IPRange, RealIdentifier);
-
-			// Slipped past into another resource without a match.
-			if (strcmp(FieldName, "RESOURCE") == 0)
-			{
-				fclose(FileStream);
-				return -1;
-			}
-
-			// We've got a match.
-			if ((strncmp(ArgClient->GetIP(), IPRange, strlen(IPRange)) == 0) || // Direct match.
-				(strcmp("x.x.x.x", IPRange) == 0)) // Wildcarded.
-			{
-				fclose(FileStream);
-
-				if (strcmp(DstResourceType, "redirect") == 0) // Resolve actual path.
-				{
-					try
-					{
-
-						CPathResolver PathResolver;
-
-						PathResolver.Add(ResolveIdentifier, RealIdentifier);
-
-						strcpy(DstResource, PathResolver(Resource).c_str());
-
-					}
-					catch (CPathResolver::exn_t exn)
-					{
-						// Illegal path.
-						return -1;
-					}
-				}
-				else  // Direct Resource.
-					strcpy(DstResource, RealIdentifier);
-
-				return 1;
-			}
-		}
-
-		// Reached end of file without a match.
-		fclose(FileStream);
 		return -1;
 	}
 
