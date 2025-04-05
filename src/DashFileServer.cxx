@@ -198,18 +198,6 @@ inline void punchBannertoScreen(void)
 		std::cout << "**-]\u001B[0m" << std::endl;
 }
 
-void interactiveConsole(DFSMessaging::Messenger* ConsoleMessenger)
-{
-	// Clear screen by default.
-	Configuration.Console.clearScreen();
-	punchBannertoScreen();
-
-	while (1)
-	{
-
-	}
-}
-
 void legacyConsole(DFSMessaging::Messenger* ConsoleMessenger)
 {
 	while (1)
@@ -560,14 +548,7 @@ int main( int argc, char *argv[] )
    NetworkThread.detach();
 
    // Main Program Loop
-   if (Configuration.interactiveConsole)
-   {
-	   // Give us one second for our threads to spawn.
-	   DFSleep(1000);
-	   interactiveConsole(ConsoleMessenger);
-   }
-   else
-	   legacyConsole(ConsoleMessenger);
+   legacyConsole(ConsoleMessenger);
 
    return 0;
 }
