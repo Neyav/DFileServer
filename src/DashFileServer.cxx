@@ -105,9 +105,9 @@ DFSMessaging::MessengerServer* MessengerServer = nullptr;
 namespace Version
 {
 	int MAJORVERSION = 2;
-	int MINORVERSION = 1;
+	int MINORVERSION = 2;
 	int PATCHVERSION = 0;
-	std::string VERSIONTITLE = "The Red Deer Redemption";
+	std::string VERSIONTITLE = "The Cochrane Collapse";
 }
 
 void DFSleep(int milliseconds)
@@ -185,15 +185,15 @@ inline void punchBannertoScreen(void)
 
 		// First we want to clear the screen.
 		std::cout << "\u001B[2J\u001B[1;1H";
-		std::cout << "\u001B[41m\u001B[30m";
+		std::cout << "\u001B[46m\u001B[30m";
 		DisplayBannerString(VersionBanner);
 		std::cout << "**-]\u001B[0m" << std::endl;
 
-		std::cout << "\u001B[41m\u001B[30m";
+		std::cout << "\u001B[46m\u001B[30m";
 		DisplayBannerString(CopyrightBanner);
 		std::cout << "**-]\u001B[0m" << std::endl;
 
-		std::cout << "\u001B[41m\u001B[30m";
+		std::cout << "\u001B[46m\u001B[30m";
 		DisplayBannerString(CopyrightBanner2);
 		std::cout << "**-]\u001B[0m" << std::endl;
 }
