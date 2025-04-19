@@ -1,5 +1,7 @@
-DFileServer 	[-port (port)] [-backlog (backlog)] [-maxconnections (connections)] [-maxbandwidth (bytes per second)]
-		[-log (logfile)] [-requireauth (username:password)] [-showconnections] [-background]
+DFileServer 	[-backlog (backlog)] [-maxconnections (connections)] [-maxbandwidth (bytes per second)]
+		[-log (logfile)] [-requireauth (username:password)] [-background]
+		[-ipv4 (port)] [-ipv6 (port)] [-ipv4s (port)] [-verbose_all] [-verbose_connections]
+		[-verbose_fileaccess] [-verbose_system] [-verbose_debug]
 
 *nix only: 	[-setuid (newuid)] [-chroot (folder to chroot to)]
 

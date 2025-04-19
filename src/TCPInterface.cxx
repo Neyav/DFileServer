@@ -105,7 +105,9 @@ namespace DFSNetworking
 
 		if (InterfaceMessenger != nullptr)
 		{
-			InterfaceMessenger->sendMessage(MSG_TARGET_CONSOLE, VISIBILITY_SYSTEM, "Interface shutdown.");
+			// This triggers when a connection to a client closes, it is wasteful and spammy. Keeping it commented out incase I decide to
+			// use it for the actual listening interface shutdown.
+			//InterfaceMessenger->sendMessage(MSG_TARGET_CONSOLE, VISIBILITY_SYSTEM, "Interface shutdown.");
 			delete InterfaceMessenger;
 		}
 	}

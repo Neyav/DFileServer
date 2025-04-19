@@ -1,4 +1,4 @@
-   |---> DFileServer 2.1.0 - [Date] [The Red Deer Redemption]
+   |---> DFileServer 2.1.0 - 2025-04-19 [The Red Deer Redemption]
    |   | - Redesigned and updated Interprocess Messenger that allows task sending down a
    |   |   channel that can be accepted and locked in by a single thread that can take it.
    |   | - Interprocess Messengers can pause ( with or without a timeout ) until a message is
