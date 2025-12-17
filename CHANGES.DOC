@@ -1,5 +1,5 @@
    |---> DFileServer 2.2.0 - [Date] [The Cochrane Collapse]
-   |   |
+   |   | - Updated C++ Standard from C++17 to C++20
    |
    |---> DFileServer 2.1.0 - [Date] [The Red Deer Redemption]
    |   | - Redesigned and updated Interprocess Messenger that allows task sending down a

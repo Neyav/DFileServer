@@ -3,7 +3,7 @@ CC = c++
 STRIP = strip
 RM = rm
 
-CFLAGS = -O2 -std=c++17 -D_DFS_USE_OPENSSL
+CFLAGS = -O2 -std=c++20 -D_DFS_USE_OPENSSL
 LINKERFLAGS = -lssl -lcrypto
 
 # The default build target.
