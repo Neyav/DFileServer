@@ -333,76 +333,115 @@ char GenerateFolderIndex( std::string ArgVirtualPath, char *ArgPath, std::string
     <title>)";
 	ArgBuffer += "DFileServer [" + std::to_string(Version::MAJORVERSION) + "." + std::to_string(Version::MINORVERSION) + "." + std::to_string(Version::PATCHVERSION) + "] " + ArgVirtualPath;
 	ArgBuffer += R"(</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f0f0f0;
-            margin: 0;
-            padding: 0;
-        }
-        .window {
-            width: 80%;
-            margin: 50px auto;
-            border: 1px solid #ccc;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            background-color: #fff;
-        }
-        .window-header {
-            background-color: #0078d7;
-            color: #fff;
-            padding: 10px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .window-header .title {
-            font-size: 16px;
-        }
-        .window-header .buttons {
-            display: flex;
-            gap: 5px;
-        }
-        .window-header .buttons div {
-            width: 15px;
-            height: 15px;
-            background-color: #fff;
-            border-radius: 50%;
-            cursor: pointer;
-        }
-        .window-location {
-            padding: 10px;
-            background-color: #f0f0f0;
-            border-bottom: 1px solid #ccc;
-        }
-        .window-content {
-            padding: 20px;
-        }
-        .file-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 10px;
-        }
-        .file-grid .file-item {
-            border: 1px solid #ccc;
-            padding: 10px;
-            text-align: center;
-            background-color: #fff;
-			box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        }
-        .file-grid .file-item .file-name {
-            font-weight: bold;
-        }
-        .file-grid .file-item .file-size {
-            color: #666;
-        }
-        .file-grid .file-item.folder {
-            background-color: #e0e0e0;
-        }
-        .file-grid .file-item a {
-            text-decoration: none;
-            color: inherit;
-        }
-    </style>
+<style>
+    body {
+        font-family: "Segoe UI", Arial, sans-serif;
+        background-color: #f3f3f3;
+        margin: 0;
+        padding: 0;
+    }
+
+    .window {
+        width: 80%;
+        margin: 50px auto;
+        border-radius: 8px; /* Rounded corners */
+        border: 1px solid #ddd;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        background-color: #fff;
+        overflow: hidden;
+    }
+
+    .window-header {
+        background-color: #0078d7; /* Windows accent blue */
+        color: #fff;
+        padding: 12px;
+        font-weight: 500;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-top-left-radius: 8px;
+        border-top-right-radius: 8px;
+    }
+
+    .window-header .title {
+        font-size: 16px;
+    }
+
+    .window-location {
+        padding: 10px;
+        background-color: #fafafa;
+        border-bottom: 1px solid #ddd;
+        font-size: 14px;
+        color: #555;
+    }
+
+    /* Breadcrumb style for path */
+    .window-location span {
+        color: #0078d7;
+        cursor: pointer;
+        margin-right: 5px;
+    }
+    .window-location span:hover {
+        text-decoration: underline;
+    }
+    .window-location .separator {
+        color: #999;
+        margin-right: 5px;
+    }
+
+    .window-content {
+        padding: 20px;
+    }
+
+    .file-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+        gap: 15px;
+    }
+
+    .file-item {
+        border: 1px solid #e0e0e0;
+        border-radius: 6px;
+        padding: 15px;
+        text-align: left;
+        background-color: #fff;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+        transition: transform 0.1s ease, box-shadow 0.1s ease, background-color 0.1s ease;
+    }
+
+	.file-item a {
+		display: block;        /* fills the parent */
+		width: 100%;
+		height: 100%;
+		text-decoration: none; /* remove underline */
+		color: inherit;        /* keep text color */
+	}
+
+    .file-item:hover {
+        transform: scale(1.02);
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        background-color: #f9f9f9;
+    }
+
+    .file-name {
+        font-weight: 500;
+        margin-bottom: 5px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .file-size {
+        font-size: 12px;
+        color: #777;
+    }
+
+    /* Folder styling */
+    .file-item.folder {
+        background-color: #f0f6ff;
+        border: 1px solid #cce0ff;
+    }
+</style>
 </head>
 <body>
     <div class="window">
