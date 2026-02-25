@@ -1,21 +1,21 @@
 
 #include <string>
 
-#include "TCPInterface.hxx"
+#include "Interface.hxx"
 
 namespace DFSNetworking
 {
-	bool TCPInterface::initializeInterface(unsigned int aPort, unsigned int aBackLog)
+	bool Interface::initializeInterface(unsigned int aPort, unsigned int aBackLog)
 	{
 		return false;
 	}
 
-	TCPInterface* TCPInterface::acceptConnection(void)
+	Interface* Interface::acceptConnection(void)
 	{
 		return nullptr;
 	}
 
-	size_t TCPInterface::sendData(char* aData, int aLength)
+	size_t Interface::sendData(char* aData, int aLength)
 	{
 		size_t DataSent;
 
@@ -28,7 +28,7 @@ namespace DFSNetworking
 		return DataSent;
 	}
 	
-	size_t TCPInterface::receiveData(char* aData, int aLength)
+	size_t Interface::receiveData(char* aData, int aLength)
 	{
 		size_t DataRecv;
 
@@ -41,12 +41,12 @@ namespace DFSNetworking
 		return DataRecv;
 	}	
 
-	char *TCPInterface::getIP(void)
+	char *Interface::getIP(void)
 	{
 		return nullptr;
 	}
 
-	TCPInterface::TCPInterface()
+	Interface::Interface()
 	{
 		listenPort = 0;
 		backLog = 0;
@@ -64,7 +64,7 @@ namespace DFSNetworking
 		
 	}
 
-	TCPInterface::~TCPInterface()
+	Interface::~Interface()
 	{
 		// Close the socket.
 #ifdef _WINDOWS
@@ -144,7 +144,7 @@ namespace DFSNetworking
 		return true;
 	}
 
-	TCPInterface* IPv4Interface::acceptConnection(void)
+	Interface* IPv4Interface::acceptConnection(void)
 	{
 		socklen_t sin_size = sizeof(struct sockaddr_in);
 		SOCKET NewSocket;
@@ -257,7 +257,7 @@ namespace DFSNetworking
 		return true;
 	}
 
-	TCPInterface* IPv6Interface::acceptConnection(void)
+	Interface* IPv6Interface::acceptConnection(void)
 	{
 		socklen_t sin_size = sizeof(struct sockaddr_in6);
 		SOCKET NewSocket;

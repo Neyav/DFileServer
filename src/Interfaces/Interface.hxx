@@ -33,12 +33,12 @@
 #include <openssl/bn.h>
 #endif
 
-#include "InterProcessMessaging.hxx"
+#include "../InterProcessMessaging.hxx"
 
 namespace DFSNetworking
 {
 
-	class TCPInterface
+	class Interface
 	{
 	protected:
 		SOCKET						NetworkSocket;
@@ -48,7 +48,7 @@ namespace DFSNetworking
 
 	public:
 		virtual bool initializeInterface(unsigned int aPort, unsigned int aBackLog);
-		virtual TCPInterface *acceptConnection(void);
+		virtual Interface *acceptConnection(void);
 
 		virtual size_t sendData(char* aData, int aLength);
 		virtual size_t receiveData(char* aData, int aLength);
@@ -56,17 +56,17 @@ namespace DFSNetworking
 		SOCKET getSocket(void) { return NetworkSocket; };
 		virtual char* getIP(void);
 
-		TCPInterface();
-		~TCPInterface();
+		Interface();
+		~Interface();
 	};
 
-	class IPv4Interface : public TCPInterface
+	class IPv4Interface : public Interface
 	{
 	protected:		
 		struct sockaddr_in			NetworkAddress;
 	public:
 		bool initializeInterface(unsigned int aPort, unsigned int aBackLog) override;
-		TCPInterface* acceptConnection(void) override;
+		Interface* acceptConnection(void) override;
 
 		char* getIP(void) override;
 
@@ -74,14 +74,14 @@ namespace DFSNetworking
 		~IPv4Interface();
 	};
 
-	class IPv6Interface : public TCPInterface
+	class IPv6Interface : public Interface
 	{
 	private:
 		struct sockaddr_in6			NetworkAddress;
 
 	public:
 		bool initializeInterface(unsigned int aPort, unsigned int aBackLog) override;
-		TCPInterface* acceptConnection(void) override;
+		Interface* acceptConnection(void) override;
 
 		char* getIP(void) override;
 

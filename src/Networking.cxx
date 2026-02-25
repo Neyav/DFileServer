@@ -18,7 +18,7 @@ extern int ActiveConnections;
 
 namespace DFSNetworking
 {
-	void NetworkDaemon::IncomingConnection(TCPInterface *aInterface)
+	void NetworkDaemon::IncomingConnection(Interface *aInterface)
 	{
 		ClientConnection *IncomingClient;
 
@@ -36,7 +36,7 @@ namespace DFSNetworking
 		NetworkMessenger->SendPointer(MSG_TARGET_NETWORK, (void *)IncomingClient);
 	}
 
-	bool NetworkDaemon::addListener(unsigned int aPort, unsigned int aBackLog, TCPInterface *aInterface)
+	bool NetworkDaemon::addListener(unsigned int aPort, unsigned int aBackLog, Interface *aInterface)
 	{
 #ifdef _WINDOWS
 		WSAPOLLFD PollFDTemp;

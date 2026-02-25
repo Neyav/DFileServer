@@ -15,7 +15,7 @@
 #include <string>
 #include "ClientConnection.hxx"
 #include "InterProcessMessaging.hxx"
-#include "TCPInterface.hxx"
+#include "Interfaces/Interface.hxx"
 
 namespace DFSNetworking
 {
@@ -27,12 +27,12 @@ namespace DFSNetworking
 #else
 		std::vector<struct pollfd> PollStruct;
 #endif
-		std::vector<TCPInterface*> InterfaceList;
+		std::vector<Interface*> InterfaceList;
 		DFSMessaging::Messenger* NetworkMessenger;
 
-		void IncomingConnection(TCPInterface *aInterface);
+		void IncomingConnection(Interface *aInterface);
 	public:
-		bool addListener(unsigned int aPort, unsigned int aBacklog, TCPInterface *aInterface);
+		bool addListener(unsigned int aPort, unsigned int aBacklog, Interface *aInterface);
 
 		void NetworkLoop();
 

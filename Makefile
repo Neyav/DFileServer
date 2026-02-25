@@ -7,7 +7,7 @@ CFLAGS = -O2 -std=c++20 -D_DFS_USE_OPENSSL
 LINKERFLAGS = -lssl -lcrypto
 
 # The default build target.
-dfileserver: CPathResolver.o DirectoryIndexing.o ClientConnection.o HTTPHeader.o DashFileServer.o MimeTypes.o Base64.o InterProcessMessaging.o Networking.o NetworkThread.o TCPInterface.o
+dfileserver: CPathResolver.o DirectoryIndexing.o ClientConnection.o HTTPHeader.o DashFileServer.o MimeTypes.o Base64.o InterProcessMessaging.o Networking.o NetworkThread.o Interface.o
 	$(CC) -o dfileserver CPathResolver.o DirectoryIndexing.o ClientConnection.o HTTPHeader.o DashFileServer.o MimeTypes.o Base64.o InterProcessMessaging.o Networking.o NetworkThread.o TCPInterface.o $(LINKERFLAGS)
 	$(STRIP) --strip-all dfileserver
 
@@ -41,8 +41,8 @@ Networking.o: src/Networking.cxx
 NetworkThread.o: src/NetworkThread.cxx
 	$(CC) $(CFLAGS) -o NetworkThread.o -c src/NetworkThread.cxx
 
-TCPInterface.o: src/TCPInterface.cxx
-	$(CC) $(CFLAGS) -o TCPInterface.o -c src/TCPInterface.cxx
+Interface.o: src/Interfaces/Interface.cxx
+	$(CC) $(CFLAGS) -o Interface.o -c src/Interfaces/Interface.cxx
 
 clean:
 	$(RM) *.o

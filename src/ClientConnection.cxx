@@ -45,7 +45,7 @@
 #endif
 
 #include "ClientConnection.hxx"
-#include "TCPInterface.hxx"
+#include "Interfaces/Interface.hxx"
 
 ClientConnection::ClientConnection ()
 {
@@ -128,7 +128,7 @@ void ClientConnection::CloseFile ( void )
 
 }
 
-char ClientConnection::AcceptConnection ( DFSNetworking::TCPInterface *aInterface )
+char ClientConnection::AcceptConnection ( DFSNetworking::Interface *aInterface )
 {
 	socklen_t sin_size = sizeof(struct sockaddr_in);
 

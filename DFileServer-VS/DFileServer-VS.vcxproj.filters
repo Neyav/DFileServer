@@ -13,6 +13,12 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Source Files\Interfaces">
+      <UniqueIdentifier>{8abd5512-0f8f-4b2c-9c01-5d8b4040fae7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Interfaces">
+      <UniqueIdentifier>{47ee6659-596b-4ae5-aff7-04e6a26bf5ec}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\ClientConnection.cxx">
@@ -45,8 +51,8 @@
     <ClCompile Include="..\src\NetworkThread.cxx">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\TCPInterface.cxx">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="..\src\Interfaces\Interface.cxx">
+      <Filter>Source Files\Interfaces</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -80,8 +86,8 @@
     <ClInclude Include="..\src\NetworkThread.hxx">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\TCPInterface.hxx">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="..\src\Interfaces\Interface.hxx">
+      <Filter>Header Files\Interfaces</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

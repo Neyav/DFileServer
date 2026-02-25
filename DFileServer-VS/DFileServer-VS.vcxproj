@@ -259,11 +259,11 @@
     <ClCompile Include="..\src\DashFileServer.cxx" />
     <ClCompile Include="..\src\DirectoryIndexing.cxx" />
     <ClCompile Include="..\src\HTTPHeader.cxx" />
+    <ClCompile Include="..\src\Interfaces\Interface.cxx" />
     <ClCompile Include="..\src\InterProcessMessaging.cxx" />
     <ClCompile Include="..\src\MimeTypes.cxx" />
     <ClCompile Include="..\src\Networking.cxx" />
     <ClCompile Include="..\src\NetworkThread.cxx" />
-    <ClCompile Include="..\src\TCPInterface.cxx" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\ClientConnection.hxx" />
@@ -271,11 +271,11 @@
     <ClInclude Include="..\src\CPathResolver.hxx" />
     <ClInclude Include="..\src\DirectoryIndexing.hxx" />
     <ClInclude Include="..\src\HTTPHeader.hxx" />
+    <ClInclude Include="..\src\Interfaces\Interface.hxx" />
     <ClInclude Include="..\src\InterProcessMessaging.hxx" />
     <ClInclude Include="..\src\MimeTypes.hxx" />
     <ClInclude Include="..\src\Networking.hxx" />
     <ClInclude Include="..\src\NetworkThread.hxx" />
-    <ClInclude Include="..\src\TCPInterface.hxx" />
     <ClInclude Include="..\src\Version.hxx" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

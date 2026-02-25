@@ -10,12 +10,12 @@
 
 #include "HTTPHeader.hxx"
 #include "InterProcessMessaging.hxx"
-#include "TCPInterface.hxx"
+#include "Interfaces/Interface.hxx"
 
 class ClientConnection
 {
 	private:
-		DFSNetworking::TCPInterface        *Interface;
+		DFSNetworking::Interface			*Interface;
 		time_t								LastAction;
 		DFSMessaging::Messenger			   *Messenger;
 	public:	
@@ -39,7 +39,7 @@ class ClientConnection
 		char *GetIP ( void );
 		size_t OpenFile ( char * );
 		void CloseFile ( void );
-		char AcceptConnection ( DFSNetworking::TCPInterface *aInterface );
+		char AcceptConnection ( DFSNetworking::Interface *aInterface );
 		void DisconnectClient ( void );
 		int SendData ( char *, int );
 		size_t RecvData ( char *, int );

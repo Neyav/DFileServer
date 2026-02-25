@@ -60,7 +60,7 @@
 #include <string_view>
 
 #include "InterProcessMessaging.hxx"
-#include "TCPInterface.hxx"
+#include "Interfaces/Interface.hxx"
 #include "Networking.hxx"
 #include "Version.hxx"
 
@@ -312,7 +312,7 @@ int main( int argc, char *argv[] )
 			exit(-1);
 		}
 
-		DFSNetworking::TCPInterface* IPv4Interface = new DFSNetworking::IPv4Interface;
+		DFSNetworking::Interface* IPv4Interface = new DFSNetworking::IPv4Interface;
 		
 		printf(" -=Configuration: Added IPv4 Port -> %i\n", port);
 
