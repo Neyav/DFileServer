@@ -104,7 +104,7 @@ namespace DFSNetworking
 		SSL* ssl;
 	public:
 		bool initializeInterface(unsigned int aPort, unsigned int aBackLog) override;
-		TCPInterface *acceptConnection(void) override;
+		Interface *acceptConnection(void) override;
 
 		virtual size_t sendData(char* aData, int aLength) override;
 		virtual size_t receiveData(char* aData, int aLength) override;

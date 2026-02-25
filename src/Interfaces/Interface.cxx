@@ -490,7 +490,7 @@ namespace DFSNetworking
 		return true;
 	}
 
-	TCPInterface* HTTPSIPv4Interface::acceptConnection(void)
+	Interface* HTTPSIPv4Interface::acceptConnection(void)
 	{
 		socklen_t sin_size = sizeof(struct sockaddr_in);
 		SOCKET NewSocket;
