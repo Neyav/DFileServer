@@ -48,6 +48,10 @@ void HTTPHeader::ImportHeader ( std::string ArgHTTPHeader )
 
 		getline ( stringStream, Value );
 
+		// If the field or value is too small, it's probably the end of the header.
+		if (Field.size() <= 3 || Value.size() <= 3)
+			break;
+
 		// Remove the : at the end of the Field, and the space in front of the value.
 		Field.replace ( Field.size() - 1, 1, "");
 		Value.replace ( 0, 1, "" );
