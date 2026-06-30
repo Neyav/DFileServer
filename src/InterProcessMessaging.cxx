@@ -97,7 +97,7 @@ namespace DFSMessaging
 	// Returns true if the message is visible to the visibility mask.
 	bool Message::isMessageVisible(unsigned int aVisibility)
 	{
-		if (visibility == VISIBILITY_ALL)  // If the message is visible to all, return true.
+		if (aVisibility == VISIBILITY_ALL)  // If the message is visible to all, return true.
 		{
 			return true;
 		}
