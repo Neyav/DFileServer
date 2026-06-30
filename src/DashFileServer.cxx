@@ -106,7 +106,7 @@ namespace Version
 {
 	int MAJORVERSION = 2;
 	int MINORVERSION = 1;
-	int PATCHVERSION = 0;
+	int PATCHVERSION = 1;
 	std::string VERSIONTITLE = "The Red Deer Redemption";
 }
 
