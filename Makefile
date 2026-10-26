@@ -8,7 +8,7 @@ LINKERFLAGS = -lssl -lcrypto
 
 # The default build target.
 dfileserver: CPathResolver.o DirectoryIndexing.o ClientConnection.o HTTPHeader.o DashFileServer.o MimeTypes.o Base64.o InterProcessMessaging.o Networking.o NetworkThread.o Interface.o
-	$(CC) -o dfileserver CPathResolver.o DirectoryIndexing.o ClientConnection.o HTTPHeader.o DashFileServer.o MimeTypes.o Base64.o InterProcessMessaging.o Networking.o NetworkThread.o TCPInterface.o $(LINKERFLAGS)
+	$(CC) -o dfileserver CPathResolver.o DirectoryIndexing.o ClientConnection.o HTTPHeader.o DashFileServer.o MimeTypes.o Base64.o InterProcessMessaging.o Networking.o NetworkThread.o Interface.o $(LINKERFLAGS)
 	$(STRIP) --strip-all dfileserver
 
 CPathResolver.o: src/CPathResolver.cxx
